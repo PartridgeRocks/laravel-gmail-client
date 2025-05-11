@@ -34,10 +34,8 @@ class GmailClient
     /**
      * Authenticate with a token.
      *
-     * @param string $accessToken
-     * @param string|null $refreshToken
-     * @param \DateTimeInterface|null $expiresAt
      * @return $this
+     *
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      */
     public function authenticate(
@@ -48,7 +46,7 @@ class GmailClient
         if (empty($accessToken)) {
             throw AuthenticationException::missingToken();
         }
-        
+
         $authenticator = new GmailOAuthAuthenticator($accessToken, $refreshToken, 'Bearer', $expiresAt);
         $this->connector->authenticate($authenticator);
 
@@ -156,8 +154,6 @@ class GmailClient
     /**
      * Get a specific message.
      *
-     * @param string $id
-     * @return \PartridgeRocks\GmailClient\Data\Email
      * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
@@ -201,7 +197,7 @@ class GmailClient
             }
 
             throw new GmailClientException(
-                "Error retrieving message with ID '{$id}': " . $e->getMessage(),
+                "Error retrieving message with ID '{$id}': ".$e->getMessage(),
                 $e->getCode(),
                 $e
             );
@@ -211,11 +207,6 @@ class GmailClient
     /**
      * Send a new email.
      *
-     * @param string $to
-     * @param string $subject
-     * @param string $body
-     * @param array $options
-     * @return \PartridgeRocks\GmailClient\Data\Email
      * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
@@ -224,7 +215,7 @@ class GmailClient
     public function sendEmail(string $to, string $subject, string $body, array $options = []): Email
     {
         // Validate email address
-        if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($to, FILTER_VALIDATE_EMAIL)) {
             throw ValidationException::invalidEmailAddress($to);
         }
 
@@ -265,7 +256,7 @@ class GmailClient
             }
 
             throw new GmailClientException(
-                "Error sending email: " . $e->getMessage(),
+                'Error sending email: '.$e->getMessage(),
                 $e->getCode(),
                 $e
             );

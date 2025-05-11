@@ -19,8 +19,8 @@ class AuthenticationException extends GmailClientException
         return new static('Missing required OAuth credentials. Please check your configuration.');
     }
 
-    public static function authorizationFailed(string $message = null): self
+    public static function authorizationFailed(?string $message = null): self
     {
-        return new static('Gmail authorization failed: ' . ($message ?? 'Unknown error'));
+        return new static('Gmail authorization failed: '.($message ?? 'Unknown error'));
     }
 }
