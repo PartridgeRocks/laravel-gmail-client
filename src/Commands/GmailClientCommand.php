@@ -33,7 +33,7 @@ class GmailClientCommand extends Command
         }
 
         // Check if we have an access token
-        if (!session('gmail_access_token') && !config('gmail-client.access_token')) {
+        if (! session('gmail_access_token') && ! config('gmail-client.access_token')) {
             $this->error('No access token found. Please authenticate first using the --authenticate option.');
 
             return self::FAILURE;
@@ -57,7 +57,7 @@ class GmailClientCommand extends Command
                     })
                 );
             } catch (\Exception $e) {
-                $this->error('Error fetching messages: ' . $e->getMessage());
+                $this->error('Error fetching messages: '.$e->getMessage());
 
                 return self::FAILURE;
             }
@@ -82,13 +82,13 @@ class GmailClientCommand extends Command
                     })
                 );
             } catch (\Exception $e) {
-                $this->error('Error fetching labels: ' . $e->getMessage());
+                $this->error('Error fetching labels: '.$e->getMessage());
 
                 return self::FAILURE;
             }
         }
 
-        if (!$this->option('list-messages') && !$this->option('list-labels') && !$this->option('authenticate')) {
+        if (! $this->option('list-messages') && ! $this->option('list-labels') && ! $this->option('authenticate')) {
             $this->info('Gmail Client is configured.');
             $this->line('Use --list-messages to list recent messages');
             $this->line('Use --list-labels to list available labels');

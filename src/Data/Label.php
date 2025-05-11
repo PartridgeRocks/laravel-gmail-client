@@ -17,8 +17,7 @@ class Label extends Data
         public ?int $threadsTotal = null,
         public ?int $threadsUnread = null,
         public ?string $color = null
-    ) {
-    }
+    ) {}
 
     public static function fromApiResponse(array $data): self
     {

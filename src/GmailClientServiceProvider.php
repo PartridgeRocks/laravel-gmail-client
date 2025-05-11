@@ -2,9 +2,9 @@
 
 namespace PartridgeRocks\GmailClient;
 
+use PartridgeRocks\GmailClient\Commands\GmailClientCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use PartridgeRocks\GmailClient\Commands\GmailClientCommand;
 
 class GmailClientServiceProvider extends PackageServiceProvider
 {
@@ -26,7 +26,7 @@ class GmailClientServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         $this->app->singleton(GmailClient::class, function ($app) {
-            $client = new GmailClient();
+            $client = new GmailClient;
 
             // If we have a token in session/config, authenticate the client
             $token = session('gmail_access_token') ?? config('gmail-client.access_token');

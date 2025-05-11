@@ -2,9 +2,9 @@
 
 namespace PartridgeRocks\GmailClient\Gmail;
 
+use Saloon\Contracts\OAuthAuthenticator;
 use Saloon\Http\Connector;
 use Saloon\Traits\Plugins\AcceptsJson;
-use Saloon\Contracts\OAuthAuthenticator;
 
 class GmailConnector extends Connector
 {
@@ -46,7 +46,6 @@ class GmailConnector extends Connector
     /**
      * Set the authenticator.
      *
-     * @param \Saloon\Contracts\OAuthAuthenticator $authenticator
      * @return $this
      */
     public function authenticate(OAuthAuthenticator $authenticator): self

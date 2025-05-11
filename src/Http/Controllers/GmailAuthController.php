@@ -11,7 +11,6 @@ class GmailAuthController extends Controller
     /**
      * Redirect to Google OAuth.
      *
-     * @param  \PartridgeRocks\GmailClient\GmailClient  $client
      * @return \Illuminate\Http\RedirectResponse
      */
     public function redirect(GmailClient $client)
@@ -20,15 +19,13 @@ class GmailAuthController extends Controller
             config('gmail-client.redirect_uri'),
             config('gmail-client.scopes')
         );
-        
+
         return redirect($authUrl);
     }
-    
+
     /**
      * Handle callback from Google OAuth.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \PartridgeRocks\GmailClient\GmailClient  $client
      * @return \Illuminate\Http\RedirectResponse
      */
     public function callback(Request $request, GmailClient $client)
@@ -37,13 +34,13 @@ class GmailAuthController extends Controller
             return redirect()->route('gmail.error')
                 ->with('error', $request->get('error'));
         }
-        
+
         $code = $request->get('code');
-        
+
         try {
             // Exchange authorization code for an access token
             $token = $client->exchangeCode($code, config('gmail-client.redirect_uri'));
-            
+
             // Store token in session (for demo purposes)
             // In a real application, you would store this token securely
             // and associate it with the authenticated user
@@ -52,9 +49,9 @@ class GmailAuthController extends Controller
                 'gmail_refresh_token' => $token['refresh_token'] ?? null,
                 'gmail_token_expires' => now()->addSeconds($token['expires_in']),
             ]);
-            
+
             return redirect()->route('gmail.success');
-            
+
         } catch (\Exception $e) {
             return redirect()->route('gmail.error')
                 ->with('error', $e->getMessage());

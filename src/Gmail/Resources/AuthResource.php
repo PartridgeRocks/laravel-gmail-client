@@ -2,26 +2,21 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Resources;
 
-use Saloon\Http\BaseResource;
-use Saloon\Http\Response;
 use Saloon\Enums\Method;
+use Saloon\Http\BaseResource;
 use Saloon\Http\Request;
+use Saloon\Http\Response;
 
 class AuthResource extends BaseResource
 {
     /**
      * Exchange an authorization code for an access token.
-     *
-     * @param string $code
-     * @param string $redirectUri
-     * @return \Saloon\Http\Response
      */
     public function exchangeCode(string $code, string $redirectUri): Response
     {
-        return $this->connector->send(new class($code, $redirectUri) extends Request {
-            public function __construct(protected string $code, protected string $redirectUri)
-            {
-            }
+        return $this->connector->send(new class($code, $redirectUri) extends Request
+        {
+            public function __construct(protected string $code, protected string $redirectUri) {}
 
             public function resolveEndpoint(): string
             {
@@ -55,16 +50,12 @@ class AuthResource extends BaseResource
 
     /**
      * Refresh an access token using a refresh token.
-     *
-     * @param string $refreshToken
-     * @return \Saloon\Http\Response
      */
     public function refreshToken(string $refreshToken): Response
     {
-        return $this->connector->send(new class($refreshToken) extends Request {
-            public function __construct(protected string $refreshToken)
-            {
-            }
+        return $this->connector->send(new class($refreshToken) extends Request
+        {
+            public function __construct(protected string $refreshToken) {}
 
             public function resolveEndpoint(): string
             {
@@ -97,19 +88,14 @@ class AuthResource extends BaseResource
 
     /**
      * Get the authorization URL.
-     *
-     * @param string $redirectUri
-     * @param array $scopes
-     * @param array $additionalParams
-     * @return string
      */
     public function getAuthorizationUrl(
-        string $redirectUri, 
-        array $scopes = [], 
+        string $redirectUri,
+        array $scopes = [],
         array $additionalParams = []
     ): string {
-        $scopes = !empty($scopes) ? $scopes : config('gmail-client.scopes');
-        
+        $scopes = ! empty($scopes) ? $scopes : config('gmail-client.scopes');
+
         $params = array_merge([
             'client_id' => config('gmail-client.client_id'),
             'redirect_uri' => $redirectUri,
@@ -118,7 +104,7 @@ class AuthResource extends BaseResource
             'access_type' => 'offline',
             'prompt' => 'consent',
         ], $additionalParams);
-        
-        return 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query($params);
+
+        return 'https://accounts.google.com/o/oauth2/v2/auth?'.http_build_query($params);
     }
 }

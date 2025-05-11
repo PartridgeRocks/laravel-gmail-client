@@ -2,10 +2,10 @@
 
 namespace PartridgeRocks\GmailClient\Data;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
-use Spatie\LaravelData\Attributes\WithCast;
 use Carbon\Carbon;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
+use Spatie\LaravelData\Data;
 
 class Email extends Data
 {
@@ -25,8 +25,7 @@ class Email extends Data
         public ?array $to = null,
         public ?array $cc = null,
         public ?array $bcc = null
-    ) {
-    }
+    ) {}
 
     public static function fromApiResponse(array $data): self
     {
@@ -42,7 +41,7 @@ class Email extends Data
         if (isset($data['payload']['headers'])) {
             foreach ($data['payload']['headers'] as $header) {
                 $headers[$header['name']] = $header['value'];
-                
+
                 switch ($header['name']) {
                     case 'Subject':
                         $subject = $header['value'];
