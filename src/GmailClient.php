@@ -265,10 +265,22 @@ class GmailClient
 
     /**
      * Create a raw email message.
+     *
+     * @param string $to
+     * @param string $subject
+     * @param string $body
+     * @param array $options
+     * @return string
+     * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
      */
     protected function createEmailRaw(string $to, string $subject, string $body, array $options = []): string
     {
         $from = $options['from'] ?? config('gmail-client.from_email');
+
+        if (empty($from)) {
+            throw ValidationException::missingRequiredField('from_email');
+        }
+
         $cc = $options['cc'] ?? null;
         $bcc = $options['bcc'] ?? null;
 
@@ -289,7 +301,8 @@ class GmailClient
         $email .= "Content-Transfer-Encoding: base64\r\n\r\n";
         $email .= chunk_split(base64_encode($body));
 
-        return base64_encode($email);
+        // Gmail API requires base64url encoding, not standard base64
+        return strtr(base64_encode($email), '+/', '-_');
     }
 
     /**
