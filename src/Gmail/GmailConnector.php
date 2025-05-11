@@ -46,9 +46,6 @@ class GmailConnector extends Connector
 
     /**
      * Set the authenticator.
-     *
-     * @param Authenticator $authenticator
-     * @return static
      */
     public function authenticate(Authenticator $authenticator): static
     {
