@@ -266,11 +266,6 @@ class GmailClient
     /**
      * Create a raw email message.
      *
-     * @param string $to
-     * @param string $subject
-     * @param string $body
-     * @param array $options
-     * @return string
      * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
      */
     protected function createEmailRaw(string $to, string $subject, string $body, array $options = []): string

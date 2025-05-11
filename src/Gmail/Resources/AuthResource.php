@@ -103,10 +103,6 @@ class AuthResource extends BaseResource
     /**
      * Get the authorization URL.
      *
-     * @param string $redirectUri
-     * @param array $scopes
-     * @param array $additionalParams
-     * @return string
      * @throws \RuntimeException
      */
     public function getAuthorizationUrl(
