@@ -2,6 +2,7 @@
 
 namespace PartridgeRocks\GmailClient\Gmail;
 
+use Saloon\Contracts\Authenticator;
 use Saloon\Contracts\OAuthAuthenticator;
 use Saloon\Http\Connector;
 use Saloon\Traits\Plugins\AcceptsJson;
@@ -46,11 +47,17 @@ class GmailConnector extends Connector
     /**
      * Set the authenticator.
      *
-     * @return $this
+     * @param Authenticator $authenticator
+     * @return static
      */
-    public function authenticate(OAuthAuthenticator $authenticator): self
+    public function authenticate(Authenticator $authenticator): static
     {
-        $this->withTokenAuth($authenticator->getToken());
+        if ($authenticator instanceof OAuthAuthenticator) {
+            $this->withTokenAuth($authenticator->getToken());
+        } else {
+            // Fall back to parent implementation for other authenticator types
+            parent::authenticate($authenticator);
+        }
 
         return $this;
     }
