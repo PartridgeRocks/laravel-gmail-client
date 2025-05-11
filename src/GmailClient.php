@@ -5,6 +5,11 @@ namespace PartridgeRocks\GmailClient;
 use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Data\Label;
+use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
+use PartridgeRocks\GmailClient\Exceptions\GmailClientException;
+use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
+use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
+use PartridgeRocks\GmailClient\Exceptions\ValidationException;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\GmailOAuthAuthenticator;
 use PartridgeRocks\GmailClient\Gmail\Resources\LabelResource;
@@ -29,13 +34,21 @@ class GmailClient
     /**
      * Authenticate with a token.
      *
+     * @param string $accessToken
+     * @param string|null $refreshToken
+     * @param \DateTimeInterface|null $expiresAt
      * @return $this
+     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      */
     public function authenticate(
         string $accessToken,
         ?string $refreshToken = null,
         ?\DateTimeInterface $expiresAt = null
     ): self {
+        if (empty($accessToken)) {
+            throw AuthenticationException::missingToken();
+        }
+        
         $authenticator = new GmailOAuthAuthenticator($accessToken, $refreshToken, 'Bearer', $expiresAt);
         $this->connector->authenticate($authenticator);
 
@@ -142,29 +155,121 @@ class GmailClient
 
     /**
      * Get a specific message.
+     *
+     * @param string $id
+     * @return \PartridgeRocks\GmailClient\Data\Email
+     * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
      */
     public function getMessage(string $id): Email
     {
-        $response = $this->messages()->get($id, ['format' => 'full']);
-        $data = $response->json();
+        try {
+            $response = $this->messages()->get($id, ['format' => 'full']);
 
-        return Email::fromApiResponse($data);
+            if ($response->status() === 404) {
+                throw NotFoundException::message($id);
+            }
+
+            if ($response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response->status() === 429) {
+                $retryAfter = (int) $response->header('Retry-After', 0);
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            $data = $response->json();
+
+            return Email::fromApiResponse($data);
+        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
+            $response = $e->getResponse();
+
+            if ($response && $response->status() === 404) {
+                throw NotFoundException::message($id);
+            }
+
+            if ($response && $response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response && $response->status() === 429) {
+                $retryAfter = (int) $response->header('Retry-After', 0);
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            throw new GmailClientException(
+                "Error retrieving message with ID '{$id}': " . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 
     /**
      * Send a new email.
+     *
+     * @param string $to
+     * @param string $subject
+     * @param string $body
+     * @param array $options
+     * @return \PartridgeRocks\GmailClient\Data\Email
+     * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
      */
     public function sendEmail(string $to, string $subject, string $body, array $options = []): Email
     {
-        $message = $this->createEmailRaw($to, $subject, $body, $options);
+        // Validate email address
+        if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            throw ValidationException::invalidEmailAddress($to);
+        }
 
-        $response = $this->messages()->send([
-            'raw' => $message,
-        ]);
+        // Validate required fields
+        if (empty($subject)) {
+            throw ValidationException::missingRequiredField('subject');
+        }
 
-        $data = $response->json();
+        try {
+            $message = $this->createEmailRaw($to, $subject, $body, $options);
 
-        return $this->getMessage($data['id']);
+            $response = $this->messages()->send([
+                'raw' => $message,
+            ]);
+
+            if ($response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response->status() === 429) {
+                $retryAfter = (int) $response->header('Retry-After', 0);
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            $data = $response->json();
+
+            return $this->getMessage($data['id']);
+        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
+            $response = $e->getResponse();
+
+            if ($response && $response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response && $response->status() === 429) {
+                $retryAfter = (int) $response->header('Retry-After', 0);
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            throw new GmailClientException(
+                "Error sending email: " . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 
     /**
