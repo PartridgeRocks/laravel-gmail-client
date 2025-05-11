@@ -9,10 +9,10 @@ class GmailOAuthAuthenticator implements OAuthAuthenticator
     /**
      * Initializes a Gmail OAuth authenticator with access token details.
      *
-     * @param string $accessToken The OAuth access token.
-     * @param string|null $refreshToken Optional refresh token for obtaining new access tokens.
-     * @param string|null $tokenType The type of the token, typically 'Bearer'.
-     * @param \DateTimeInterface|null $expiresAt Optional expiration date and time for the access token.
+     * @param  string  $accessToken  The OAuth access token.
+     * @param  string|null  $refreshToken  Optional refresh token for obtaining new access tokens.
+     * @param  string|null  $tokenType  The type of the token, typically 'Bearer'.
+     * @param  \DateTimeInterface|null  $expiresAt  Optional expiration date and time for the access token.
      */
     public function __construct(
         protected string $accessToken,

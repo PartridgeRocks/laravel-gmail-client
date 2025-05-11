@@ -20,11 +20,11 @@ class MessageResource extends BaseResource
         return $this->connector->send(new class($query) extends Request
         {
             /**
- * Initializes the request with the specified query parameters.
- *
- * @param array $query Query parameters to include in the request.
- */
-public function __construct(protected array $query) {}
+             * Initializes the request with the specified query parameters.
+             *
+             * @param  array  $query  Query parameters to include in the request.
+             */
+            public function __construct(protected array $query) {}
 
             /****
              * Returns the API endpoint for accessing the user's messages.
@@ -61,8 +61,8 @@ public function __construct(protected array $query) {}
     /**
      * Retrieves a specific Gmail message by its ID.
      *
-     * @param string $id The unique identifier of the message to retrieve.
-     * @param array $query Optional query parameters to customize the request.
+     * @param  string  $id  The unique identifier of the message to retrieve.
+     * @param  array  $query  Optional query parameters to customize the request.
      * @return Response The HTTP response containing the message data.
      */
     public function get(string $id, array $query = []): Response
@@ -70,12 +70,12 @@ public function __construct(protected array $query) {}
         return $this->connector->send(new class($id, $query) extends Request
         {
             /**
- * Initializes the request with a message ID and optional query parameters.
- *
- * @param string $id The unique identifier of the Gmail message.
- * @param array $query Optional query parameters for the request.
- */
-public function __construct(protected string $id, protected array $query) {}
+             * Initializes the request with a message ID and optional query parameters.
+             *
+             * @param  string  $id  The unique identifier of the Gmail message.
+             * @param  array  $query  Optional query parameters for the request.
+             */
+            public function __construct(protected string $id, protected array $query) {}
 
             /**
              * Returns the API endpoint for retrieving a specific Gmail message by its ID.
@@ -112,7 +112,7 @@ public function __construct(protected string $id, protected array $query) {}
     /**
      * Sends an email message using the Gmail API.
      *
-     * @param array $data The message content and metadata to be sent.
+     * @param  array  $data  The message content and metadata to be sent.
      * @return Response The HTTP response from the Gmail API.
      */
     public function send(array $data): Response
@@ -120,11 +120,11 @@ public function __construct(protected string $id, protected array $query) {}
         return $this->connector->send(new class($data) extends Request
         {
             /**
- * Initializes the MessageResource with the provided data.
- *
- * @param array $data Data used to configure the resource.
- */
-public function __construct(protected array $data) {}
+             * Initializes the MessageResource with the provided data.
+             *
+             * @param  array  $data  Data used to configure the resource.
+             */
+            public function __construct(protected array $data) {}
 
             /**
              * Returns the API endpoint for sending a Gmail message.

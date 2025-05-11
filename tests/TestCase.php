@@ -37,7 +37,7 @@ class TestCase extends Orchestra
     /**
      * Configures the application environment for testing by setting the default database connection to 'testing'.
      *
-     * @param \Illuminate\Foundation\Application $app The application instance.
+     * @param  \Illuminate\Foundation\Application  $app  The application instance.
      */
     public function getEnvironmentSetUp($app)
     {

@@ -43,7 +43,7 @@ class LabelResource extends BaseResource
     /**
      * Retrieves a Gmail label by its unique identifier.
      *
-     * @param string $id The ID of the label to retrieve.
+     * @param  string  $id  The ID of the label to retrieve.
      * @return Response The HTTP response containing the label details.
      */
     public function get(string $id): Response
@@ -51,11 +51,11 @@ class LabelResource extends BaseResource
         return $this->connector->send(new class($id) extends Request
         {
             /**
- * Initializes the class with the specified label ID.
- *
- * @param string $id The unique identifier for the label.
- */
-public function __construct(protected string $id) {}
+             * Initializes the class with the specified label ID.
+             *
+             * @param  string  $id  The unique identifier for the label.
+             */
+            public function __construct(protected string $id) {}
 
             /**
              * Returns the API endpoint for accessing a specific Gmail label by its ID.
@@ -90,11 +90,11 @@ public function __construct(protected string $id) {}
         return $this->connector->send(new class($data) extends Request
         {
             /**
- * Initializes the class with the provided data array.
- *
- * @param array $data Data to be used by the instance.
- */
-public function __construct(protected array $data) {}
+             * Initializes the class with the provided data array.
+             *
+             * @param  array  $data  Data to be used by the instance.
+             */
+            public function __construct(protected array $data) {}
 
             /**
              * Returns the API endpoint for Gmail label resources.
@@ -131,8 +131,8 @@ public function __construct(protected array $data) {}
     /**
      * Updates an existing Gmail label with the specified data.
      *
-     * @param string $id The unique identifier of the label to update.
-     * @param array $data The data to update the label with.
+     * @param  string  $id  The unique identifier of the label to update.
+     * @param  array  $data  The data to update the label with.
      * @return Response The HTTP response from the Gmail API.
      */
     public function update(string $id, array $data): Response
@@ -145,7 +145,7 @@ public function __construct(protected array $data) {}
  * @param string $id The unique identifier of the label.
  * @param array $data The data associated with the label.
  */
-public function __construct(protected string $id, protected array $data) {}
+            public function __construct(protected string $id, protected array $data) {}
 
             /**
              * Returns the API endpoint for accessing a specific Gmail label by its ID.
@@ -182,7 +182,7 @@ public function __construct(protected string $id, protected array $data) {}
     /**
      * Deletes a Gmail label by its ID.
      *
-     * @param string $id The unique identifier of the label to delete.
+     * @param  string  $id  The unique identifier of the label to delete.
      * @return Response The HTTP response from the Gmail API.
      */
     public function delete(string $id): Response
@@ -194,7 +194,7 @@ public function __construct(protected string $id, protected array $data) {}
  *
  * @param string $id The unique identifier for the label.
  */
-public function __construct(protected string $id) {}
+            public function __construct(protected string $id) {}
 
             /**
              * Returns the API endpoint for accessing a specific Gmail label by its ID.

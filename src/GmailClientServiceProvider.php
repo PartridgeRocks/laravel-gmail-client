@@ -11,7 +11,7 @@ class GmailClientServiceProvider extends PackageServiceProvider
     /**
      * Configures the Gmail client package by registering its name, configuration file, views, migration, and console command.
      *
-     * @param Package $package The package instance to configure.
+     * @param  Package  $package  The package instance to configure.
      */
     public function configurePackage(Package $package): void
     {

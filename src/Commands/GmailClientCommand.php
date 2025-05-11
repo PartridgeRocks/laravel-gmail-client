@@ -16,7 +16,7 @@ class GmailClientCommand extends Command
     /**
      * Creates a new GmailClientCommand instance with the provided Gmail client.
      *
-     * @param GmailClient $client The Gmail client used for API interactions.
+     * @param  GmailClient  $client  The Gmail client used for API interactions.
      */
     public function __construct(GmailClient $client)
     {

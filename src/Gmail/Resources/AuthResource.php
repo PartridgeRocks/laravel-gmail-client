@@ -26,7 +26,7 @@ class AuthResource extends BaseResource
  * @param string $code The authorization code received from the OAuth2 authorization server.
  * @param string $redirectUri The URI to which the authorization server redirected the user.
  */
-public function __construct(protected string $code, protected string $redirectUri) {}
+            public function __construct(protected string $code, protected string $redirectUri) {}
 
             /**
              * Returns the OAuth2 token endpoint URL for Google authentication.
@@ -89,11 +89,11 @@ public function __construct(protected string $code, protected string $redirectUr
         return $this->connector->send(new class($refreshToken) extends Request
         {
             /**
- * Initializes the AuthResource with a refresh token.
- *
- * @param string $refreshToken The OAuth2 refresh token to use for authentication operations.
- */
-public function __construct(protected string $refreshToken) {}
+             * Initializes the AuthResource with a refresh token.
+             *
+             * @param  string  $refreshToken  The OAuth2 refresh token to use for authentication operations.
+             */
+            public function __construct(protected string $refreshToken) {}
 
             /**
              * Returns the Google OAuth2 token endpoint URL.

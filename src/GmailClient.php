@@ -17,7 +17,7 @@ class GmailClient
     /**
      * Initializes a new GmailClient instance, optionally authenticating with the provided access token.
      *
-     * @param string|null $accessToken Optional access token for immediate authentication.
+     * @param  string|null  $accessToken  Optional access token for immediate authentication.
      */
     public function __construct(?string $accessToken = null)
     {
@@ -33,9 +33,9 @@ class GmailClient
      *
      * Updates the client to use the provided access token, and optionally a refresh token and expiration time, for subsequent API requests.
      *
-     * @param string $accessToken The OAuth access token.
-     * @param string|null $refreshToken Optional refresh token for renewing access.
-     * @param \DateTimeInterface|null $expiresAt Optional expiration time of the access token.
+     * @param  string  $accessToken  The OAuth access token.
+     * @param  string|null  $refreshToken  Optional refresh token for renewing access.
+     * @param  \DateTimeInterface|null  $expiresAt  Optional expiration time of the access token.
      * @return $this The current GmailClient instance for method chaining.
      */
     public function authenticate(
@@ -78,8 +78,8 @@ class GmailClient
     /**
      * Exchanges an OAuth authorization code for access and refresh tokens, updates authentication, and returns the token data.
      *
-     * @param string $code The authorization code received from the OAuth flow.
-     * @param string $redirectUri The redirect URI used in the OAuth flow.
+     * @param  string  $code  The authorization code received from the OAuth flow.
+     * @param  string  $redirectUri  The redirect URI used in the OAuth flow.
      * @return array The token data including access token, refresh token, and expiration information.
      */
     public function exchangeCode(string $code, string $redirectUri): array
@@ -106,7 +106,7 @@ class GmailClient
     /**
      * Obtains a new access token using the provided refresh token and updates the client's authentication state.
      *
-     * @param string $refreshToken The refresh token to use for obtaining a new access token.
+     * @param  string  $refreshToken  The refresh token to use for obtaining a new access token.
      * @return array The token response data, including the new access token and related information.
      */
     public function refreshToken(string $refreshToken): array
@@ -155,7 +155,7 @@ class GmailClient
      *
      * For each message found, fetches the full `Email` object by its ID. Returns a collection of `Email` objects.
      *
-     * @param array $query Optional query parameters for filtering messages.
+     * @param  array  $query  Optional query parameters for filtering messages.
      * @return Collection Collection of `Email` objects.
      */
     public function listMessages(array $query = []): Collection
@@ -173,7 +173,7 @@ class GmailClient
     /**
      * Retrieves a specific email message by its ID.
      *
-     * @param string $id The unique identifier of the email message.
+     * @param  string  $id  The unique identifier of the email message.
      * @return Email The email message as an Email object.
      */
     public function getMessage(string $id): Email
@@ -189,10 +189,10 @@ class GmailClient
      *
      * Constructs and sends a MIME email with the given recipient, subject, and body. Optional headers such as CC and BCC can be provided via the $options array. Returns the sent email as an Email object.
      *
-     * @param string $to Recipient email address.
-     * @param string $subject Email subject line.
-     * @param string $body Email message body.
-     * @param array $options Optional headers (e.g., 'cc', 'bcc').
+     * @param  string  $to  Recipient email address.
+     * @param  string  $subject  Email subject line.
+     * @param  string  $body  Email message body.
+     * @param  array  $options  Optional headers (e.g., 'cc', 'bcc').
      * @return Email The sent email as an Email object.
      */
     public function sendEmail(string $to, string $subject, string $body, array $options = []): Email
@@ -213,10 +213,10 @@ class GmailClient
      *
      * Builds a MIME email string with the specified recipient, subject, and HTML body, including optional 'from', 'cc', and 'bcc' headers from the options array. The message body is base64-encoded and the entire email is returned as a base64-encoded string suitable for Gmail API transmission.
      *
-     * @param string $to Recipient email address.
-     * @param string $subject Email subject line.
-     * @param string $body HTML content of the email.
-     * @param array $options Optional headers: 'from', 'cc', and 'bcc'.
+     * @param  string  $to  Recipient email address.
+     * @param  string  $subject  Email subject line.
+     * @param  string  $body  HTML content of the email.
+     * @param  array  $options  Optional headers: 'from', 'cc', and 'bcc'.
      * @return string Base64-encoded raw email message.
      */
     protected function createEmailRaw(string $to, string $subject, string $body, array $options = []): string
@@ -277,8 +277,8 @@ class GmailClient
     /**
      * Creates a new Gmail label with the specified name and options.
      *
-     * @param string $name The name of the label to create.
-     * @param array $options Optional additional label properties.
+     * @param  string  $name  The name of the label to create.
+     * @param  array  $options  Optional additional label properties.
      * @return Label The created label as a Label object.
      */
     public function createLabel(string $name, array $options = []): Label
