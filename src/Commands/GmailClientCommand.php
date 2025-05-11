@@ -13,12 +13,24 @@ class GmailClientCommand extends Command
 
     protected GmailClient $client;
 
+    /**
+     * Creates a new GmailClientCommand instance with the provided Gmail client.
+     *
+     * @param GmailClient $client The Gmail client used for API interactions.
+     */
     public function __construct(GmailClient $client)
     {
         parent::__construct();
         $this->client = $client;
     }
 
+    /**
+     * Executes the Gmail Client test command based on provided options.
+     *
+     * Depending on the command-line flags, this method outputs the Gmail API authentication URL, lists recent Gmail messages, or lists available Gmail labels. If no access token is found when required, it prompts the user to authenticate. If no options are specified, it displays usage instructions.
+     *
+     * @return int Command exit status code.
+     */
     public function handle(): int
     {
         if ($this->option('authenticate')) {

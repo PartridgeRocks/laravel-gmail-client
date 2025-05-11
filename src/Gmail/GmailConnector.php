@@ -11,9 +11,9 @@ class GmailConnector extends Connector
     use AcceptsJson;
 
     /**
-     * The Base URL of the Gmail API.
+     * Returns the base URL for the Gmail API.
      *
-     * @var string
+     * @return string The Gmail API base endpoint.
      */
     public function resolveBaseUrl(): string
     {
@@ -21,9 +21,9 @@ class GmailConnector extends Connector
     }
 
     /**
-     * Default headers for every request.
+     * Returns the default HTTP headers for all requests, specifying JSON content type and acceptance.
      *
-     * @return string[]
+     * @return string[] Associative array of HTTP headers.
      */
     protected function defaultHeaders(): array
     {
@@ -34,9 +34,9 @@ class GmailConnector extends Connector
     }
 
     /**
-     * Default query parameters for every request.
+     * Returns the default query parameters for all requests.
      *
-     * @return string[]
+     * @return array An empty array, indicating no default query parameters are set.
      */
     protected function defaultQuery(): array
     {
@@ -44,9 +44,11 @@ class GmailConnector extends Connector
     }
 
     /**
-     * Set the authenticator.
+     * Applies OAuth authentication to the connector using the provided authenticator.
      *
-     * @return $this
+     * Retrieves the OAuth token from the given authenticator and configures the connector to use token-based authentication for subsequent requests.
+     *
+     * @return $this The connector instance for method chaining.
      */
     public function authenticate(OAuthAuthenticator $authenticator): self
     {

@@ -9,9 +9,9 @@ use PartridgeRocks\GmailClient\GmailClient;
 class GmailAuthController extends Controller
 {
     /**
-     * Redirect to Google OAuth.
+     * Redirects the user to the Google OAuth authorization URL for Gmail authentication.
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\RedirectResponse Redirects to Google's OAuth consent screen.
      */
     public function redirect(GmailClient $client)
     {
@@ -24,7 +24,9 @@ class GmailAuthController extends Controller
     }
 
     /**
-     * Handle callback from Google OAuth.
+     * Handles the Google OAuth callback, exchanging the authorization code for access tokens and storing them in the session.
+     *
+     * Redirects to a success route on successful authentication, or to an error route if authentication fails or an error is present in the request.
      *
      * @return \Illuminate\Http\RedirectResponse
      */

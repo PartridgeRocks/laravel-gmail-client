@@ -8,6 +8,11 @@ use PartridgeRocks\GmailClient\GmailClientServiceProvider;
 
 class TestCase extends Orchestra
 {
+    /**
+     * Sets up the test environment and configures model factory name resolution for the package.
+     *
+     * Overrides the default factory name guessing to use the package's factory namespace.
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -17,6 +22,11 @@ class TestCase extends Orchestra
         );
     }
 
+    /**
+     * Returns the service providers to be loaded for the test environment.
+     *
+     * @return array List of service provider class names.
+     */
     protected function getPackageProviders($app)
     {
         return [
@@ -24,6 +34,11 @@ class TestCase extends Orchestra
         ];
     }
 
+    /**
+     * Configures the application environment for testing by setting the default database connection to 'testing'.
+     *
+     * @param \Illuminate\Foundation\Application $app The application instance.
+     */
     public function getEnvironmentSetUp($app)
     {
         config()->set('database.default', 'testing');
