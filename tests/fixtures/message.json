@@ -1,0 +1,35 @@
+{
+  "id": "msg123",
+  "threadId": "thread123",
+  "labelIds": ["INBOX", "UNREAD"],
+  "snippet": "This is a test email snippet",
+  "sizeEstimate": 5000,
+  "internalDate": "1624982400000",
+  "payload": {
+    "partId": "",
+    "mimeType": "text/html",
+    "filename": "",
+    "headers": [
+      {
+        "name": "From",
+        "value": "test@example.com"
+      },
+      {
+        "name": "To",
+        "value": "recipient@example.com"
+      },
+      {
+        "name": "Subject",
+        "value": "Test Email Subject"
+      },
+      {
+        "name": "Date",
+        "value": "Tue, 29 Jun 2021 10:00:00 -0700"
+      }
+    ],
+    "body": {
+      "size": 1000,
+      "data": "VGhpcyBpcyBhIHRlc3QgZW1haWwgYm9keQ=="
+    }
+  }
+}
