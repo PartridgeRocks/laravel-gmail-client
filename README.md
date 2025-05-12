@@ -274,6 +274,64 @@ public function listEmails()
 
 ## Advanced Usage
 
+### Pagination Support
+
+The package supports pagination for listing messages and labels:
+
+```php
+// Get a paginator for messages
+$paginator = GmailClient::listMessages(['maxResults' => 25], true);
+
+// Get the first page
+$firstPage = $paginator->getNextPage();
+
+// Check if there are more pages
+if ($paginator->hasMorePages()) {
+    // Get the next page
+    $secondPage = $paginator->getNextPage();
+}
+
+// Or get all pages at once (use cautiously with large datasets)
+$allMessages = $paginator->getAllPages();
+
+// You can also transform the results using the DTO
+use PartridgeRocks\GmailClient\Data\Responses\EmailDTO;
+$emails = $paginator->transformUsingDTO(EmailDTO::class);
+```
+
+### Enhanced Error Handling
+
+The package provides detailed error handling for common Gmail API errors:
+
+```php
+use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
+use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
+use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
+use PartridgeRocks\GmailClient\Exceptions\ValidationException;
+
+try {
+    $message = GmailClient::getMessage('non-existent-id');
+} catch (NotFoundException $e) {
+    // Handle not found error
+    echo "Message not found: " . $e->getMessage();
+} catch (AuthenticationException $e) {
+    // Handle authentication errors
+    echo "Authentication error: " . $e->getMessage();
+
+    if ($e->getError()->code === 'token_expired') {
+        // Refresh the token
+        $tokens = GmailClient::refreshToken($refreshToken);
+    }
+} catch (RateLimitException $e) {
+    // Handle rate limit errors
+    $retryAfter = $e->getRetryAfter();
+    echo "Rate limit exceeded. Retry after {$retryAfter} seconds.";
+} catch (ValidationException $e) {
+    // Handle validation errors
+    echo "Validation error: " . $e->getMessage();
+}
+```
+
 ### Refresh a Token
 
 ```php
