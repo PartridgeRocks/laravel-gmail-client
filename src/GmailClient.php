@@ -12,6 +12,9 @@ use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
 use PartridgeRocks\GmailClient\Exceptions\ValidationException;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\GmailOAuthAuthenticator;
+use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use PartridgeRocks\GmailClient\Gmail\Resources\LabelResource;
 use PartridgeRocks\GmailClient\Gmail\Resources\MessageResource;
 
@@ -138,9 +141,18 @@ class GmailClient
 
     /**
      * List messages with optional query parameters.
+     *
+     * @param array $query Query parameters for filtering messages
+     * @param bool $paginate Whether to return a paginator for all results
+     * @param int $maxResults Maximum number of results per page
+     * @return Collection|GmailPaginator
      */
-    public function listMessages(array $query = []): Collection
+    public function listMessages(array $query = [], bool $paginate = false, int $maxResults = 100): mixed
     {
+        if ($paginate) {
+            return $this->paginateMessages($query, $maxResults);
+        }
+
         $response = $this->messages()->list($query);
         $data = $response->json();
 
@@ -149,6 +161,25 @@ class GmailClient
         return $messages->map(function ($message) {
             return $this->getMessage($message['id']);
         });
+    }
+
+    /**
+     * Create a paginator for messages.
+     *
+     * @param array $query Query parameters for filtering messages
+     * @param int $maxResults Maximum number of results per page
+     * @return GmailPaginator
+     */
+    public function paginateMessages(array $query = [], int $maxResults = 100): GmailPaginator
+    {
+        $paginator = new GmailPaginator(
+            $this->connector,
+            ListMessagesRequest::class,
+            'messages',
+            $maxResults
+        );
+
+        return $paginator;
     }
 
     /**
@@ -302,15 +333,41 @@ class GmailClient
 
     /**
      * List all labels.
+     *
+     * @param bool $paginate Whether to return a paginator for all results
+     * @param int $maxResults Maximum number of results per page
+     * @return Collection|GmailPaginator
      */
-    public function listLabels(): Collection
+    public function listLabels(bool $paginate = false, int $maxResults = 100): mixed
     {
+        if ($paginate) {
+            return $this->paginateLabels($maxResults);
+        }
+
         $response = $this->labels()->list();
         $data = $response->json();
 
         return collect($data['labels'] ?? [])->map(function ($label) {
             return Label::fromApiResponse($label);
         });
+    }
+
+    /**
+     * Create a paginator for labels.
+     *
+     * @param int $maxResults Maximum number of results per page
+     * @return GmailPaginator
+     */
+    public function paginateLabels(int $maxResults = 100): GmailPaginator
+    {
+        $paginator = new GmailPaginator(
+            $this->connector,
+            ListLabelsRequest::class,
+            'labels',
+            $maxResults
+        );
+
+        return $paginator;
     }
 
     /**
