@@ -13,8 +13,6 @@ class GmailConnector extends Connector
 
     /**
      * The Base URL of the Gmail API.
-     *
-     * @return string
      */
     public function resolveBaseUrl(): string
     {
@@ -46,9 +44,6 @@ class GmailConnector extends Connector
 
     /**
      * Set the authenticator.
-     *
-     * @param \Saloon\Contracts\Authenticator $authenticator
-     * @return static
      */
     public function authenticate(Authenticator $authenticator): static
     {
