@@ -2,10 +2,11 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Resources;
 
-use Saloon\Enums\Method;
 use Saloon\Http\BaseResource;
-use Saloon\Http\Request;
 use Saloon\Http\Response;
+use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Messages\GetMessageRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Messages\SendMessageRequest;
 
 class MessageResource extends BaseResource
 {
@@ -14,25 +15,7 @@ class MessageResource extends BaseResource
      */
     public function list(array $query = []): Response
     {
-        return $this->connector->send(new class($query) extends Request
-        {
-            public function __construct(protected array $query) {}
-
-            public function resolveEndpoint(): string
-            {
-                return '/users/me/messages';
-            }
-
-            public function method(): Method
-            {
-                return Method::GET;
-            }
-
-            public function defaultQuery(): array
-            {
-                return $this->query;
-            }
-        });
+        return $this->connector->send(new ListMessagesRequest($query));
     }
 
     /**
@@ -40,25 +23,7 @@ class MessageResource extends BaseResource
      */
     public function get(string $id, array $query = []): Response
     {
-        return $this->connector->send(new class($id, $query) extends Request
-        {
-            public function __construct(protected string $id, protected array $query) {}
-
-            public function resolveEndpoint(): string
-            {
-                return '/users/me/messages/'.$this->id;
-            }
-
-            public function method(): Method
-            {
-                return Method::GET;
-            }
-
-            public function defaultQuery(): array
-            {
-                return $this->query;
-            }
-        });
+        return $this->connector->send(new GetMessageRequest($id, $query));
     }
 
     /**
@@ -66,24 +31,6 @@ class MessageResource extends BaseResource
      */
     public function send(array $data): Response
     {
-        return $this->connector->send(new class($data) extends Request
-        {
-            public function __construct(protected array $data) {}
-
-            public function resolveEndpoint(): string
-            {
-                return '/users/me/messages/send';
-            }
-
-            public function method(): Method
-            {
-                return Method::POST;
-            }
-
-            public function defaultBody(): array
-            {
-                return $this->data;
-            }
-        });
+        return $this->connector->send(new SendMessageRequest($data));
     }
 }

@@ -2,10 +2,13 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Resources;
 
-use Saloon\Enums\Method;
 use Saloon\Http\BaseResource;
-use Saloon\Http\Request;
 use Saloon\Http\Response;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\GetLabelRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\CreateLabelRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\UpdateLabelRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\DeleteLabelRequest;
 
 class LabelResource extends BaseResource
 {
@@ -14,18 +17,7 @@ class LabelResource extends BaseResource
      */
     public function list(): Response
     {
-        return $this->connector->send(new class extends Request
-        {
-            public function resolveEndpoint(): string
-            {
-                return '/users/me/labels';
-            }
-
-            public function method(): Method
-            {
-                return Method::GET;
-            }
-        });
+        return $this->connector->send(new ListLabelsRequest());
     }
 
     /**
@@ -33,20 +25,7 @@ class LabelResource extends BaseResource
      */
     public function get(string $id): Response
     {
-        return $this->connector->send(new class($id) extends Request
-        {
-            public function __construct(protected string $id) {}
-
-            public function resolveEndpoint(): string
-            {
-                return '/users/me/labels/'.$this->id;
-            }
-
-            public function method(): Method
-            {
-                return Method::GET;
-            }
-        });
+        return $this->connector->send(new GetLabelRequest($id));
     }
 
     /**
@@ -54,25 +33,7 @@ class LabelResource extends BaseResource
      */
     public function create(array $data): Response
     {
-        return $this->connector->send(new class($data) extends Request
-        {
-            public function __construct(protected array $data) {}
-
-            public function resolveEndpoint(): string
-            {
-                return '/users/me/labels';
-            }
-
-            public function method(): Method
-            {
-                return Method::POST;
-            }
-
-            public function defaultBody(): array
-            {
-                return $this->data;
-            }
-        });
+        return $this->connector->send(new CreateLabelRequest($data));
     }
 
     /**
@@ -80,25 +41,7 @@ class LabelResource extends BaseResource
      */
     public function update(string $id, array $data): Response
     {
-        return $this->connector->send(new class($id, $data) extends Request
-        {
-            public function __construct(protected string $id, protected array $data) {}
-
-            public function resolveEndpoint(): string
-            {
-                return '/users/me/labels/'.$this->id;
-            }
-
-            public function method(): Method
-            {
-                return Method::PUT;
-            }
-
-            public function defaultBody(): array
-            {
-                return $this->data;
-            }
-        });
+        return $this->connector->send(new UpdateLabelRequest($id, $data));
     }
 
     /**
@@ -106,19 +49,6 @@ class LabelResource extends BaseResource
      */
     public function delete(string $id): Response
     {
-        return $this->connector->send(new class($id) extends Request
-        {
-            public function __construct(protected string $id) {}
-
-            public function resolveEndpoint(): string
-            {
-                return '/users/me/labels/'.$this->id;
-            }
-
-            public function method(): Method
-            {
-                return Method::DELETE;
-            }
-        });
+        return $this->connector->send(new DeleteLabelRequest($id));
     }
 }

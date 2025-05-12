@@ -1,0 +1,28 @@
+<?php
+
+namespace PartridgeRocks\GmailClient\Gmail\Requests\Messages;
+
+use Saloon\Enums\Method;
+use Saloon\Http\Request;
+
+class SendMessageRequest extends Request
+{
+    // Define the HTTP method
+    protected Method $method = Method::POST;
+
+    protected array $messageData;
+
+    public function __construct(array $data) {
+        $this->messageData = $data;
+    }
+
+    public function resolveEndpoint(): string
+    {
+        return '/users/me/messages/send';
+    }
+
+    public function defaultBody(): array
+    {
+        return $this->messageData;
+    }
+}

@@ -2,10 +2,10 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Resources;
 
-use Saloon\Enums\Method;
 use Saloon\Http\BaseResource;
-use Saloon\Http\Request;
 use Saloon\Http\Response;
+use PartridgeRocks\GmailClient\Gmail\Requests\Auth\ExchangeCodeRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Auth\RefreshTokenRequest;
 
 class AuthResource extends BaseResource
 {
@@ -14,45 +14,7 @@ class AuthResource extends BaseResource
      */
     public function exchangeCode(string $code, string $redirectUri): Response
     {
-        return $this->connector->send(new class($code, $redirectUri) extends Request
-        {
-            public function __construct(protected string $code, protected string $redirectUri) {}
-
-            public function resolveEndpoint(): string
-            {
-                return 'https://oauth2.googleapis.com/token';
-            }
-
-            public function method(): Method
-            {
-                return Method::POST;
-            }
-
-            protected function defaultHeaders(): array
-            {
-                return [
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                ];
-            }
-
-            public function defaultBody(): array
-            {
-                $clientId = config('gmail-client.client_id');
-                $clientSecret = config('gmail-client.client_secret');
-
-                if (empty($clientId) || empty($clientSecret)) {
-                    throw new \RuntimeException('Gmail API client credentials not configured. Check your .env and gmail-client config.');
-                }
-
-                return [
-                    'code' => $this->code,
-                    'client_id' => $clientId,
-                    'client_secret' => $clientSecret,
-                    'redirect_uri' => $this->redirectUri,
-                    'grant_type' => 'authorization_code',
-                ];
-            }
-        });
+        return $this->connector->send(new ExchangeCodeRequest($code, $redirectUri));
     }
 
     /**
@@ -60,44 +22,7 @@ class AuthResource extends BaseResource
      */
     public function refreshToken(string $refreshToken): Response
     {
-        return $this->connector->send(new class($refreshToken) extends Request
-        {
-            public function __construct(protected string $refreshToken) {}
-
-            public function resolveEndpoint(): string
-            {
-                return 'https://oauth2.googleapis.com/token';
-            }
-
-            public function method(): Method
-            {
-                return Method::POST;
-            }
-
-            protected function defaultHeaders(): array
-            {
-                return [
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                ];
-            }
-
-            public function defaultBody(): array
-            {
-                $clientId = config('gmail-client.client_id');
-                $clientSecret = config('gmail-client.client_secret');
-
-                if (empty($clientId) || empty($clientSecret)) {
-                    throw new \RuntimeException('Gmail API client credentials not configured. Check your .env and gmail-client config.');
-                }
-
-                return [
-                    'client_id' => $clientId,
-                    'client_secret' => $clientSecret,
-                    'refresh_token' => $this->refreshToken,
-                    'grant_type' => 'refresh_token',
-                ];
-            }
-        });
+        return $this->connector->send(new RefreshTokenRequest($refreshToken));
     }
 
     /**

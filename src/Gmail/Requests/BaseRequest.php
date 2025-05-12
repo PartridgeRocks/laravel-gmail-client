@@ -1,0 +1,84 @@
+<?php
+
+namespace PartridgeRocks\GmailClient\Gmail\Requests;
+
+use PartridgeRocks\GmailClient\Data\Errors\ErrorDTO;
+use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
+use PartridgeRocks\GmailClient\Exceptions\GmailClientException;
+use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
+use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
+use PartridgeRocks\GmailClient\Exceptions\ValidationException;
+// Ensure the correct namespace or class exists
+// Ensure the correct namespace or class exists
+use Saloon\Contracts\Response; // Ensure the Saloon package is installed and the namespace is correct
+use Saloon\Http\Request;
+
+abstract class BaseRequest extends Request
+{
+    /**
+     * Process the response and throw appropriate exceptions for errors.
+     *
+     * @param Response $response
+     * @return Response
+     * 
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws RateLimitException
+     * @throws ValidationException
+     * @throws GmailClientException
+     */
+    public function processResponse(Response $response): Response
+    {
+        $status = $response->status();
+        
+        // Only process error responses
+        if ($status >= 200 && $status < 300) {
+            return $response;
+        }
+        
+        // Extract error data for better context
+        $errorData = $response->json() ?? [];
+        
+        // Handle specific error types based on status code and response content
+        switch ($status) {
+            case 400:
+                throw ValidationException::fromResponse($errorData);
+                
+            case 401:
+                throw AuthenticationException::fromResponse($errorData);
+                
+            case 404:
+                // Extract resource identifier from the request URL
+                $path = $response->getRequest()->resolveEndpoint();
+                $resourceId = $this->extractResourceId($path);
+                
+                throw NotFoundException::fromPath($path, $resourceId);
+                
+            case 429:
+                $retryAfter = (int) $response->header('Retry-After', 0);
+                throw RateLimitException::quotaExceeded($retryAfter);
+                
+            default:
+                $error = ErrorDTO::fromResponse($errorData);
+                throw new GmailClientException(
+                    "Gmail API Error: {$error->message}",
+                    $status, 
+                    null,
+                    $error
+                );
+        }
+    }
+    
+    /**
+     * Extract a resource ID from a path
+     * 
+     * @param string $path
+     * @return string|null
+     */
+    protected function extractResourceId(string $path): ?string
+    {
+        // Simple extraction of the last path segment
+        $segments = explode('/', trim($path, '/'));
+        return end($segments);
+    }
+}
