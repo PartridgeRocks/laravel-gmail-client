@@ -12,7 +12,8 @@ class RefreshTokenRequest extends Request
 
     protected string $refreshToken;
 
-    public function __construct(string $refreshToken) {
+    public function __construct(string $refreshToken)
+    {
         $this->refreshToken = $refreshToken;
     }
 

@@ -2,8 +2,6 @@
 
 namespace PartridgeRocks\GmailClient\Data\Errors;
 
-use Spatie\LaravelData\Data;
-
 class NotFoundErrorDTO extends ErrorDTO
 {
     public function __construct(

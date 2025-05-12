@@ -2,8 +2,8 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Requests\Labels;
 
-use Saloon\Enums\Method;
 use PartridgeRocks\GmailClient\Gmail\Requests\BaseRequest;
+use Saloon\Enums\Method;
 
 class ListLabelsRequest extends BaseRequest
 {
@@ -12,7 +12,8 @@ class ListLabelsRequest extends BaseRequest
 
     protected array $customQuery = [];
 
-    public function __construct(array $query = []) {
+    public function __construct(array $query = [])
+    {
         $this->customQuery = $query;
     }
 

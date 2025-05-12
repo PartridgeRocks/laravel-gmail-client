@@ -2,13 +2,13 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Resources;
 
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\CreateLabelRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\DeleteLabelRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\GetLabelRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\UpdateLabelRequest;
 use Saloon\Http\BaseResource;
 use Saloon\Http\Response;
-use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
-use PartridgeRocks\GmailClient\Gmail\Requests\Labels\GetLabelRequest;
-use PartridgeRocks\GmailClient\Gmail\Requests\Labels\CreateLabelRequest;
-use PartridgeRocks\GmailClient\Gmail\Requests\Labels\UpdateLabelRequest;
-use PartridgeRocks\GmailClient\Gmail\Requests\Labels\DeleteLabelRequest;
 
 class LabelResource extends BaseResource
 {
@@ -17,7 +17,7 @@ class LabelResource extends BaseResource
      */
     public function list(): Response
     {
-        return $this->connector->send(new ListLabelsRequest());
+        return $this->connector->send(new ListLabelsRequest);
     }
 
     /**

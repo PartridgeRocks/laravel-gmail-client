@@ -2,8 +2,8 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Requests\Labels;
 
-use Saloon\Enums\Method;
 use PartridgeRocks\GmailClient\Gmail\Requests\BaseRequest;
+use Saloon\Enums\Method;
 
 class DeleteLabelRequest extends BaseRequest
 {
@@ -12,7 +12,8 @@ class DeleteLabelRequest extends BaseRequest
 
     protected string $labelId;
 
-    public function __construct(string $id) {
+    public function __construct(string $id)
+    {
         $this->labelId = $id;
     }
 

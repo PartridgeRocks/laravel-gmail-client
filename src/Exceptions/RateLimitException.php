@@ -20,14 +20,14 @@ class RateLimitException extends GmailClientException
             $retryAfter,
             'You have exceeded the Gmail API rate limit. Please try again later.'
         );
-        
+
         return new static(
             'You have exceeded the Gmail API rate limit. Please try again later.',
             $retryAfter,
             $error
         );
     }
-    
+
     /**
      * Create a rate limit exception from a daily quota error
      */
@@ -38,7 +38,7 @@ class RateLimitException extends GmailClientException
             'day',
             'Daily quota exceeded for Gmail API. Please try again tomorrow.'
         );
-        
+
         return new static(
             'Daily quota exceeded for Gmail API. Please try again tomorrow.',
             86400, // Retry after 24 hours
@@ -53,13 +53,13 @@ class RateLimitException extends GmailClientException
     {
         $errorData = $response['error'] ?? $response;
         $message = $errorData['message'] ?? 'Rate limit exceeded';
-        
+
         // Check if it's a quota limit or rate limit
         $isQuota = false;
         if (isset($errorData['reason']) && $errorData['reason'] === 'quotaExceeded') {
             $isQuota = true;
         }
-        
+
         if ($isQuota) {
             $error = RateLimitErrorDTO::quotaExceeded(
                 $errorData['quota'] ?? 0,
@@ -74,7 +74,7 @@ class RateLimitException extends GmailClientException
                 $response
             );
         }
-        
+
         return new static($message, $retryAfter, $error);
     }
 

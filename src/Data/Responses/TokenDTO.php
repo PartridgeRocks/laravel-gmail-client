@@ -3,7 +3,6 @@
 namespace PartridgeRocks\GmailClient\Data\Responses;
 
 use Carbon\Carbon;
-use Illuminate\Support\Carbon as IlluminateCarbon;
 use DateTimeInterface;
 
 class TokenDTO extends ResponseDTO
@@ -44,7 +43,7 @@ class TokenDTO extends ResponseDTO
      */
     public function hasExpired(): bool
     {
-        if (!$this->expiresAt) {
+        if (! $this->expiresAt) {
             return false;
         }
 
@@ -56,7 +55,7 @@ class TokenDTO extends ResponseDTO
      */
     public function canRefresh(): bool
     {
-        return !empty($this->refreshToken);
+        return ! empty($this->refreshToken);
     }
 
     /**

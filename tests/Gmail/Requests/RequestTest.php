@@ -19,7 +19,7 @@ it('creates correct endpoint for get message', function () {
 });
 
 it('creates correct endpoint for list messages', function () {
-    $request = new ListMessagesRequest();
+    $request = new ListMessagesRequest;
     expect($request->resolveEndpoint())->toBe('/users/me/messages');
 });
 
@@ -33,7 +33,7 @@ it('includes query parameters in list requests', function () {
         'maxResults' => 10,
         'q' => 'test query',
     ]);
-    
+
     expect($request->defaultQuery())
         ->toHaveKey('maxResults', 10)
         ->toHaveKey('q', 'test query');
@@ -42,70 +42,70 @@ it('includes query parameters in list requests', function () {
 it('includes body data in send requests', function () {
     $data = ['raw' => 'test-data'];
     $request = new SendMessageRequest($data);
-    
+
     expect($request->defaultBody())->toBe($data);
 });
 
 it('handles 401 responses with authentication exception', function () {
-    $connector = new GmailConnector();
-    
+    $connector = new GmailConnector;
+
     Saloon::fake([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 401,
                 'message' => 'Invalid Credentials',
-            ]
+            ],
         ], 401),
     ]);
-    
+
     $request = new GetMessageRequest('test-id');
     $connector->send($request);
 })->throws(AuthenticationException::class);
 
 it('handles 404 responses with not found exception', function () {
-    $connector = new GmailConnector();
-    
+    $connector = new GmailConnector;
+
     Saloon::fake([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 404,
                 'message' => 'Resource not found',
-            ]
+            ],
         ], 404),
     ]);
-    
+
     $request = new GetMessageRequest('test-id');
     $connector->send($request);
 })->throws(NotFoundException::class);
 
 it('handles 429 responses with rate limit exception', function () {
-    $connector = new GmailConnector();
-    
+    $connector = new GmailConnector;
+
     Saloon::fake([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 429,
                 'message' => 'Rate limit exceeded',
-            ]
+            ],
         ], 429, ['Retry-After' => '30']),
     ]);
-    
+
     $request = new GetMessageRequest('test-id');
     $connector->send($request);
 })->throws(RateLimitException::class);
 
 it('handles 400 responses with validation exception', function () {
-    $connector = new GmailConnector();
-    
+    $connector = new GmailConnector;
+
     Saloon::fake([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 400,
                 'message' => 'Invalid request',
-            ]
+            ],
         ], 400),
     ]);
-    
+
     $request = new SendMessageRequest(['invalid' => 'data']);
     $connector->send($request);
 })->throws(ValidationException::class);

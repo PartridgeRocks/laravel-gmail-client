@@ -6,10 +6,10 @@ use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Data\Responses\LabelDTO;
 
 it('can create from API response', function () {
-    $data = json_decode(file_get_contents(__DIR__ . '/../fixtures/label.json'), true);
-    
+    $data = json_decode(file_get_contents(__DIR__.'/../fixtures/label.json'), true);
+
     $label = LabelDTO::fromApiResponse($data);
-    
+
     expect($label)
         ->toBeInstanceOf(LabelDTO::class)
         ->and($label->id)->toBe('Label_123')
@@ -25,9 +25,9 @@ it('handles missing fields gracefully', function () {
         'id' => 'Label_123',
         'name' => 'Test Label',
     ];
-    
+
     $label = LabelDTO::fromApiResponse($data);
-    
+
     expect($label)
         ->toBeInstanceOf(LabelDTO::class)
         ->and($label->id)->toBe('Label_123')
@@ -39,10 +39,10 @@ it('handles missing fields gracefully', function () {
 });
 
 it('can create a collection from API response', function () {
-    $data = json_decode(file_get_contents(__DIR__ . '/../fixtures/labels-list.json'), true);
-    
+    $data = json_decode(file_get_contents(__DIR__.'/../fixtures/labels-list.json'), true);
+
     $labels = LabelDTO::collectionFromApiResponse($data);
-    
+
     expect($labels)
         ->toBeInstanceOf(Collection::class)
         ->toHaveCount(2)

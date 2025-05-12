@@ -2,8 +2,8 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Requests\Messages;
 
-use Saloon\Enums\Method;
 use PartridgeRocks\GmailClient\Gmail\Requests\BaseRequest;
+use Saloon\Enums\Method;
 
 class SendMessageRequest extends BaseRequest
 {
@@ -12,7 +12,8 @@ class SendMessageRequest extends BaseRequest
 
     protected array $messageData;
 
-    public function __construct(array $data) {
+    public function __construct(array $data)
+    {
         $this->messageData = $data;
     }
 

@@ -2,8 +2,6 @@
 
 namespace PartridgeRocks\GmailClient\Data\Errors;
 
-use Spatie\LaravelData\Data;
-
 class RateLimitErrorDTO extends ErrorDTO
 {
     public function __construct(

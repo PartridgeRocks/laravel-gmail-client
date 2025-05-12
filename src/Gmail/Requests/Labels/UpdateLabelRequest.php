@@ -2,8 +2,8 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Requests\Labels;
 
-use Saloon\Enums\Method;
 use PartridgeRocks\GmailClient\Gmail\Requests\BaseRequest;
+use Saloon\Enums\Method;
 
 class UpdateLabelRequest extends BaseRequest
 {
@@ -11,9 +11,11 @@ class UpdateLabelRequest extends BaseRequest
     protected Method $method = Method::PUT;
 
     protected string $labelId;
+
     protected array $labelData;
 
-    public function __construct(string $id, array $data) {
+    public function __construct(string $id, array $data)
+    {
         $this->labelId = $id;
         $this->labelData = $data;
     }

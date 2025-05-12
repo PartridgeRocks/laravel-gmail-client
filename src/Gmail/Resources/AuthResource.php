@@ -2,10 +2,10 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Resources;
 
-use Saloon\Http\BaseResource;
-use Saloon\Http\Response;
 use PartridgeRocks\GmailClient\Gmail\Requests\Auth\ExchangeCodeRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Auth\RefreshTokenRequest;
+use Saloon\Http\BaseResource;
+use Saloon\Http\Response;
 
 class AuthResource extends BaseResource
 {

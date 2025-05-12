@@ -104,14 +104,14 @@ class EmailDTO extends ResponseDTO
     public static function collectionFromApiResponse(array $data): Collection
     {
         $messages = collect($data['messages'] ?? []);
-        
+
         if (empty($messages)) {
             return collect();
         }
 
         return $messages->map(function ($message) {
             // If we only have the ID, we need to return a partial DTO
-            if (!isset($message['payload'])) {
+            if (! isset($message['payload'])) {
                 return new static(
                     id: $message['id'],
                     threadId: $message['threadId'] ?? '',
@@ -124,7 +124,7 @@ class EmailDTO extends ResponseDTO
                     responseTime: Carbon::now()
                 );
             }
-            
+
             return static::fromApiResponse($message);
         });
     }

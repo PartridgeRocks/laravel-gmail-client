@@ -8,13 +8,13 @@ use PartridgeRocks\GmailClient\Data\Errors\ErrorDTO;
 class GmailClientException extends Exception
 {
     protected ?ErrorDTO $error = null;
-    
-    public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = null, ?ErrorDTO $error = null)
+
+    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null, ?ErrorDTO $error = null)
     {
         parent::__construct($message, $code, $previous);
         $this->error = $error;
     }
-    
+
     /**
      * Get the error DTO associated with this exception
      */
@@ -22,16 +22,17 @@ class GmailClientException extends Exception
     {
         return $this->error;
     }
-    
+
     /**
      * Set the error DTO
      */
     public function setError(ErrorDTO $error): self
     {
         $this->error = $error;
+
         return $this;
     }
-    
+
     /**
      * Check if the exception has an error DTO
      */
@@ -39,14 +40,14 @@ class GmailClientException extends Exception
     {
         return $this->error !== null;
     }
-    
+
     /**
      * Create an exception from a response array
      */
     public static function fromResponse(array $response, ?string $message = null): self
     {
         $error = ErrorDTO::fromResponse($response);
-        
+
         return new static(
             $message ?? $error->message,
             0,

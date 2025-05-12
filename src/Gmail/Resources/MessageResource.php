@@ -2,11 +2,11 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Resources;
 
+use PartridgeRocks\GmailClient\Gmail\Requests\Messages\GetMessageRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Messages\SendMessageRequest;
 use Saloon\Http\BaseResource;
 use Saloon\Http\Response;
-use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
-use PartridgeRocks\GmailClient\Gmail\Requests\Messages\GetMessageRequest;
-use PartridgeRocks\GmailClient\Gmail\Requests\Messages\SendMessageRequest;
 
 class MessageResource extends BaseResource
 {

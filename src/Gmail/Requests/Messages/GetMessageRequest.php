@@ -2,8 +2,8 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Requests\Messages;
 
-use Saloon\Enums\Method;
 use PartridgeRocks\GmailClient\Gmail\Requests\BaseRequest;
+use Saloon\Enums\Method;
 
 class GetMessageRequest extends BaseRequest
 {
@@ -11,9 +11,11 @@ class GetMessageRequest extends BaseRequest
     protected Method $method = Method::GET;
 
     protected string $messageId;
+
     protected array $customQuery = [];
 
-    public function __construct(string $id, array $query = []) {
+    public function __construct(string $id, array $query = [])
+    {
         $this->messageId = $id;
         $this->customQuery = $query;
     }

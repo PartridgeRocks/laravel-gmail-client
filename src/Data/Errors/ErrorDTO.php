@@ -12,8 +12,7 @@ class ErrorDTO extends Data
         public ?string $detail = null,
         public ?array $context = null,
         public ?string $service = 'Gmail API'
-    ) {
-    }
+    ) {}
 
     /**
      * Create an error DTO from a response array
@@ -27,7 +26,7 @@ class ErrorDTO extends Data
         $code = $error['code'] ?? $error['status'] ?? 'unknown_error';
         $message = $error['message'] ?? 'Unknown error occurred';
         $detail = $error['details'][0]['detail'] ?? $error['details'][0]['errorMessage'] ?? null;
-        
+
         return new self(
             code: is_numeric($code) ? (string) $code : $code,
             message: $message,

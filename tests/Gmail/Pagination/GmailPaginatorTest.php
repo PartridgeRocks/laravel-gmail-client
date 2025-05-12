@@ -11,8 +11,8 @@ use Saloon\Http\Faking\MockResponse;
 use Saloon\Laravel\Facades\Saloon;
 
 it('can fetch the first page of results', function () {
-    $connector = new GmailConnector();
-    
+    $connector = new GmailConnector;
+
     // First page of results with a next page token
     Saloon::fake([
         '*messages*' => MockResponse::make([
@@ -23,16 +23,16 @@ it('can fetch the first page of results', function () {
             'nextPageToken' => 'page2token',
         ], 200),
     ]);
-    
+
     $paginator = new GmailPaginator(
         $connector,
         ListMessagesRequest::class,
         'messages',
         2
     );
-    
+
     $results = $paginator->getNextPage();
-    
+
     expect($results)
         ->toBeInstanceOf(Collection::class)
         ->toHaveCount(2)
@@ -41,46 +41,43 @@ it('can fetch the first page of results', function () {
 });
 
 it('can fetch all pages of results', function () {
-    $connector = new GmailConnector();
-    
+    $connector = new GmailConnector;
+
     // Respond with different data based on the page token
     Saloon::fake([
-        fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && !isset($request->query['pageToken']) => 
-            MockResponse::make([
-                'messages' => [
-                    ['id' => 'msg1', 'threadId' => 'thread1'],
-                    ['id' => 'msg2', 'threadId' => 'thread2'],
-                ],
-                'nextPageToken' => 'page2token',
-            ], 200),
-        
-        fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && isset($request->query['pageToken']) && $request->query['pageToken'] === 'page2token' => 
-            MockResponse::make([
-                'messages' => [
-                    ['id' => 'msg3', 'threadId' => 'thread3'],
-                    ['id' => 'msg4', 'threadId' => 'thread4'],
-                ],
-                'nextPageToken' => 'page3token',
-            ], 200),
-            
-        fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && isset($request->query['pageToken']) && $request->query['pageToken'] === 'page3token' => 
-            MockResponse::make([
-                'messages' => [
-                    ['id' => 'msg5', 'threadId' => 'thread5'],
-                ],
-                // No next page token means this is the last page
-            ], 200),
+        fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && ! isset($request->query['pageToken']) => MockResponse::make([
+            'messages' => [
+                ['id' => 'msg1', 'threadId' => 'thread1'],
+                ['id' => 'msg2', 'threadId' => 'thread2'],
+            ],
+            'nextPageToken' => 'page2token',
+        ], 200),
+
+        fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && isset($request->query['pageToken']) && $request->query['pageToken'] === 'page2token' => MockResponse::make([
+            'messages' => [
+                ['id' => 'msg3', 'threadId' => 'thread3'],
+                ['id' => 'msg4', 'threadId' => 'thread4'],
+            ],
+            'nextPageToken' => 'page3token',
+        ], 200),
+
+        fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && isset($request->query['pageToken']) && $request->query['pageToken'] === 'page3token' => MockResponse::make([
+            'messages' => [
+                ['id' => 'msg5', 'threadId' => 'thread5'],
+            ],
+            // No next page token means this is the last page
+        ], 200),
     ]);
-    
+
     $paginator = new GmailPaginator(
         $connector,
         ListMessagesRequest::class,
         'messages',
         2
     );
-    
+
     $results = $paginator->getAllPages();
-    
+
     expect($results)
         ->toBeInstanceOf(Collection::class)
         ->toHaveCount(5)
@@ -89,20 +86,20 @@ it('can fetch all pages of results', function () {
 });
 
 it('can transform results using a DTO', function () {
-    $connector = new GmailConnector();
-    
+    $connector = new GmailConnector;
+
     // Simple one-page response
     Saloon::fake([
         '*messages*' => MockResponse::make([
             'messages' => [
                 [
-                    'id' => 'msg1', 
+                    'id' => 'msg1',
                     'threadId' => 'thread1',
                     'payload' => [
                         'headers' => [
                             ['name' => 'Subject', 'value' => 'Test Subject'],
                             ['name' => 'From', 'value' => 'test@example.com'],
-                        ]
+                        ],
                     ],
                     'sizeEstimate' => 1000,
                     'internalDate' => '1624982400000',
@@ -110,16 +107,16 @@ it('can transform results using a DTO', function () {
             ],
         ], 200),
     ]);
-    
+
     $paginator = new GmailPaginator(
         $connector,
         ListMessagesRequest::class,
         'messages',
         2
     );
-    
+
     $results = $paginator->transformUsingDTO(EmailDTO::class);
-    
+
     expect($results)
         ->toBeInstanceOf(Collection::class)
         ->toHaveCount(1)

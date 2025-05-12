@@ -48,6 +48,7 @@ class GmailOAuthAuthenticator implements OAuthAuthenticator
         $this->tokenType = $tokenType;
         $this->expiresAt = $expiresAt;
     }
+
     /**
      * Create a new Gmail OAuth authenticator.
      */

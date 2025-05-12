@@ -11,9 +11,11 @@ class ExchangeCodeRequest extends Request
     protected Method $method = Method::POST;
 
     protected string $code;
+
     protected string $redirectUri;
 
-    public function __construct(string $code, string $redirectUri) {
+    public function __construct(string $code, string $redirectUri)
+    {
         $this->code = $code;
         $this->redirectUri = $redirectUri;
     }

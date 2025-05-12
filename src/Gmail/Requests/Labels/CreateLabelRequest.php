@@ -2,8 +2,8 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Requests\Labels;
 
-use Saloon\Enums\Method;
 use PartridgeRocks\GmailClient\Gmail\Requests\BaseRequest;
+use Saloon\Enums\Method;
 
 class CreateLabelRequest extends BaseRequest
 {
@@ -12,7 +12,8 @@ class CreateLabelRequest extends BaseRequest
 
     protected array $labelData;
 
-    public function __construct(array $data) {
+    public function __construct(array $data)
+    {
         $this->labelData = $data;
     }
 

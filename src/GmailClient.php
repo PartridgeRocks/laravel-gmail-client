@@ -142,9 +142,9 @@ class GmailClient
     /**
      * List messages with optional query parameters.
      *
-     * @param array $query Query parameters for filtering messages
-     * @param bool $paginate Whether to return a paginator for all results
-     * @param int $maxResults Maximum number of results per page
+     * @param  array  $query  Query parameters for filtering messages
+     * @param  bool  $paginate  Whether to return a paginator for all results
+     * @param  int  $maxResults  Maximum number of results per page
      * @return Collection|GmailPaginator
      */
     public function listMessages(array $query = [], bool $paginate = false, int $maxResults = 100): mixed
@@ -166,9 +166,8 @@ class GmailClient
     /**
      * Create a paginator for messages.
      *
-     * @param array $query Query parameters for filtering messages
-     * @param int $maxResults Maximum number of results per page
-     * @return GmailPaginator
+     * @param  array  $query  Query parameters for filtering messages
+     * @param  int  $maxResults  Maximum number of results per page
      */
     public function paginateMessages(array $query = [], int $maxResults = 100): GmailPaginator
     {
@@ -334,8 +333,8 @@ class GmailClient
     /**
      * List all labels.
      *
-     * @param bool $paginate Whether to return a paginator for all results
-     * @param int $maxResults Maximum number of results per page
+     * @param  bool  $paginate  Whether to return a paginator for all results
+     * @param  int  $maxResults  Maximum number of results per page
      * @return Collection|GmailPaginator
      */
     public function listLabels(bool $paginate = false, int $maxResults = 100): mixed
@@ -355,8 +354,7 @@ class GmailClient
     /**
      * Create a paginator for labels.
      *
-     * @param int $maxResults Maximum number of results per page
-     * @return GmailPaginator
+     * @param  int  $maxResults  Maximum number of results per page
      */
     public function paginateLabels(int $maxResults = 100): GmailPaginator
     {

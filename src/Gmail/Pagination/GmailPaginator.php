@@ -3,7 +3,6 @@
 namespace PartridgeRocks\GmailClient\Gmail\Pagination;
 
 use Illuminate\Support\Collection;
-use PartridgeRocks\GmailClient\Data\Responses\ResponseDTO;
 use Saloon\Http\Connector;
 use Saloon\Http\Response;
 use Saloon\Traits\Plugins\AcceptsJson;
@@ -12,39 +11,18 @@ class GmailPaginator
 {
     use AcceptsJson;
 
-    /**
-     * @var Connector
-     */
     protected Connector $connector;
 
-    /**
-     * @var string|null
-     */
     protected ?string $nextPageToken = null;
 
-    /**
-     * @var bool
-     */
     protected bool $hasMorePages = true;
 
-    /**
-     * @var int
-     */
     protected int $maxResults;
 
-    /**
-     * @var string
-     */
     protected string $resourceClass;
 
-    /**
-     * @var string|null
-     */
     protected ?string $responseKey = null;
 
-    /**
-     * @var Collection
-     */
     protected Collection $items;
 
     /**
@@ -104,7 +82,7 @@ class GmailPaginator
      */
     public function getNextPage(): Collection
     {
-        if (!$this->hasMorePages) {
+        if (! $this->hasMorePages) {
             return collect();
         }
 
@@ -133,11 +111,11 @@ class GmailPaginator
     public function transformUsingDTO(string $dtoClass, string $method = 'collectionFromApiResponse'): Collection
     {
         $response = $this->getAllPages();
-        
+
         // Create the response data structure expected by the DTO
         $dataKey = $this->responseKey ?? 'items';
         $responseData = [$dataKey => $response->toArray()];
-        
+
         // Use the DTO's static method to transform the collection
         return $dtoClass::$method($responseData);
     }
