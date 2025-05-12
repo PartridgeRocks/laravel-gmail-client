@@ -2,6 +2,8 @@
 
 namespace PartridgeRocks\GmailClient;
 
+use DateTimeImmutable;
+use PartridgeRocks\GmailClient\Gmail\GmailClientHelpers;
 use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Data\Label;
@@ -15,11 +17,13 @@ use PartridgeRocks\GmailClient\Gmail\GmailOAuthAuthenticator;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
+use PartridgeRocks\GmailClient\Gmail\Resources\AuthResource;
 use PartridgeRocks\GmailClient\Gmail\Resources\LabelResource;
 use PartridgeRocks\GmailClient\Gmail\Resources\MessageResource;
 
 class GmailClient
 {
+    use GmailClientHelpers;
     protected GmailConnector $connector;
 
     /**
@@ -58,10 +62,12 @@ class GmailClient
 
     /**
      * Get the authentication resource.
+     *
+     * @return AuthResource
      */
-    protected function auth(): \PartridgeRocks\GmailClient\Gmail\Resources\AuthResource
+    protected function auth(): AuthResource
     {
-        return new \PartridgeRocks\GmailClient\Gmail\Resources\AuthResource($this->connector);
+        return new AuthResource($this->connector);
     }
 
     /**
@@ -83,11 +89,22 @@ class GmailClient
         $response = $this->auth()->exchangeCode($code, $redirectUri);
         $data = $response->json();
 
+        // Check for error in response
+        if (isset($data['error'])) {
+            $errorMessage = $data['error_description'] ?? $data['error'];
+            throw new AuthenticationException("OAuth error: {$errorMessage}");
+        }
+
+        // Verify required keys exist
+        if (!isset($data['access_token'])) {
+            throw new AuthenticationException("Invalid OAuth response: missing access_token");
+        }
+
         // Set the current token
         $expiresAt = null;
         if (isset($data['expires_in'])) {
-            $expiresAt = new \DateTime;
-            $expiresAt->modify("+{$data['expires_in']} seconds");
+            $expiresAt = new DateTimeImmutable();
+            $expiresAt = $expiresAt->modify("+{$data['expires_in']} seconds");
         }
 
         $this->authenticate(
@@ -107,11 +124,22 @@ class GmailClient
         $response = $this->auth()->refreshToken($refreshToken);
         $data = $response->json();
 
+        // Check for error in response
+        if (isset($data['error'])) {
+            $errorMessage = $data['error_description'] ?? $data['error'];
+            throw new AuthenticationException("OAuth error: {$errorMessage}");
+        }
+
+        // Verify required keys exist
+        if (!isset($data['access_token'])) {
+            throw new AuthenticationException("Invalid OAuth response: missing access_token");
+        }
+
         // Set the current token
         $expiresAt = null;
         if (isset($data['expires_in'])) {
-            $expiresAt = new \DateTime;
-            $expiresAt->modify("+{$data['expires_in']} seconds");
+            $expiresAt = new DateTimeImmutable();
+            $expiresAt = $expiresAt->modify("+{$data['expires_in']} seconds");
         }
 
         $this->authenticate(
@@ -203,7 +231,7 @@ class GmailClient
             }
 
             if ($response->status() === 429) {
-                $retryAfter = (int) $response->header('Retry-After', 0);
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -222,7 +250,7 @@ class GmailClient
             }
 
             if ($response && $response->status() === 429) {
-                $retryAfter = (int) $response->header('Retry-After', 0);
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -266,7 +294,7 @@ class GmailClient
             }
 
             if ($response->status() === 429) {
-                $retryAfter = (int) $response->header('Retry-After', 0);
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -281,7 +309,7 @@ class GmailClient
             }
 
             if ($response && $response->status() === 429) {
-                $retryAfter = (int) $response->header('Retry-After', 0);
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -306,6 +334,11 @@ class GmailClient
             throw ValidationException::missingRequiredField('from_email');
         }
 
+        // Validate sender email address
+        if (! filter_var($from, FILTER_VALIDATE_EMAIL)) {
+            throw ValidationException::invalidEmailAddress($from);
+        }
+
         $cc = $options['cc'] ?? null;
         $bcc = $options['bcc'] ?? null;
 
@@ -323,11 +356,11 @@ class GmailClient
         $email .= "Subject: {$subject}\r\n";
         $email .= "MIME-Version: 1.0\r\n";
         $email .= "Content-Type: text/html; charset=utf-8\r\n";
-        $email .= "Content-Transfer-Encoding: base64\r\n\r\n";
-        $email .= chunk_split(base64_encode($body));
+        $email .= "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
+        $email .= quoted_printable_encode($body);
 
         // Gmail API requires base64url encoding, not standard base64
-        return strtr(base64_encode($email), '+/', '-_');
+        return $this->base64UrlEncode($email);
     }
 
     /**
