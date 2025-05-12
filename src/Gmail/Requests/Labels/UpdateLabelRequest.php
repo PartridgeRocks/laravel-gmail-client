@@ -3,9 +3,9 @@
 namespace PartridgeRocks\GmailClient\Gmail\Requests\Labels;
 
 use Saloon\Enums\Method;
-use Saloon\Http\Request;
+use PartridgeRocks\GmailClient\Gmail\Requests\BaseRequest;
 
-class UpdateLabelRequest extends Request
+class UpdateLabelRequest extends BaseRequest
 {
     // Define the HTTP method
     protected Method $method = Method::PUT;

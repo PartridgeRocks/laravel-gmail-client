@@ -3,9 +3,9 @@
 namespace PartridgeRocks\GmailClient\Gmail\Requests\Labels;
 
 use Saloon\Enums\Method;
-use Saloon\Http\Request;
+use PartridgeRocks\GmailClient\Gmail\Requests\BaseRequest;
 
-class DeleteLabelRequest extends Request
+class DeleteLabelRequest extends BaseRequest
 {
     // Define the HTTP method
     protected Method $method = Method::DELETE;

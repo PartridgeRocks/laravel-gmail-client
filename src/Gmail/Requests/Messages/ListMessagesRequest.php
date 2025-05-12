@@ -3,9 +3,9 @@
 namespace PartridgeRocks\GmailClient\Gmail\Requests\Messages;
 
 use Saloon\Enums\Method;
-use Saloon\Http\Request;
+use PartridgeRocks\GmailClient\Gmail\Requests\BaseRequest;
 
-class ListMessagesRequest extends Request
+class ListMessagesRequest extends BaseRequest
 {
     // Define the HTTP method
     protected Method $method = Method::GET;
