@@ -1,0 +1,15 @@
+{
+  "id": "Label_123",
+  "name": "Test Label",
+  "type": "user",
+  "messageListVisibility": "show",
+  "labelListVisibility": "labelShow",
+  "messagesTotal": 0,
+  "messagesUnread": 0,
+  "threadsTotal": 0,
+  "threadsUnread": 0,
+  "color": {
+    "textColor": "#ffffff",
+    "backgroundColor": "#4285f4"
+  }
+}

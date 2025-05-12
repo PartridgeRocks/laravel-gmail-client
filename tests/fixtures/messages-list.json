@@ -1,0 +1,10 @@
+{
+  "messages": [
+    {
+      "id": "msg123",
+      "threadId": "thread123"
+    }
+  ],
+  "nextPageToken": "token123",
+  "resultSizeEstimate": 1
+}

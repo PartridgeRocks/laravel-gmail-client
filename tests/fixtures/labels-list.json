@@ -1,0 +1,18 @@
+{
+  "labels": [
+    {
+      "id": "Label_123",
+      "name": "Test Label",
+      "type": "user",
+      "messageListVisibility": "show",
+      "labelListVisibility": "labelShow"
+    },
+    {
+      "id": "INBOX",
+      "name": "INBOX",
+      "type": "system",
+      "messageListVisibility": "show",
+      "labelListVisibility": "labelShow"
+    }
+  ]
+}
