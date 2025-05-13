@@ -15,7 +15,6 @@ use PartridgeRocks\GmailClient\Gmail\GmailClientHelpers;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\GmailOAuthAuthenticator;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
-use Illuminate\Support\LazyCollection;
 use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use PartridgeRocks\GmailClient\Gmail\Resources\AuthResource;
@@ -237,7 +236,6 @@ class GmailClient
      * @param  array  $query  Query parameters for filtering messages
      * @param  int  $maxResults  Maximum number of results per page
      * @param  bool  $fullDetails  Whether to fetch full message details or just basic info
-     * @return \PartridgeRocks\GmailClient\Gmail\Pagination\GmailLazyCollection
      */
     public function lazyLoadMessages(array $query = [], int $maxResults = 100, bool $fullDetails = true): Gmail\Pagination\GmailLazyCollection
     {
@@ -247,8 +245,6 @@ class GmailClient
     /**
      * Create a lazy-loading collection for labels.
      * This provides memory-efficient iteration over labels.
-     *
-     * @return \PartridgeRocks\GmailClient\Gmail\Pagination\GmailLazyCollection
      */
     public function lazyLoadLabels(): Gmail\Pagination\GmailLazyCollection
     {
