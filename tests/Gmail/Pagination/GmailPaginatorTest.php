@@ -8,13 +8,13 @@ use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use Saloon\Http\Faking\MockResponse;
-use Saloon\Laravel\Facades\Saloon;
+use PartridgeRocks\GmailClient\Tests\TestHelpers\MockClientAdapter;
 
 it('can fetch the first page of results', function () {
     $connector = new GmailConnector;
 
     // First page of results with a next page token
-    Saloon::fake([
+    $mockClient = MockClientAdapter::create([
         '*messages*' => MockResponse::make([
             'messages' => [
                 ['id' => 'msg1', 'threadId' => 'thread1'],
@@ -23,6 +23,8 @@ it('can fetch the first page of results', function () {
             'nextPageToken' => 'page2token',
         ], 200),
     ]);
+
+    $connector->withMockClient($mockClient);
 
     $paginator = new GmailPaginator(
         $connector,
@@ -44,7 +46,7 @@ it('can fetch all pages of results', function () {
     $connector = new GmailConnector;
 
     // Respond with different data based on the page token
-    Saloon::fake([
+    $mockClient = MockClientAdapter::create([
         fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && ! isset($request->query['pageToken']) => MockResponse::make([
             'messages' => [
                 ['id' => 'msg1', 'threadId' => 'thread1'],
@@ -69,6 +71,8 @@ it('can fetch all pages of results', function () {
         ], 200),
     ]);
 
+    $connector->withMockClient($mockClient);
+
     $paginator = new GmailPaginator(
         $connector,
         ListMessagesRequest::class,
@@ -89,7 +93,7 @@ it('can transform results using a DTO', function () {
     $connector = new GmailConnector;
 
     // Simple one-page response
-    Saloon::fake([
+    $mockClient = MockClientAdapter::create([
         '*messages*' => MockResponse::make([
             'messages' => [
                 [
@@ -107,6 +111,8 @@ it('can transform results using a DTO', function () {
             ],
         ], 200),
     ]);
+
+    $connector->withMockClient($mockClient);
 
     $paginator = new GmailPaginator(
         $connector,
