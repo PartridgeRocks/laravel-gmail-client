@@ -40,7 +40,7 @@ class ValidationException extends GmailClientException
     /**
      * Create from an API validation response
      */
-    public static function fromResponse(array $response): self
+    public static function fromValidationResponse(array $response): self
     {
         $errorData = $response['error'] ?? $response;
         $errors = [];
@@ -65,5 +65,26 @@ class ValidationException extends GmailClientException
         $error = ValidationErrorDTO::withErrors($errors, $response);
 
         return new static('Multiple validation errors occurred.', 422, null, $error);
+    }
+
+    /**
+     * Create an exception from a response array
+     *
+     * @param array $response The response data
+     * @param string|null $message Optional custom message
+     * @return self
+     */
+    public static function fromResponse(array $response, ?string $message = null): self
+    {
+        $errorData = $response['error'] ?? $response;
+        $defaultMessage = $errorData['message'] ?? 'Validation error';
+
+        $error = ValidationErrorDTO::forField(
+            'request',
+            $message ?? $defaultMessage,
+            $response
+        );
+
+        return new static($message ?? $defaultMessage, 422, null, $error);
     }
 }

@@ -40,7 +40,7 @@ abstract class BaseRequest extends Request
         // Handle specific error types based on status code and response content
         switch ($status) {
             case 400:
-                throw ValidationException::fromResponse($errorData);
+                throw ValidationException::fromValidationResponse($errorData);
             case 401:
                 throw AuthenticationException::fromResponse($errorData);
             case 404:
