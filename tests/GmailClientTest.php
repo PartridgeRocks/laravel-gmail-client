@@ -82,7 +82,7 @@ it('validates email addresses when sending', function () {
     $this->client->authenticate('test-token');
 
     $this->client->sendEmail('invalid-email', 'Test Subject', 'Test body');
-})->throws(ValidationException::class, 'The email address "invalid-email" is not valid');
+})->throws(ValidationException::class, 'Invalid email address: \'invalid-email\'.');
 
 it('can list labels', function () {
     $labelsJson = json_decode(file_get_contents(__DIR__.'/fixtures/labels-list.json'), true);
