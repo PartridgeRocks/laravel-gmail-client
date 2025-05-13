@@ -14,4 +14,14 @@ class GmailClientFacadeTest extends TestCase
             GmailClient::getFacadeRoot()
         );
     }
+
+    public function test_facade_can_invoke_methods()
+    {
+        // Mock the underlying client
+        $mockClient = $this->mock(\PartridgeRocks\GmailClient\GmailClient::class);
+        $mockClient->shouldReceive('authenticate')->once()->with('test-token')->andReturnSelf();
+
+        // Test the facade method call
+        GmailClient::authenticate('test-token');
+    }
 }
