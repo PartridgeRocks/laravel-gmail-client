@@ -11,13 +11,13 @@ class LabelDTO extends ResponseDTO
         public string $id,
         public string $name,
         public ?string $type = null,
-        public ?array $messageListVisibility = null,
-        public ?array $labelListVisibility = null,
+        public string|array|null $messageListVisibility = null,
+        public string|array|null $labelListVisibility = null,
         public ?int $messagesTotal = null,
         public ?int $messagesUnread = null,
         public ?int $threadsTotal = null,
         public ?int $threadsUnread = null,
-        public ?string $color = null,
+        public string|array|null $color = null,
         ?string $etag = null,
         ?Carbon $responseTime = null
     ) {

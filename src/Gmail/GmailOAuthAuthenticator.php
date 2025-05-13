@@ -2,7 +2,10 @@
 
 namespace PartridgeRocks\GmailClient\Gmail;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Saloon\Contracts\OAuthAuthenticator;
+use Saloon\Http\PendingRequest;
 
 class GmailOAuthAuthenticator implements OAuthAuthenticator
 {
@@ -40,13 +43,27 @@ class GmailOAuthAuthenticator implements OAuthAuthenticator
 
     /**
      * Set a new access token.
+     *
+     * This method is used to update token information
      */
-    public function set(string $accessToken, ?string $refreshToken = null, ?string $tokenType = null, ?\DateTimeInterface $expiresAt = null): static
+    public function updateToken(string $accessToken, ?string $refreshToken = null, ?string $tokenType = null, ?\DateTimeInterface $expiresAt = null): static
     {
         $this->accessToken = $accessToken;
         $this->refreshToken = $refreshToken;
         $this->tokenType = $tokenType;
         $this->expiresAt = $expiresAt;
+
+        return $this;
+    }
+
+    /**
+     * Set authenticator data in a pending request.
+     *
+     * This method is required by the Saloon Authenticator interface
+     */
+    public function set(PendingRequest $pendingRequest): void
+    {
+        $pendingRequest->headers()->add('Authorization', $this->tokenType.' '.$this->accessToken);
     }
 
     /**
@@ -88,7 +105,14 @@ class GmailOAuthAuthenticator implements OAuthAuthenticator
      */
     public function getExpiresAt(): ?DateTimeImmutable
     {
-        return $this->expiresAt;
+        // Convert to DateTimeImmutable if it's not already
+        if ($this->expiresAt instanceof DateTimeImmutable) {
+            return $this->expiresAt;
+        } elseif ($this->expiresAt instanceof DateTimeInterface) {
+            return new DateTimeImmutable('@'.$this->expiresAt->getTimestamp());
+        }
+
+        return null;
     }
 
     /**

@@ -175,20 +175,16 @@ class RefreshGmailToken
 
 ### Listing Messages
 
+#### Standard Method
+
 ```php
-// Basic listing
+// Basic listing (loads all message details in memory at once)
 $messages = GmailClient::listMessages(['maxResults' => 10]);
 
 // With query filters (search)
 $messages = GmailClient::listMessages([
     'q' => 'from:example@gmail.com after:2023/01/01 has:attachment',
     'maxResults' => 20
-]);
-
-// Get unread messages
-$messages = GmailClient::listMessages([
-    'q' => 'is:unread',
-    'maxResults' => 10
 ]);
 
 // Process messages
@@ -198,6 +194,55 @@ foreach ($messages as $message) {
     echo "Date: {$message->internalDate->format('Y-m-d H:i:s')}\n";
     echo "Snippet: {$message->snippet}\n";
     echo "-----------------------\n";
+}
+```
+
+#### Memory-Efficient Lazy Loading (Recommended for Large Datasets)
+
+```php
+// Create a lazy-loading collection of messages
+$messages = GmailClient::listMessages(
+    query: ['q' => 'is:unread'], 
+    lazy: true,
+    maxResults: 100,
+    fullDetails: true
+);
+
+// Messages are loaded only when accessed, keeping memory usage low
+foreach ($messages as $message) {
+    echo "From: {$message->from}\n";
+    echo "Subject: {$message->subject}\n";
+    
+    // You can stop iteration at any point
+    if ($someCondition) {
+        break;
+    }
+}
+
+// You can also use Laravel Collection methods
+$importantMessages = $messages
+    ->filter(function ($message) {
+        return in_array('IMPORTANT', $message->labelIds);
+    })
+    ->take(5);
+```
+
+For very large datasets where you only need basic metadata:
+
+```php
+// Get only message IDs and thread IDs without full details
+$messageIds = GmailClient::listMessages(
+    lazy: true,
+    fullDetails: false
+);
+
+foreach ($messageIds as $messageData) {
+    echo "Message ID: {$messageData['id']}\n";
+    
+    // Load full details only for specific messages if needed
+    if ($needsFullDetails) {
+        $fullMessage = GmailClient::getMessage($messageData['id']);
+    }
 }
 ```
 
@@ -359,7 +404,7 @@ try {
 
 ## Pagination
 
-When dealing with large numbers of messages or labels, it's better to use pagination:
+When dealing with large numbers of messages or labels, you can use pagination:
 
 ```php
 // Enable pagination for messages
@@ -387,6 +432,26 @@ use PartridgeRocks\GmailClient\Data\Responses\EmailDTO;
 $labelPaginator = GmailClient::listLabels(true, 50);
 $allLabels = $labelPaginator->transformUsingDTO(LabelDTO::class);
 ```
+
+## Memory Efficiency Considerations
+
+When working with large Gmail accounts, it's important to avoid loading all messages into memory at once. 
+The package provides several options for efficient memory usage:
+
+1. **Lazy Loading**: This is the most memory-efficient approach for iterating through large collections
+   ```php
+   $messages = GmailClient::listMessages(lazy: true);
+   ```
+
+2. **Pagination**: For manual control of page loading
+   ```php
+   $paginator = GmailClient::listMessages(paginate: true);
+   ```
+
+3. **Metadata Only**: When you only need message IDs and thread IDs
+   ```php
+   $messageIds = GmailClient::listMessages(lazy: true, fullDetails: false);
+   ```
 
 ## Testing
 

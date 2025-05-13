@@ -40,7 +40,7 @@ abstract class BaseRequest extends Request
         // Handle specific error types based on status code and response content
         switch ($status) {
             case 400:
-                throw ValidationException::fromResponse($errorData);
+                throw ValidationException::fromValidationResponse($errorData);
             case 401:
                 throw AuthenticationException::fromResponse($errorData);
             case 404:
@@ -51,9 +51,11 @@ abstract class BaseRequest extends Request
                 throw NotFoundException::fromPath($path, $resourceId);
             case 429:
                 $retryAfter = (int) $response->header('Retry-After', 0);
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             default:
                 $error = ErrorDTO::fromResponse($errorData);
+
                 throw new GmailClientException(
                     "Gmail API Error: {$error->message}",
                     $status,

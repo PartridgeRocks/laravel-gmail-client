@@ -47,9 +47,9 @@ class RateLimitException extends GmailClientException
     }
 
     /**
-     * Create a rate limit exception from a response
+     * Create a rate limit exception from a response with retry information
      */
-    public static function fromResponse(array $response, int $retryAfter = 0): self
+    public static function fromRateLimitResponse(array $response, int $retryAfter = 0): self
     {
         $errorData = $response['error'] ?? $response;
         $message = $errorData['message'] ?? 'Rate limit exceeded';
@@ -76,6 +76,26 @@ class RateLimitException extends GmailClientException
         }
 
         return new static($message, $retryAfter, $error);
+    }
+
+    /**
+     * Create an exception from a response array
+     *
+     * @param  array  $response  The response data
+     * @param  string|null  $message  Optional custom message
+     */
+    public static function fromResponse(array $response, ?string $message = null): self
+    {
+        $errorData = $response['error'] ?? $response;
+        $defaultMessage = $errorData['message'] ?? 'Rate limit exceeded';
+
+        $error = RateLimitErrorDTO::withRetry(
+            0,
+            $message ?? $defaultMessage,
+            $response
+        );
+
+        return new static($message ?? $defaultMessage, 0, $error);
     }
 
     public function getRetryAfter(): int

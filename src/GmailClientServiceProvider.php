@@ -8,6 +8,11 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class GmailClientServiceProvider extends PackageServiceProvider
 {
+    /**
+     * Configures the Gmail client package by registering its name, configuration file, views, migration, and console command.
+     *
+     * @param  Package  $package  The package instance to configure.
+     */
     public function configurePackage(Package $package): void
     {
         /*
@@ -23,6 +28,9 @@ class GmailClientServiceProvider extends PackageServiceProvider
             ->hasCommand(GmailClientCommand::class);
     }
 
+    /**
+     * Registers a singleton GmailClient in the service container, authenticating it with an access token from the session or configuration if available.
+     */
     public function packageRegistered(): void
     {
         $this->app->singleton(GmailClient::class, function ($app) {
@@ -38,6 +46,11 @@ class GmailClientServiceProvider extends PackageServiceProvider
         });
     }
 
+    /**
+     * Performs boot-time initialization for the Gmail client package.
+     *
+     * Loads branded views if specified in configuration and registers package routes.
+     */
     public function packageBooted(): void
     {
         // Register view components or other boot-time functionality
@@ -50,7 +63,9 @@ class GmailClientServiceProvider extends PackageServiceProvider
     }
 
     /**
-     * Register the package routes.
+     * Registers OAuth authentication routes for the Gmail client package if enabled in configuration.
+     *
+     * Defines GET routes for authentication redirect and callback under a configurable prefix and middleware group.
      */
     protected function registerRoutes()
     {

@@ -40,6 +40,14 @@ class GmailClient
     }
 
     /**
+     * Get the connector instance.
+     */
+    public function getConnector(): GmailConnector
+    {
+        return $this->connector;
+    }
+
+    /**
      * Authenticate with a token.
      *
      * @return $this
@@ -91,6 +99,7 @@ class GmailClient
         // Check for error in response
         if (isset($data['error'])) {
             $errorMessage = $data['error_description'] ?? $data['error'];
+
             throw new AuthenticationException("OAuth error: {$errorMessage}");
         }
 
@@ -126,6 +135,7 @@ class GmailClient
         // Check for error in response
         if (isset($data['error'])) {
             $errorMessage = $data['error_description'] ?? $data['error'];
+
             throw new AuthenticationException("OAuth error: {$errorMessage}");
         }
 
@@ -172,10 +182,21 @@ class GmailClient
      * @param  array  $query  Query parameters for filtering messages
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  int  $maxResults  Maximum number of results per page
-     * @return Collection|GmailPaginator
+     * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
+     * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
+     * @return Collection|GmailPaginator|\Illuminate\Support\LazyCollection
      */
-    public function listMessages(array $query = [], bool $paginate = false, int $maxResults = 100): mixed
-    {
+    public function listMessages(
+        array $query = [],
+        bool $paginate = false,
+        int $maxResults = 100,
+        bool $lazy = false,
+        bool $fullDetails = true
+    ): mixed {
+        if ($lazy) {
+            return $this->lazyLoadMessages($query, $maxResults, $fullDetails);
+        }
+
         if ($paginate) {
             return $this->paginateMessages($query, $maxResults);
         }
@@ -209,6 +230,28 @@ class GmailClient
     }
 
     /**
+     * Create a lazy-loading collection for messages.
+     * This provides memory-efficient iteration over messages.
+     *
+     * @param  array  $query  Query parameters for filtering messages
+     * @param  int  $maxResults  Maximum number of results per page
+     * @param  bool  $fullDetails  Whether to fetch full message details or just basic info
+     */
+    public function lazyLoadMessages(array $query = [], int $maxResults = 100, bool $fullDetails = true): Gmail\Pagination\GmailLazyCollection
+    {
+        return Gmail\Pagination\GmailLazyCollection::messages($this, $query, $maxResults, $fullDetails);
+    }
+
+    /**
+     * Create a lazy-loading collection for labels.
+     * This provides memory-efficient iteration over labels.
+     */
+    public function lazyLoadLabels(): Gmail\Pagination\GmailLazyCollection
+    {
+        return Gmail\Pagination\GmailLazyCollection::labels($this);
+    }
+
+    /**
      * Get a specific message.
      *
      * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
@@ -231,6 +274,7 @@ class GmailClient
 
             if ($response->status() === 429) {
                 $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -250,6 +294,7 @@ class GmailClient
 
             if ($response && $response->status() === 429) {
                 $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -294,6 +339,7 @@ class GmailClient
 
             if ($response->status() === 429) {
                 $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -309,6 +355,7 @@ class GmailClient
 
             if ($response && $response->status() === 429) {
                 $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -366,13 +413,18 @@ class GmailClient
      * List all labels.
      *
      * @param  bool  $paginate  Whether to return a paginator for all results
+     * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  int  $maxResults  Maximum number of results per page
-     * @return Collection|GmailPaginator
+     * @return Collection|GmailPaginator|Gmail\Pagination\GmailLazyCollection
      */
-    public function listLabels(bool $paginate = false, int $maxResults = 100): mixed
+    public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
     {
         if ($paginate) {
             return $this->paginateLabels($maxResults);
+        }
+
+        if ($lazy) {
+            return $this->lazyLoadLabels();
         }
 
         $response = $this->labels()->list();

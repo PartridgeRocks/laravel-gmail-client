@@ -2,8 +2,8 @@
 
 namespace PartridgeRocks\GmailClient\Gmail\Resources;
 
-use PartridgeRocks\GmailClient\Gmail\Requests\Auth\ExchangeCodeRequest;
-use PartridgeRocks\GmailClient\Gmail\Requests\Auth\RefreshTokenRequest;
+use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
+use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\BaseResource;
 use Saloon\Http\Response;
 
@@ -11,47 +11,86 @@ class AuthResource extends BaseResource
 {
     /**
      * Exchange an authorization code for an access token.
+     *
+     * @param  string  $code  The authorization code
+     * @param  string|null  $redirectUri  Optional override for the redirect URI
+     * @return array The token response data
+     *
+     * @throws AuthenticationException
      */
-    public function exchangeCode(string $code, string $redirectUri): Response
+    public function exchangeCode(string $code, ?string $redirectUri = null): array
     {
-        return $this->connector->send(new ExchangeCodeRequest($code, $redirectUri));
+        // We can use the built-in method from AuthorizationCodeGrant trait
+        try {
+            // Use the configured redirect URI from OAuthConfig if not specified
+            if ($redirectUri) {
+                $this->connector->oauthConfig()->setRedirectUri($redirectUri);
+            }
+
+            $response = $this->connector->getAccessToken($code);
+            $tokenData = $response->json();
+
+            // Authenticate the connector with the new token
+            $this->connector->authenticate(
+                new TokenAuthenticator($tokenData['access_token'])
+            );
+
+            return $tokenData;
+        } catch (\Exception $e) {
+            throw AuthenticationException::fromOAuthError($e->getMessage());
+        }
     }
 
     /**
      * Refresh an access token using a refresh token.
+     *
+     * @param  string  $refreshToken  The refresh token
+     * @return array The token response data
+     *
+     * @throws AuthenticationException
      */
-    public function refreshToken(string $refreshToken): Response
+    public function refreshToken(string $refreshToken): array
     {
-        return $this->connector->send(new RefreshTokenRequest($refreshToken));
+        try {
+            $response = $this->connector->refreshAccessToken($refreshToken);
+            $tokenData = $response->json();
+
+            // Authenticate the connector with the new token
+            $this->connector->authenticate(
+                new TokenAuthenticator($tokenData['access_token'])
+            );
+
+            return $tokenData;
+        } catch (\Exception $e) {
+            throw AuthenticationException::fromOAuthError($e->getMessage());
+        }
     }
 
     /**
      * Get the authorization URL.
      *
+     * @param  string|null  $redirectUri  Optional override for the redirect URI
+     * @param  array  $scopes  Optional override for scopes
+     * @param  array  $additionalParams  Additional query parameters
+     * @return string The authorization URL
+     *
      * @throws \RuntimeException
      */
     public function getAuthorizationUrl(
-        string $redirectUri,
+        ?string $redirectUri = null,
         array $scopes = [],
         array $additionalParams = []
     ): string {
-        $clientId = config('gmail-client.client_id');
-
-        if (empty($clientId)) {
-            throw new \RuntimeException('Gmail API client_id not configured. Check your .env and gmail-client config.');
+        // Use the configured redirect URI from OAuthConfig if not specified
+        if ($redirectUri) {
+            $this->connector->oauthConfig()->setRedirectUri($redirectUri);
         }
 
-        $scopes = ! empty($scopes) ? $scopes : config('gmail-client.scopes');
+        // Use the configured scopes from OAuthConfig if not specified
+        if (! empty($scopes)) {
+            $this->connector->oauthConfig()->setDefaultScopes($scopes);
+        }
 
-        $params = array_merge([
-            'client_id' => $clientId,
-            'redirect_uri' => $redirectUri,
-            'response_type' => 'code',
-            'scope' => implode(' ', $scopes),
-            'access_type' => 'offline',
-            'prompt' => 'consent',
-        ], $additionalParams);
-
-        return 'https://accounts.google.com/o/oauth2/v2/auth?'.http_build_query($params);
+        return $this->connector->getAuthorizationUrl($additionalParams);
     }
 }

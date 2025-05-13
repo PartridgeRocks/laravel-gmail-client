@@ -2,14 +2,14 @@
 
 namespace PartridgeRocks\GmailClient\Data\Responses;
 
-use Illuminate\Support\Carbon;
+use Carbon\CarbonInterface;
 use Spatie\LaravelData\Data;
 
 abstract class ResponseDTO extends Data
 {
     public function __construct(
         public readonly ?string $etag = null,
-        public readonly ?Carbon $responseTime = null
+        public readonly ?CarbonInterface $responseTime = null
     ) {}
 
     /**
