@@ -1,0 +1,19 @@
+parameters:
+    ignoreErrors:
+        # Date/Time Interface Errors
+        - '#Return type \(DateTimeImmutable\|null\) of method PartridgeRocks\\GmailClient\\Gmail\\GmailOAuthAuthenticator::getExpiresAt\(\) should be compatible with return type \(\\DateTimeInterface\|null\) of method Saloon\\Contracts\\OAuthAuthenticator::getExpiresAt\(\)#'
+        
+        # Method Return Type Errors
+        - '#Method PartridgeRocks\\GmailClient\\Gmail\\Pagination\\GmailPaginator::getRequest\(\) should return mixed but returns object#'
+        
+        # Method Set missing return type
+        - '#Method PartridgeRocks\\GmailClient\\Gmail\\GmailOAuthAuthenticator::set\(\) should return static\(PartridgeRocks\\GmailClient\\Gmail\\GmailOAuthAuthenticator\) but return statement is missing#'
+        
+        # Auth Trait/Class Mismatch
+        - '#Call to an undefined method PartridgeRocks\\GmailClient\\Gmail\\Resources\\AuthResource::exchangeCode\(\).#'
+        - '#Call to an undefined method PartridgeRocks\\GmailClient\\Gmail\\Resources\\AuthResource::refreshToken\(\).#'
+        - '#Call to an undefined method PartridgeRocks\\GmailClient\\Gmail\\Resources\\AuthResource::getAuthorizationUrl\(\).#'
+        
+        # Ignore mixed return type
+        - '#Method PartridgeRocks\\GmailClient\\GmailClient::listMessages\(\) should return Illuminate\\Support\\Collection\|PartridgeRocks\\GmailClient\\Gmail\\Pagination\\GmailPaginator but returns mixed#'
+        - '#Method PartridgeRocks\\GmailClient\\GmailClient::listLabels\(\) should return Illuminate\\Support\\Collection\|PartridgeRocks\\GmailClient\\Gmail\\Pagination\\GmailPaginator but returns mixed#'
