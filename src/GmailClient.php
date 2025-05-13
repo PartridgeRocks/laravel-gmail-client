@@ -30,7 +30,7 @@ class GmailClient
     /**
      * Create a new GmailClient instance.
      *
-     * @param string|null $accessToken Optional access token to authenticate with
+     * @param  string|null  $accessToken  Optional access token to authenticate with
      */
     public function __construct(?string $accessToken = null)
     {
