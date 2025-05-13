@@ -15,6 +15,7 @@ use PartridgeRocks\GmailClient\Gmail\GmailClientHelpers;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\GmailOAuthAuthenticator;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
+use Illuminate\Support\LazyCollection;
 use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use PartridgeRocks\GmailClient\Gmail\Resources\AuthResource;
@@ -182,10 +183,21 @@ class GmailClient
      * @param  array  $query  Query parameters for filtering messages
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  int  $maxResults  Maximum number of results per page
-     * @return Collection|GmailPaginator
+     * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
+     * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
+     * @return Collection|GmailPaginator|\Illuminate\Support\LazyCollection
      */
-    public function listMessages(array $query = [], bool $paginate = false, int $maxResults = 100): mixed
-    {
+    public function listMessages(
+        array $query = [],
+        bool $paginate = false,
+        int $maxResults = 100,
+        bool $lazy = false,
+        bool $fullDetails = true
+    ): mixed {
+        if ($lazy) {
+            return $this->lazyLoadMessages($query, $maxResults, $fullDetails);
+        }
+
         if ($paginate) {
             return $this->paginateMessages($query, $maxResults);
         }
@@ -216,6 +228,31 @@ class GmailClient
         );
 
         return $paginator;
+    }
+
+    /**
+     * Create a lazy-loading collection for messages.
+     * This provides memory-efficient iteration over messages.
+     *
+     * @param  array  $query  Query parameters for filtering messages
+     * @param  int  $maxResults  Maximum number of results per page
+     * @param  bool  $fullDetails  Whether to fetch full message details or just basic info
+     * @return \PartridgeRocks\GmailClient\Gmail\Pagination\GmailLazyCollection
+     */
+    public function lazyLoadMessages(array $query = [], int $maxResults = 100, bool $fullDetails = true): Gmail\Pagination\GmailLazyCollection
+    {
+        return Gmail\Pagination\GmailLazyCollection::messages($this, $query, $maxResults, $fullDetails);
+    }
+
+    /**
+     * Create a lazy-loading collection for labels.
+     * This provides memory-efficient iteration over labels.
+     *
+     * @return \PartridgeRocks\GmailClient\Gmail\Pagination\GmailLazyCollection
+     */
+    public function lazyLoadLabels(): Gmail\Pagination\GmailLazyCollection
+    {
+        return Gmail\Pagination\GmailLazyCollection::labels($this);
     }
 
     /**
@@ -380,13 +417,18 @@ class GmailClient
      * List all labels.
      *
      * @param  bool  $paginate  Whether to return a paginator for all results
+     * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  int  $maxResults  Maximum number of results per page
-     * @return Collection|GmailPaginator
+     * @return Collection|GmailPaginator|Gmail\Pagination\GmailLazyCollection
      */
-    public function listLabels(bool $paginate = false, int $maxResults = 100): mixed
+    public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
     {
         if ($paginate) {
             return $this->paginateLabels($maxResults);
+        }
+
+        if ($lazy) {
+            return $this->lazyLoadLabels();
         }
 
         $response = $this->labels()->list();
