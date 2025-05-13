@@ -25,11 +25,11 @@ class GmailLazyCollection extends LazyCollection
         array $query = [],
         int $pageSize = 100,
         bool $fullDetails = true
-    ): static {
+    ): self {
         // Set page size in query
         $query['maxResults'] = $pageSize;
 
-        return new static(function () use ($client, $query, $fullDetails) {
+        return new self(function () use ($client, $query, $fullDetails) {
             $hasMorePages = true;
             $pageToken = null;
 
@@ -76,9 +76,9 @@ class GmailLazyCollection extends LazyCollection
      *
      * @param  \PartridgeRocks\GmailClient\GmailClient  $client  The Gmail client instance
      */
-    public static function labels(GmailClient $client): static
+    public static function labels(GmailClient $client): self
     {
-        return new static(function () use ($client) {
+        return new self(function () use ($client) {
             $response = $client->labels()->list();
             $data = $response->json();
 

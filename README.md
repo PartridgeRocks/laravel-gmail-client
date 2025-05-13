@@ -89,6 +89,18 @@ GMAIL_FROM_EMAIL=your-email@gmail.com
 
 ## Usage
 
+The package automatically registers a Laravel Facade that you can use to interact with the Gmail API:
+
+```php
+use PartridgeRocks\GmailClient\Facades\GmailClient;
+
+// Get messages
+$messages = GmailClient::listMessages();
+
+// Get a specific message
+$message = GmailClient::getMessage('message-id');
+```
+
 ### Authentication
 
 The package provides two ways to authenticate with the Gmail API:
@@ -111,13 +123,13 @@ return redirect($authUrl);
 public function handleCallback(Request $request)
 {
     $code = $request->get('code');
-    
+
     // Exchange code for tokens
     $tokens = GmailClient::exchangeCode(
-        $code, 
+        $code,
         config('gmail-client.redirect_uri')
     );
-    
+
     // Store tokens securely for the authenticated user
     // This is just an example, implement this according to your app's needs
     auth()->user()->update([
@@ -125,7 +137,7 @@ public function handleCallback(Request $request)
         'gmail_refresh_token' => $tokens['refresh_token'] ?? null,
         'gmail_token_expires_at' => now()->addSeconds($tokens['expires_in']),
     ]);
-    
+
     return redirect()->route('dashboard');
 }
 ```

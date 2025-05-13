@@ -29,6 +29,8 @@ class GmailClient
 
     /**
      * Create a new GmailClient instance.
+     *
+     * @param  string|null  $accessToken  Optional access token to authenticate with
      */
     public function __construct(?string $accessToken = null)
     {
@@ -163,7 +165,7 @@ class GmailClient
     /**
      * Get the message resource.
      */
-    protected function messages(): MessageResource
+    public function messages(): MessageResource
     {
         return new MessageResource($this->connector);
     }
@@ -171,7 +173,7 @@ class GmailClient
     /**
      * Get the label resource.
      */
-    protected function labels(): LabelResource
+    public function labels(): LabelResource
     {
         return new LabelResource($this->connector);
     }

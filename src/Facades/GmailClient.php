@@ -20,10 +20,10 @@ class GmailClient extends Facade
     /**
      * Returns the service container binding key for the underlying Gmail client.
      *
-     * @return string The fully qualified class name of the Gmail client service.
+     * @return string The container binding key for the Gmail client service.
      */
-    protected static function getFacadeAccessor(): string
+    protected static function getFacadeAccessor()
     {
-        return \PartridgeRocks\GmailClient\GmailClient::class;
+        return 'gmail-client';
     }
 }

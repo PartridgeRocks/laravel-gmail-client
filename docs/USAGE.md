@@ -35,6 +35,22 @@ GMAIL_REDIRECT_URI=https://your-app.com/gmail/auth/callback
 GMAIL_FROM_EMAIL=your-email@gmail.com
 ```
 
+### Using the Facade
+
+The package provides a convenient facade for accessing the Gmail client functionality:
+
+```php
+use PartridgeRocks\GmailClient\Facades\GmailClient;
+
+// List messages
+$messages = GmailClient::listMessages();
+
+// Get a single message
+$message = GmailClient::getMessage('message-id');
+```
+
+The facade is automatically registered by the package's service provider, so you can use it right away in your Laravel application.
+
 ## Authentication
 
 ### OAuth Flow
