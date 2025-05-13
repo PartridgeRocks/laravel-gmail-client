@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#2 \\$responseTime of method PartridgeRocks\\\\GmailClient\\\\Data\\\\Responses\\\\ResponseDTO\\:\\:__construct\\(\\) expects Illuminate\\\\Support\\\\Carbon\\|null, Carbon\\\\Carbon\\|null given\\.$#"
-			count: 1
-			path: src/Data/Responses/EmailDTO.php
-
-		-
 			message: "#^Unsafe usage of new static\\(\\)\\.$#"
 			count: 2
 			path: src/Data/Responses/EmailDTO.php
@@ -16,19 +11,9 @@ parameters:
 			path: src/Data/Responses/EmailDTO.php
 
 		-
-			message: "#^Parameter \\#2 \\$responseTime of method PartridgeRocks\\\\GmailClient\\\\Data\\\\Responses\\\\ResponseDTO\\:\\:__construct\\(\\) expects Illuminate\\\\Support\\\\Carbon\\|null, Carbon\\\\Carbon\\|null given\\.$#"
-			count: 1
-			path: src/Data/Responses/LabelDTO.php
-
-		-
 			message: "#^Unsafe usage of new static\\(\\)\\.$#"
 			count: 1
 			path: src/Data/Responses/LabelDTO.php
-
-		-
-			message: "#^Parameter \\#2 \\$responseTime of method PartridgeRocks\\\\GmailClient\\\\Data\\\\Responses\\\\ResponseDTO\\:\\:__construct\\(\\) expects Illuminate\\\\Support\\\\Carbon\\|null, Carbon\\\\Carbon\\|null given\\.$#"
-			count: 1
-			path: src/Data/Responses/TokenDTO.php
 
 		-
 			message: "#^Unsafe usage of new static\\(\\)\\.$#"
@@ -72,11 +57,6 @@ parameters:
 			"""
 			count: 1
 			path: src/Gmail/GmailConnector.php
-
-		-
-			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\),mixed\\>\\:\\:last\\(\\) expects \\(callable\\(mixed, int\\|string\\)\\: bool\\)\\|null, int given\\.$#"
-			count: 1
-			path: src/Gmail/Pagination/GmailPaginator.php
 
 		-
 			message: "#^Call to method getRequest\\(\\) on an unknown class Saloon\\\\Contracts\\\\Response\\.$#"
