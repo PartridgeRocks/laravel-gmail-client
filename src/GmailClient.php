@@ -40,6 +40,16 @@ class GmailClient
     }
 
     /**
+     * Get the connector instance.
+     *
+     * @return \PartridgeRocks\GmailClient\Gmail\GmailConnector
+     */
+    public function getConnector(): GmailConnector
+    {
+        return $this->connector;
+    }
+
+    /**
      * Authenticate with a token.
      *
      * @return $this
