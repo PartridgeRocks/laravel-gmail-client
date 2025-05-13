@@ -2,17 +2,14 @@
 
 use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Data\Email;
-use PartridgeRocks\GmailClient\Data\Label;
-use PartridgeRocks\GmailClient\Gmail\Pagination\GmailLazyCollection;
-use PartridgeRocks\GmailClient\Gmail\Resources\MessageResource;
 use PartridgeRocks\GmailClient\GmailClient;
-use Saloon\Http\Faking\MockResponse;
 use Saloon\Http\Faking\MockClient;
+use Saloon\Http\Faking\MockResponse;
 
 it('loads messages lazily', function () {
     // Skip test for now since we're refactoring the API
     $this->markTestSkipped('Skipping until implementation is complete');
-    
+
     // Create mock responses
     $messagesListJson = [
         'messages' => [
@@ -21,7 +18,7 @@ it('loads messages lazily', function () {
         ],
         'nextPageToken' => 'page2token',
     ];
-    
+
     $message1Json = [
         'id' => 'msg1',
         'threadId' => 'thread1',
@@ -36,7 +33,7 @@ it('loads messages lazily', function () {
         'sizeEstimate' => 1000,
         'internalDate' => '1624982400000',
     ];
-    
+
     $message2Json = [
         'id' => 'msg2',
         'threadId' => 'thread2',
@@ -51,38 +48,38 @@ it('loads messages lazily', function () {
         'sizeEstimate' => 2000,
         'internalDate' => '1624982500000',
     ];
-    
+
     // Set up mock client
     $mockClient = new MockClient([
         '*users/me/messages' => MockResponse::make($messagesListJson, 200),
         '*users/me/messages/msg1*' => MockResponse::make($message1Json, 200),
         '*users/me/messages/msg2*' => MockResponse::make($message2Json, 200),
     ]);
-    
+
     // Create client and set up mock
-    $client = new GmailClient();
+    $client = new GmailClient;
     $client->getConnector()->withMockClient($mockClient);
     $client->authenticate('test-token');
-    
+
     // Use lazy collection
     $lazyCollection = $client->listMessages(lazy: true);
-    
+
     // First item shouldn't make additional requests yet
     $lazyCollection->take(1);
-    
+
     // When we actually process items, it should make requests as needed
     $processed = $lazyCollection
-        ->filter(fn($email) => $email instanceof Email)
-        ->map(fn($email) => $email->id)
+        ->filter(fn ($email) => $email instanceof Email)
+        ->map(fn ($email) => $email->id)
         ->all();
-        
+
     expect($processed)->toBe(['msg1', 'msg2']);
 });
 
 it('converts to standard collection', function () {
     // Skip test for now since we're refactoring the API
     $this->markTestSkipped('Skipping until implementation is complete');
-    
+
     $mockClient = new MockClient([
         '*users/me/messages' => MockResponse::make([
             'messages' => [
@@ -95,13 +92,13 @@ it('converts to standard collection', function () {
             'snippet' => 'Test message',
         ], 200),
     ]);
-    
-    $client = new GmailClient();
+
+    $client = new GmailClient;
     $client->getConnector()->withMockClient($mockClient);
     $client->authenticate('test-token');
-    
+
     $lazy = $client->listMessages(lazy: true);
     $regular = $lazy->toCollection();
-    
+
     expect($regular)->toBeInstanceOf(Collection::class);
 });
