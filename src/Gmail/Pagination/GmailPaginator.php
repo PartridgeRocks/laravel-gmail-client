@@ -90,7 +90,8 @@ class GmailPaginator
         $response = $this->connector->send($request);
         $this->processResponse($response);
 
-        return $this->items->last($this->maxResults);
+        // Get the last N items where N is the max results
+        return $this->items->slice(-$this->maxResults);
     }
 
     /**

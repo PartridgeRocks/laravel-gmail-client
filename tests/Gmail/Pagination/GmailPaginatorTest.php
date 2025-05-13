@@ -47,28 +47,37 @@ it('can fetch all pages of results', function () {
 
     // Respond with different data based on the page token
     $mockClient = MockClientAdapter::create([
-        fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && ! isset($request->query['pageToken']) => MockResponse::make([
-            'messages' => [
-                ['id' => 'msg1', 'threadId' => 'thread1'],
-                ['id' => 'msg2', 'threadId' => 'thread2'],
-            ],
-            'nextPageToken' => 'page2token',
-        ], 200),
-
-        fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && isset($request->query['pageToken']) && $request->query['pageToken'] === 'page2token' => MockResponse::make([
-            'messages' => [
-                ['id' => 'msg3', 'threadId' => 'thread3'],
-                ['id' => 'msg4', 'threadId' => 'thread4'],
-            ],
-            'nextPageToken' => 'page3token',
-        ], 200),
-
-        fn ($request) => $request->url === 'https://gmail.googleapis.com/gmail/v1/users/me/messages' && isset($request->query['pageToken']) && $request->query['pageToken'] === 'page3token' => MockResponse::make([
-            'messages' => [
-                ['id' => 'msg5', 'threadId' => 'thread5'],
-            ],
-            // No next page token means this is the last page
-        ], 200),
+        '*users/me/messages' => function($request) {
+            // First page (no token)
+            if (!isset($request->query['pageToken'])) {
+                return MockResponse::make([
+                    'messages' => [
+                        ['id' => 'msg1', 'threadId' => 'thread1'],
+                        ['id' => 'msg2', 'threadId' => 'thread2'],
+                    ],
+                    'nextPageToken' => 'page2token',
+                ], 200);
+            }
+            // Second page
+            else if ($request->query['pageToken'] === 'page2token') {
+                return MockResponse::make([
+                    'messages' => [
+                        ['id' => 'msg3', 'threadId' => 'thread3'],
+                        ['id' => 'msg4', 'threadId' => 'thread4'],
+                    ],
+                    'nextPageToken' => 'page3token',
+                ], 200);
+            }
+            // Third page (last)
+            else if ($request->query['pageToken'] === 'page3token') {
+                return MockResponse::make([
+                    'messages' => [
+                        ['id' => 'msg5', 'threadId' => 'thread5'],
+                    ],
+                    // No next page token means this is the last page
+                ], 200);
+            }
+        }
     ]);
 
     $connector->withMockClient($mockClient);
