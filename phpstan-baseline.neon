@@ -1,19 +1,149 @@
 parameters:
-    ignoreErrors:
-        # Date/Time Interface Errors
-        - '#Return type \(DateTimeImmutable\|null\) of method PartridgeRocks\\GmailClient\\Gmail\\GmailOAuthAuthenticator::getExpiresAt\(\) should be compatible with return type \(\\DateTimeInterface\|null\) of method Saloon\\Contracts\\OAuthAuthenticator::getExpiresAt\(\)#'
-        
-        # Method Return Type Errors
-        - '#Method PartridgeRocks\\GmailClient\\Gmail\\Pagination\\GmailPaginator::getRequest\(\) should return mixed but returns object#'
-        
-        # Method Set missing return type
-        - '#Method PartridgeRocks\\GmailClient\\Gmail\\GmailOAuthAuthenticator::set\(\) should return static\(PartridgeRocks\\GmailClient\\Gmail\\GmailOAuthAuthenticator\) but return statement is missing#'
-        
-        # Auth Trait/Class Mismatch
-        - '#Call to an undefined method PartridgeRocks\\GmailClient\\Gmail\\Resources\\AuthResource::exchangeCode\(\).#'
-        - '#Call to an undefined method PartridgeRocks\\GmailClient\\Gmail\\Resources\\AuthResource::refreshToken\(\).#'
-        - '#Call to an undefined method PartridgeRocks\\GmailClient\\Gmail\\Resources\\AuthResource::getAuthorizationUrl\(\).#'
-        
-        # Ignore mixed return type
-        - '#Method PartridgeRocks\\GmailClient\\GmailClient::listMessages\(\) should return Illuminate\\Support\\Collection\|PartridgeRocks\\GmailClient\\Gmail\\Pagination\\GmailPaginator but returns mixed#'
-        - '#Method PartridgeRocks\\GmailClient\\GmailClient::listLabels\(\) should return Illuminate\\Support\\Collection\|PartridgeRocks\\GmailClient\\Gmail\\Pagination\\GmailPaginator but returns mixed#'
+	ignoreErrors:
+		-
+			message: "#^Parameter \\#2 \\$responseTime of method PartridgeRocks\\\\GmailClient\\\\Data\\\\Responses\\\\ResponseDTO\\:\\:__construct\\(\\) expects Illuminate\\\\Support\\\\Carbon\\|null, Carbon\\\\Carbon\\|null given\\.$#"
+			count: 1
+			path: src/Data/Responses/EmailDTO.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 2
+			path: src/Data/Responses/EmailDTO.php
+
+		-
+			message: "#^Variable \\$messages in empty\\(\\) always exists and is not falsy\\.$#"
+			count: 1
+			path: src/Data/Responses/EmailDTO.php
+
+		-
+			message: "#^Parameter \\#2 \\$responseTime of method PartridgeRocks\\\\GmailClient\\\\Data\\\\Responses\\\\ResponseDTO\\:\\:__construct\\(\\) expects Illuminate\\\\Support\\\\Carbon\\|null, Carbon\\\\Carbon\\|null given\\.$#"
+			count: 1
+			path: src/Data/Responses/LabelDTO.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Data/Responses/LabelDTO.php
+
+		-
+			message: "#^Parameter \\#2 \\$responseTime of method PartridgeRocks\\\\GmailClient\\\\Data\\\\Responses\\\\ResponseDTO\\:\\:__construct\\(\\) expects Illuminate\\\\Support\\\\Carbon\\|null, Carbon\\\\Carbon\\|null given\\.$#"
+			count: 1
+			path: src/Data/Responses/TokenDTO.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Data/Responses/TokenDTO.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 7
+			path: src/Exceptions/AuthenticationException.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: src/Exceptions/GmailClientException.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 6
+			path: src/Exceptions/NotFoundException.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 4
+			path: src/Exceptions/RateLimitException.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 7
+			path: src/Exceptions/ValidationException.php
+
+		-
+			message: "#^Call to an undefined method Saloon\\\\Contracts\\\\OAuthAuthenticator\\:\\:getToken\\(\\)\\.$#"
+			count: 1
+			path: src/Gmail/GmailConnector.php
+
+		-
+			message: """
+				#^Call to deprecated method withTokenAuth\\(\\) of class Saloon\\\\Http\\\\Connector\\:
+				This method will be removed in Saloon v4\\. You should use the defaultAuth method or the `\\-\\>authenticate\\(new TokenAuthenticator\\)` instead\\.$#
+			"""
+			count: 1
+			path: src/Gmail/GmailConnector.php
+
+		-
+			message: "#^Parameter \\#1 \\$callback of method Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\),mixed\\>\\:\\:last\\(\\) expects \\(callable\\(mixed, int\\|string\\)\\: bool\\)\\|null, int given\\.$#"
+			count: 1
+			path: src/Gmail/Pagination/GmailPaginator.php
+
+		-
+			message: "#^Call to method getRequest\\(\\) on an unknown class Saloon\\\\Contracts\\\\Response\\.$#"
+			count: 1
+			path: src/Gmail/Requests/BaseRequest.php
+
+		-
+			message: "#^Call to method header\\(\\) on an unknown class Saloon\\\\Contracts\\\\Response\\.$#"
+			count: 1
+			path: src/Gmail/Requests/BaseRequest.php
+
+		-
+			message: "#^Call to method json\\(\\) on an unknown class Saloon\\\\Contracts\\\\Response\\.$#"
+			count: 1
+			path: src/Gmail/Requests/BaseRequest.php
+
+		-
+			message: "#^Call to method status\\(\\) on an unknown class Saloon\\\\Contracts\\\\Response\\.$#"
+			count: 1
+			path: src/Gmail/Requests/BaseRequest.php
+
+		-
+			message: "#^Method PartridgeRocks\\\\GmailClient\\\\Gmail\\\\Requests\\\\BaseRequest\\:\\:processResponse\\(\\) has invalid return type Saloon\\\\Contracts\\\\Response\\.$#"
+			count: 1
+			path: src/Gmail/Requests/BaseRequest.php
+
+		-
+			message: "#^Parameter \\$response of method PartridgeRocks\\\\GmailClient\\\\Gmail\\\\Requests\\\\BaseRequest\\:\\:processResponse\\(\\) has invalid type Saloon\\\\Contracts\\\\Response\\.$#"
+			count: 1
+			path: src/Gmail/Requests/BaseRequest.php
+
+		-
+			message: "#^Call to an undefined method Saloon\\\\Http\\\\Connector\\:\\:getAccessToken\\(\\)\\.$#"
+			count: 1
+			path: src/Gmail/Resources/AuthResource.php
+
+		-
+			message: "#^Call to an undefined method Saloon\\\\Http\\\\Connector\\:\\:getAuthorizationUrl\\(\\)\\.$#"
+			count: 1
+			path: src/Gmail/Resources/AuthResource.php
+
+		-
+			message: "#^Call to an undefined method Saloon\\\\Http\\\\Connector\\:\\:oauthConfig\\(\\)\\.$#"
+			count: 3
+			path: src/Gmail/Resources/AuthResource.php
+
+		-
+			message: "#^Call to an undefined method Saloon\\\\Http\\\\Connector\\:\\:refreshAccessToken\\(\\)\\.$#"
+			count: 1
+			path: src/Gmail/Resources/AuthResource.php
+
+		-
+			message: "#^Call to an undefined static method PartridgeRocks\\\\GmailClient\\\\Exceptions\\\\AuthenticationException\\:\\:fromOAuthError\\(\\)\\.$#"
+			count: 2
+			path: src/Gmail/Resources/AuthResource.php
+
+		-
+			message: "#^Call to an undefined method Saloon\\\\Exceptions\\\\Request\\\\FatalRequestException\\:\\:getResponse\\(\\)\\.$#"
+			count: 2
+			path: src/GmailClient.php
+
+		-
+			message: "#^Cannot call method json\\(\\) on array\\.$#"
+			count: 2
+			path: src/GmailClient.php
+
+		-
+			message: "#^Method Saloon\\\\Http\\\\Response\\:\\:header\\(\\) invoked with 2 parameters, 1 required\\.$#"
+			count: 2
+			path: src/GmailClient.php
