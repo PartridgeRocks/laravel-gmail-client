@@ -22,8 +22,8 @@ class GmailClient extends Facade
      *
      * @return string The fully qualified class name of the Gmail client service.
      */
-    protected static function getFacadeAccessor(): string
+    protected static function getFacadeAccessor()
     {
-        return \PartridgeRocks\GmailClient\GmailClient::class;
+        return 'gmail-client';
     }
 }
