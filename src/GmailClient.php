@@ -3,7 +3,6 @@
 namespace PartridgeRocks\GmailClient;
 
 use DateTimeImmutable;
-use PartridgeRocks\GmailClient\Gmail\GmailClientHelpers;
 use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Data\Label;
@@ -12,6 +11,7 @@ use PartridgeRocks\GmailClient\Exceptions\GmailClientException;
 use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
 use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
 use PartridgeRocks\GmailClient\Exceptions\ValidationException;
+use PartridgeRocks\GmailClient\Gmail\GmailClientHelpers;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\GmailOAuthAuthenticator;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
@@ -24,6 +24,7 @@ use PartridgeRocks\GmailClient\Gmail\Resources\MessageResource;
 class GmailClient
 {
     use GmailClientHelpers;
+
     protected GmailConnector $connector;
 
     /**
@@ -62,8 +63,6 @@ class GmailClient
 
     /**
      * Get the authentication resource.
-     *
-     * @return AuthResource
      */
     protected function auth(): AuthResource
     {
@@ -96,14 +95,14 @@ class GmailClient
         }
 
         // Verify required keys exist
-        if (!isset($data['access_token'])) {
-            throw new AuthenticationException("Invalid OAuth response: missing access_token");
+        if (! isset($data['access_token'])) {
+            throw new AuthenticationException('Invalid OAuth response: missing access_token');
         }
 
         // Set the current token
         $expiresAt = null;
         if (isset($data['expires_in'])) {
-            $expiresAt = new DateTimeImmutable();
+            $expiresAt = new DateTimeImmutable;
             $expiresAt = $expiresAt->modify("+{$data['expires_in']} seconds");
         }
 
@@ -131,14 +130,14 @@ class GmailClient
         }
 
         // Verify required keys exist
-        if (!isset($data['access_token'])) {
-            throw new AuthenticationException("Invalid OAuth response: missing access_token");
+        if (! isset($data['access_token'])) {
+            throw new AuthenticationException('Invalid OAuth response: missing access_token');
         }
 
         // Set the current token
         $expiresAt = null;
         if (isset($data['expires_in'])) {
-            $expiresAt = new DateTimeImmutable();
+            $expiresAt = new DateTimeImmutable;
             $expiresAt = $expiresAt->modify("+{$data['expires_in']} seconds");
         }
 
