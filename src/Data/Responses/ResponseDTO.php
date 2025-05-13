@@ -2,7 +2,6 @@
 
 namespace PartridgeRocks\GmailClient\Data\Responses;
 
-use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Spatie\LaravelData\Data;
 

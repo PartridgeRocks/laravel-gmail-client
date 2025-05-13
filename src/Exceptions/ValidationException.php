@@ -70,9 +70,8 @@ class ValidationException extends GmailClientException
     /**
      * Create an exception from a response array
      *
-     * @param array $response The response data
-     * @param string|null $message Optional custom message
-     * @return self
+     * @param  array  $response  The response data
+     * @param  string|null  $message  Optional custom message
      */
     public static function fromResponse(array $response, ?string $message = null): self
     {

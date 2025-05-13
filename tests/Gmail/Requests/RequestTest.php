@@ -10,8 +10,8 @@ use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\GetMessageRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\SendMessageRequest;
-use Saloon\Http\Faking\MockResponse;
 use PartridgeRocks\GmailClient\Tests\TestHelpers\MockClientAdapter;
+use Saloon\Http\Faking\MockResponse;
 
 it('creates correct endpoint for get message', function () {
     $request = new GetMessageRequest('test-message-id');

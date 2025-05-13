@@ -7,8 +7,8 @@ use PartridgeRocks\GmailClient\Data\Responses\EmailDTO;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
-use Saloon\Http\Faking\MockResponse;
 use PartridgeRocks\GmailClient\Tests\TestHelpers\MockClientAdapter;
+use Saloon\Http\Faking\MockResponse;
 
 it('can fetch the first page of results', function () {
     $connector = new GmailConnector;
@@ -47,9 +47,9 @@ it('can fetch all pages of results', function () {
 
     // Respond with different data based on the page token
     $mockClient = MockClientAdapter::create([
-        '*users/me/messages' => function($request) {
+        '*users/me/messages' => function ($request) {
             // First page (no token)
-            if (!isset($request->query['pageToken'])) {
+            if (! isset($request->query['pageToken'])) {
                 return MockResponse::make([
                     'messages' => [
                         ['id' => 'msg1', 'threadId' => 'thread1'],
@@ -59,7 +59,7 @@ it('can fetch all pages of results', function () {
                 ], 200);
             }
             // Second page
-            else if ($request->query['pageToken'] === 'page2token') {
+            elseif ($request->query['pageToken'] === 'page2token') {
                 return MockResponse::make([
                     'messages' => [
                         ['id' => 'msg3', 'threadId' => 'thread3'],
@@ -69,7 +69,7 @@ it('can fetch all pages of results', function () {
                 ], 200);
             }
             // Third page (last)
-            else if ($request->query['pageToken'] === 'page3token') {
+            elseif ($request->query['pageToken'] === 'page3token') {
                 return MockResponse::make([
                     'messages' => [
                         ['id' => 'msg5', 'threadId' => 'thread5'],
@@ -77,7 +77,7 @@ it('can fetch all pages of results', function () {
                     // No next page token means this is the last page
                 ], 200);
             }
-        }
+        },
     ]);
 
     $connector->withMockClient($mockClient);

@@ -41,8 +41,6 @@ class GmailClient
 
     /**
      * Get the connector instance.
-     *
-     * @return \PartridgeRocks\GmailClient\Gmail\GmailConnector
      */
     public function getConnector(): GmailConnector
     {
@@ -101,6 +99,7 @@ class GmailClient
         // Check for error in response
         if (isset($data['error'])) {
             $errorMessage = $data['error_description'] ?? $data['error'];
+
             throw new AuthenticationException("OAuth error: {$errorMessage}");
         }
 
@@ -136,6 +135,7 @@ class GmailClient
         // Check for error in response
         if (isset($data['error'])) {
             $errorMessage = $data['error_description'] ?? $data['error'];
+
             throw new AuthenticationException("OAuth error: {$errorMessage}");
         }
 
@@ -241,6 +241,7 @@ class GmailClient
 
             if ($response->status() === 429) {
                 $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -260,6 +261,7 @@ class GmailClient
 
             if ($response && $response->status() === 429) {
                 $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -304,6 +306,7 @@ class GmailClient
 
             if ($response->status() === 429) {
                 $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 
@@ -319,6 +322,7 @@ class GmailClient
 
             if ($response && $response->status() === 429) {
                 $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
 

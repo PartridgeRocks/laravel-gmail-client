@@ -12,9 +12,10 @@ class AuthResource extends BaseResource
     /**
      * Exchange an authorization code for an access token.
      *
-     * @param string $code The authorization code
-     * @param string|null $redirectUri Optional override for the redirect URI
+     * @param  string  $code  The authorization code
+     * @param  string|null  $redirectUri  Optional override for the redirect URI
      * @return array The token response data
+     *
      * @throws AuthenticationException
      */
     public function exchangeCode(string $code, ?string $redirectUri = null): array
@@ -43,8 +44,9 @@ class AuthResource extends BaseResource
     /**
      * Refresh an access token using a refresh token.
      *
-     * @param string $refreshToken The refresh token
+     * @param  string  $refreshToken  The refresh token
      * @return array The token response data
+     *
      * @throws AuthenticationException
      */
     public function refreshToken(string $refreshToken): array
@@ -67,10 +69,11 @@ class AuthResource extends BaseResource
     /**
      * Get the authorization URL.
      *
-     * @param string|null $redirectUri Optional override for the redirect URI
-     * @param array $scopes Optional override for scopes
-     * @param array $additionalParams Additional query parameters
+     * @param  string|null  $redirectUri  Optional override for the redirect URI
+     * @param  array  $scopes  Optional override for scopes
+     * @param  array  $additionalParams  Additional query parameters
      * @return string The authorization URL
+     *
      * @throws \RuntimeException
      */
     public function getAuthorizationUrl(
@@ -84,7 +87,7 @@ class AuthResource extends BaseResource
         }
 
         // Use the configured scopes from OAuthConfig if not specified
-        if (!empty($scopes)) {
+        if (! empty($scopes)) {
             $this->connector->oauthConfig()->setDefaultScopes($scopes);
         }
 

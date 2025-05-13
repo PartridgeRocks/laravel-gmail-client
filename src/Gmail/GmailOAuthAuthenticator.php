@@ -63,7 +63,7 @@ class GmailOAuthAuthenticator implements OAuthAuthenticator
      */
     public function set(PendingRequest $pendingRequest): void
     {
-        $pendingRequest->headers()->add('Authorization', $this->tokenType . ' ' . $this->accessToken);
+        $pendingRequest->headers()->add('Authorization', $this->tokenType.' '.$this->accessToken);
     }
 
     /**
@@ -109,7 +109,7 @@ class GmailOAuthAuthenticator implements OAuthAuthenticator
         if ($this->expiresAt instanceof DateTimeImmutable) {
             return $this->expiresAt;
         } elseif ($this->expiresAt instanceof DateTimeInterface) {
-            return new DateTimeImmutable('@' . $this->expiresAt->getTimestamp());
+            return new DateTimeImmutable('@'.$this->expiresAt->getTimestamp());
         }
 
         return null;

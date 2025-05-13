@@ -7,9 +7,8 @@ use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
 use PartridgeRocks\GmailClient\Exceptions\ValidationException;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\GmailClient;
-use Saloon\Http\Faking\MockResponse;
 use Saloon\Http\Faking\MockClient;
-use Mockery;
+use Saloon\Http\Faking\MockResponse;
 
 beforeEach(function () {
     $this->client = new GmailClient;
@@ -41,10 +40,10 @@ it('can list messages', function () {
         '*users/me/messages*' => MockResponse::make($messagesJson, 200),
         '*users/me/messages/msg123*' => MockResponse::make($messageJson, 200),
     ]);
-    
+
     $this->client->getConnector()->withMockClient($mockClient);
     $this->client->authenticate('test-token');
-    
+
     $messages = $this->client->listMessages();
 
     expect($messages)

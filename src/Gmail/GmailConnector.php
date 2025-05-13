@@ -55,8 +55,6 @@ class GmailConnector extends Connector
      * - Google's OAuth endpoints
      * - Redirect URI from config
      * - Google-specific parameters like offline access and consent prompt
-     *
-     * @return \Saloon\Helpers\OAuth2\OAuthConfig
      */
     protected function defaultOauthConfig(): OAuthConfig
     {
@@ -95,7 +93,7 @@ class GmailConnector extends Connector
                 if ($request->getMethod()->value === 'GET' && str_contains($request->resolveEndpoint(), 'accounts.google.com')) {
                     $request->query()->merge([
                         'access_type' => 'offline',
-                        'prompt' => 'consent'
+                        'prompt' => 'consent',
                     ]);
                 }
             });

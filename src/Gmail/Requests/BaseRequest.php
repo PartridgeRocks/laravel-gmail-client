@@ -51,9 +51,11 @@ abstract class BaseRequest extends Request
                 throw NotFoundException::fromPath($path, $resourceId);
             case 429:
                 $retryAfter = (int) $response->header('Retry-After', 0);
+
                 throw RateLimitException::quotaExceeded($retryAfter);
             default:
                 $error = ErrorDTO::fromResponse($errorData);
+
                 throw new GmailClientException(
                     "Gmail API Error: {$error->message}",
                     $status,
