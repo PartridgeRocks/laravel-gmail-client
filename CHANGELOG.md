@@ -8,6 +8,12 @@ All notable changes to `gmail_client` will be documented in this file.
 - Fixed header method calls to match Saloon v3 API requirements
 - Removed obsolete PHPStan ignore rule for header() method
 
+## v1.0.2 - 2025-05-16
+
+### Fixed
+- Fixed class-not-found error in production by properly binding the facade string key
+- Fixed header method calls to match Saloon v3 API
+
 ## v1.0.1 - 2025-05-12
 
 ### Fixed
