@@ -122,8 +122,3 @@ parameters:
 			message: "#^Cannot call method json\\(\\) on array\\.$#"
 			count: 2
 			path: src/GmailClient.php
-
-		-
-			message: "#^Method Saloon\\\\Http\\\\Response\\:\\:header\\(\\) invoked with 2 parameters, 1 required\\.$#"
-			count: 2
-			path: src/GmailClient.php
