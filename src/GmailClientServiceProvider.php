@@ -45,8 +45,10 @@ class GmailClientServiceProvider extends PackageServiceProvider
             return $client;
         });
 
-        // Register the facade alias
-        $this->app->alias(GmailClient::class, 'gmail-client');
+        // Register binding for the facade
+        $this->app->bind('gmail-client', function ($app) {
+            return $app->make(GmailClient::class);
+        });
     }
 
     /**
