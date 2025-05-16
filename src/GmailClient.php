@@ -309,7 +309,7 @@ class GmailClient
     }
 
     /**
-     * Send a new email.
+     * Send a new email message.
      *
      * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
