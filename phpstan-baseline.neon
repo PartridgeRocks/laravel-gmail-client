@@ -122,3 +122,4 @@ parameters:
 			message: "#^Cannot call method json\\(\\) on array\\.$#"
 			count: 2
 			path: src/GmailClient.php
+			# This error should be fixed in future PR
