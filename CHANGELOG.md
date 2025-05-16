@@ -2,7 +2,7 @@
 
 All notable changes to `gmail_client` will be documented in this file.
 
-## Unreleased
+## v1.0.2 - 2025-05-16
 
 ### Fixed
 - Fixed class-not-found error in production by properly binding the facade string key
