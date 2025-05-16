@@ -4,81 +4,102 @@
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/partridgerocks/gmail-client/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/partridgerocks/gmail-client/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/partridgerocks/gmail-client/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/partridgerocks/gmail-client/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/partridgerocks/gmail-client.svg?style=flat-square)](https://packagist.org/packages/partridgerocks/gmail-client)
+[![PHP Version Support](https://img.shields.io/packagist/php-v/partridgerocks/gmail-client.svg?style=flat-square)](https://packagist.org/packages/partridgerocks/gmail-client)
+[![Laravel Version Support](https://img.shields.io/badge/Laravel-10.x%20%7C%2011.x%20%7C%2012.x-orange?style=flat-square)](https://packagist.org/packages/partridgerocks/gmail-client)
 
-A Laravel package that integrates with the Gmail API to seamlessly manage emails within your application. Built with [Saloon PHP](https://github.com/saloonphp/saloon) and [Laravel Data](https://github.com/spatie/laravel-data).
+A Laravel package that integrates with the Gmail API to seamlessly manage emails within your application. Built with [Saloon PHP](https://github.com/saloonphp/saloon) for API interactions and [Laravel Data](https://github.com/spatie/laravel-data) for structured data handling.
 
-## Features
+## 📋 Table of Contents
 
-- OAuth authentication with Gmail API
-- Read emails and threads
-- Send emails
-- Manage labels
-- Access Gmail inbox data with a clean API
-- Integrates with Laravel's service container
+- [Features](#-features)
+- [Requirements](#-requirements)
+- [Installation](#-installation)
+- [Google API Setup](#-google-api-setup)
+- [Usage](#-usage)
+  - [Authentication](#authentication)
+  - [Working with Emails](#working-with-emails)
+  - [Working with Labels](#working-with-labels)
+  - [Using Without Facade](#using-without-facade)
+  - [Integration with User Model](#integration-with-your-user-model)
+- [Advanced Usage](#-advanced-usage)
+  - [Pagination](#pagination-support)
+  - [Memory-Efficient Processing](#memory-efficiency)
+  - [Error Handling](#enhanced-error-handling)
+  - [Token Refreshing](#refresh-a-token)
+  - [CLI Testing](#command-line-testing)
+  - [Custom Templates](#custom-email-templates)
+- [Events](#-events)
+- [Testing](#-testing)
+- [Changelog](#-changelog)
+- [Contributing](#-contributing)
+- [Security](#-security-vulnerabilities)
+- [Credits](#-credits)
+- [License](#-license)
 
-## Installation
+## 🚀 Features
 
-You can install the package via composer:
+- **OAuth Authentication**: Seamless integration with Gmail's OAuth 2.0 flow
+- **Email Operations**:
+  - Read emails and threads with full content and attachments
+  - Send emails with HTML content
+  - Support for CC, BCC, and custom sender addresses
+- **Label Management**:
+  - List, create, update, and delete email labels
+  - Organize emails with custom label hierarchies
+- **Performance Optimizations**:
+  - Lazy loading collections for memory-efficient processing
+  - Pagination support for large datasets
+  - Customizable batch sizes for API requests
+- **Developer Experience**:
+  - Laravel facade for convenient access
+  - Strongly-typed data objects with Laravel Data
+  - Full Laravel service container integration
+  - Comprehensive exception handling
+  - Command-line testing utilities
+
+## 📋 Requirements
+
+- PHP 8.2 or higher
+- Laravel 10.x, 11.x, or 12.x
+- Google API credentials
+
+## 📦 Installation
+
+You can install the package via Composer:
 
 ```bash
 composer require partridgerocks/gmail-client
 ```
 
-You can publish the config file with:
+After installation, publish the configuration file:
 
 ```bash
 php artisan vendor:publish --tag="gmail-client-config"
 ```
 
-This is the contents of the published config file:
+This will create a `config/gmail-client.php` configuration file in your project.
 
-```php
-return [
-    /*
-    |--------------------------------------------------------------------------
-    | Gmail API Credentials
-    |--------------------------------------------------------------------------
-    |
-    | Your Gmail API client ID and client secret, obtained from the
-    | Google Developer Console.
-    |
-    */
-    'client_id' => env('GMAIL_CLIENT_ID'),
-    'client_secret' => env('GMAIL_CLIENT_SECRET'),
-    'redirect_uri' => env('GMAIL_REDIRECT_URI'),
+## 🔐 Google API Setup
 
-    /*
-    |--------------------------------------------------------------------------
-    | Gmail API Scopes
-    |--------------------------------------------------------------------------
-    |
-    | The scopes requested when authenticating with Google.
-    | See https://developers.google.com/gmail/api/auth/scopes for available scopes.
-    |
-    */
-    'scopes' => [
-        'https://www.googleapis.com/auth/gmail.readonly',
-        'https://www.googleapis.com/auth/gmail.send',
-        'https://www.googleapis.com/auth/gmail.compose',
-        'https://www.googleapis.com/auth/gmail.modify',
-        'https://www.googleapis.com/auth/gmail.labels',
-    ],
-
-    // Additional configuration options...
-];
-```
-
-## Setup
-
-### Google API Setup
+Before you can use the Gmail Client, you need to set up a project in the Google Developer Console and obtain OAuth 2.0 credentials:
 
 1. Go to the [Google Developer Console](https://console.developers.google.com/)
-2. Create a new project
-3. Enable the Gmail API for your project
-4. Configure the OAuth consent screen
-5. Create OAuth credentials (Web application type)
-6. Add your authorized redirect URI (this should match your `GMAIL_REDIRECT_URI` config value)
-7. Copy the Client ID and Client Secret to your `.env` file:
+2. Create a new project (or select an existing one)
+3. Navigate to "APIs & Services" > "Library"
+4. Search for and enable the "Gmail API"
+5. Go to "APIs & Services" > "Credentials"
+6. Click "Configure Consent Screen" and set up your OAuth consent screen:
+   - Select "External" or "Internal" user type (depending on your needs)
+   - Fill in the required app information
+   - Add the required scopes (see below)
+   - Add test users if needed (for external user type)
+7. Create OAuth 2.0 credentials:
+   - Go to "Credentials" and click "Create Credentials" > "OAuth client ID"
+   - Select "Web application" as the application type
+   - Add a name for your client
+   - Add your authorized redirect URIs (this should match your `GMAIL_REDIRECT_URI` config value)
+   - Click "Create"
+8. Copy the Client ID and Client Secret to your `.env` file:
 
 ```
 GMAIL_CLIENT_ID=your-client-id
@@ -87,39 +108,54 @@ GMAIL_REDIRECT_URI=https://your-app.com/gmail/auth/callback
 GMAIL_FROM_EMAIL=your-email@gmail.com
 ```
 
-## Usage
+> **Note**: The Gmail API requires specific scopes to access different features. The default configuration includes commonly used scopes, but you can customize them in the config file.
 
-The package automatically registers a Laravel Facade that you can use to interact with the Gmail API:
+## 🔍 Usage
+
+The package automatically registers a Laravel Facade that provides a convenient way to interact with the Gmail API:
 
 ```php
 use PartridgeRocks\GmailClient\Facades\GmailClient;
 
-// Get messages
+// Get recent messages
 $messages = GmailClient::listMessages();
 
 // Get a specific message
 $message = GmailClient::getMessage('message-id');
+
+// Send an email
+$email = GmailClient::sendEmail(
+    'recipient@example.com',
+    'Subject line',
+    '<p>Email body in HTML format</p>'
+);
 ```
 
 ### Authentication
 
-The package provides two ways to authenticate with the Gmail API:
+The Gmail Client provides two ways to authenticate with the Gmail API:
 
-#### 1. Manual authentication flow
+#### 1. Manual Authentication Flow
+
+If you want full control over the authentication process:
 
 ```php
 use PartridgeRocks\GmailClient\Facades\GmailClient;
 
-// Get the authorization URL
+// 1. Get the authorization URL
 $authUrl = GmailClient::getAuthorizationUrl(
     config('gmail-client.redirect_uri'),
-    config('gmail-client.scopes')
+    config('gmail-client.scopes'),
+    [
+        'access_type' => 'offline',
+        'prompt' => 'consent'
+    ]
 );
 
-// Redirect the user to the authorization URL
+// 2. Redirect the user to the authorization URL
 return redirect($authUrl);
 
-// In your callback route, exchange the code for tokens
+// 3. In your callback route, exchange the code for tokens
 public function handleCallback(Request $request)
 {
     $code = $request->get('code');
@@ -131,7 +167,6 @@ public function handleCallback(Request $request)
     );
 
     // Store tokens securely for the authenticated user
-    // This is just an example, implement this according to your app's needs
     auth()->user()->update([
         'gmail_access_token' => $tokens['access_token'],
         'gmail_refresh_token' => $tokens['refresh_token'] ?? null,
@@ -142,9 +177,9 @@ public function handleCallback(Request $request)
 }
 ```
 
-#### 2. Using built-in routes
+#### 2. Using Built-in Routes
 
-If you prefer, you can use the built-in routes for authentication:
+For a simpler setup, you can enable the built-in routes:
 
 1. Enable route registration in the config file:
 
@@ -178,10 +213,17 @@ GmailClient::authenticate($accessToken);
 $messages = GmailClient::listMessages(['maxResults' => 10]);
 
 foreach ($messages as $message) {
-    echo $message->subject;
-    echo $message->from;
-    echo $message->body;
+    echo "From: {$message->from}\n";
+    echo "Subject: {$message->subject}\n";
+    echo "Date: {$message->internalDate->format('Y-m-d H:i:s')}\n";
+    echo "Body: {$message->body}\n";
 }
+
+// With query parameters (using Gmail search syntax)
+$messages = GmailClient::listMessages([
+    'q' => 'from:example@gmail.com after:2023/01/01 has:attachment',
+    'maxResults' => 20
+]);
 ```
 
 #### Get a Specific Message
@@ -190,20 +232,37 @@ foreach ($messages as $message) {
 // Get a specific message by ID
 $email = GmailClient::getMessage('message-id');
 
-echo $email->subject;
-echo $email->from;
-echo $email->snippet;
-echo $email->body;
+echo "Subject: {$email->subject}\n";
+echo "From: {$email->from}\n";
+echo "Snippet: {$email->snippet}\n";
+echo "Body: {$email->body}\n";
+
+// Access message headers
+foreach ($email->headers as $name => $value) {
+    echo "{$name}: {$value}\n";
+}
+
+// Check for specific labels
+if (in_array('INBOX', $email->labelIds)) {
+    echo "This message is in the inbox\n";
+}
 ```
 
 #### Send an Email
 
 ```php
-// Send a new email
+// Send a simple email
 $email = GmailClient::sendEmail(
     'recipient@example.com',
     'Email subject',
-    '<p>This is the email body in HTML format.</p>',
+    '<p>This is the email body in HTML format.</p>'
+);
+
+// Send with additional options
+$email = GmailClient::sendEmail(
+    'recipient@example.com',
+    'Email with options',
+    '<p>This email includes CC and BCC recipients.</p>',
     [
         'from' => 'your-email@gmail.com',
         'cc' => 'cc@example.com',
@@ -217,20 +276,45 @@ echo "Email sent with ID: {$email->id}";
 
 ### Working with Labels
 
+Gmail uses labels to organize emails. You can create, retrieve, and manage these labels:
+
 ```php
 // List all labels
 $labels = GmailClient::listLabels();
 
 foreach ($labels as $label) {
-    echo $label->name;
-    echo $label->id;
+    echo "Label: {$label->name} (ID: {$label->id})\n";
+    echo "Type: {$label->type}\n";
+    
+    if ($label->messagesTotal !== null) {
+        echo "Messages: {$label->messagesTotal} ({$label->messagesUnread} unread)\n";
+    }
 }
 
 // Get a specific label
 $label = GmailClient::getLabel('label-id');
 
 // Create a new label
-$newLabel = GmailClient::createLabel('New Label Name');
+$newLabel = GmailClient::createLabel('Important Clients', [
+    'labelListVisibility' => 'labelShow',
+    'messageListVisibility' => 'show',
+    'color' => [
+        'backgroundColor' => '#16a765',
+        'textColor' => '#ffffff'
+    ]
+]);
+
+// Update a label (using the LabelResource directly)
+$updatedLabel = GmailClient::labels()->update($label->id, [
+    'name' => 'VIP Clients',
+    'color' => [
+        'backgroundColor' => '#4986e7',
+        'textColor' => '#ffffff'
+    ]
+]);
+
+// Delete a label
+GmailClient::labels()->delete($label->id);
 ```
 
 ### Using Without Facade
@@ -249,7 +333,7 @@ public function index(GmailClient $gmailClient)
 }
 ```
 
-### Integrating with Your User Model
+### Integration with Your User Model
 
 Here's an example of how you might integrate the Gmail client with your User model:
 
@@ -284,7 +368,7 @@ public function listEmails()
 }
 ```
 
-## Advanced Usage
+## 🔧 Advanced Usage
 
 ### Pagination Support
 
@@ -309,6 +393,37 @@ $allMessages = $paginator->getAllPages();
 // You can also transform the results using the DTO
 use PartridgeRocks\GmailClient\Data\Responses\EmailDTO;
 $emails = $paginator->transformUsingDTO(EmailDTO::class);
+```
+
+### Memory Efficiency
+
+When working with large Gmail accounts, it's important to avoid loading all messages into memory at once:
+
+```php
+// Lazy loading is the most memory-efficient approach for large datasets
+$messages = GmailClient::listMessages(lazy: true);
+
+// Process messages one by one without loading everything into memory
+foreach ($messages as $message) {
+    processMessage($message);
+    
+    // You can stop iteration at any point
+    if ($someCondition) {
+        break;
+    }
+}
+
+// For even more efficiency, you can get only message IDs without full details
+$messageIds = GmailClient::listMessages(lazy: true, fullDetails: false);
+
+foreach ($messageIds as $messageData) {
+    echo "Message ID: {$messageData['id']}\n";
+    
+    // Load full details only for specific messages if needed
+    if (needsFullDetails($messageData)) {
+        $fullMessage = GmailClient::getMessage($messageData['id']);
+    }
+}
 ```
 
 ### Enhanced Error Handling
@@ -351,6 +466,12 @@ try {
 $tokens = GmailClient::refreshToken($refreshToken);
 
 // The client is automatically authenticated with the new token
+// Update the tokens in your storage
+$user->update([
+    'gmail_access_token' => $tokens['access_token'],
+    'gmail_refresh_token' => $tokens['refresh_token'] ?? $user->gmail_refresh_token,
+    'gmail_token_expires_at' => now()->addSeconds($tokens['expires_in']),
+]);
 ```
 
 ### Command Line Testing
@@ -368,8 +489,6 @@ php artisan gmail-client:test --list-messages
 php artisan gmail-client:test --list-labels
 ```
 
-## Customization
-
 ### Custom Email Templates
 
 You can use your own branded email templates:
@@ -379,36 +498,64 @@ You can use your own branded email templates:
 'branded_template' => resource_path('views/emails/branded-template.blade.php'),
 ```
 
-## Events
+## 📡 Events
 
 The package dispatches events that you can listen for:
 
 - `GmailAccessTokenRefreshed`: When a token is refreshed
 - `GmailMessageSent`: When an email is sent
 
-## Testing
+## 🧪 Testing
+
+The package includes tests that you can run with PHPUnit:
 
 ```bash
 composer test
 ```
 
-## Changelog
+For testing in your own application, you can use Saloon's built-in mocking capabilities:
+
+```php
+use Saloon\Laravel\Facades\Saloon;
+use Saloon\Http\Faking\MockResponse;
+
+// In your test setup
+public function setUp(): void
+{
+    parent::setUp();
+    
+    // Mock all Gmail API responses
+    Saloon::fake([
+        '*gmail.googleapis.com*' => MockResponse::make([
+            'messages' => [
+                [
+                    'id' => 'test-id-123',
+                    'threadId' => 'thread-123',
+                    'snippet' => 'This is a test email',
+                ]
+            ]
+        ], 200),
+    ]);
+}
+```
+
+## 📝 Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
-## Contributing
+## 🤝 Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
-## Security Vulnerabilities
+## 🔒 Security Vulnerabilities
 
 Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
-## Credits
+## 👨‍💻 Credits
 
 - [Jordan Partridge](https://github.com/PartridgeRocks)
 - [All Contributors](../../contributors)
 
-## License
+## 📄 License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
