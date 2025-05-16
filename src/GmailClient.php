@@ -275,7 +275,7 @@ class GmailClient
             }
 
             if ($response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
@@ -295,7 +295,7 @@ class GmailClient
             }
 
             if ($response && $response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
@@ -340,7 +340,7 @@ class GmailClient
             }
 
             if ($response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
@@ -356,7 +356,7 @@ class GmailClient
             }
 
             if ($response && $response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After', '0'));
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
                 throw RateLimitException::quotaExceeded($retryAfter);
             }
