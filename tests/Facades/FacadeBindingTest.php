@@ -18,7 +18,7 @@ class FacadeBindingTest extends TestCase
     {
         // Get the instance from the facade
         $instance = GmailClient::getFacadeRoot();
-        
+
         // Assert it's the right class
         $this->assertInstanceOf(\PartridgeRocks\GmailClient\GmailClient::class, $instance);
     }
