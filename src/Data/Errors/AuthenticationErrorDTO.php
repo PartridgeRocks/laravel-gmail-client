@@ -26,6 +26,7 @@ class AuthenticationErrorDTO extends ErrorDTO
             'refresh_failed' => 'Failed to refresh the access token',
             'token_expired' => 'The access token has expired',
             'unauthorized' => 'Unauthorized access to the requested resource',
+            'oauth_error' => 'OAuth authentication process failed',
         ];
 
         return new self(
