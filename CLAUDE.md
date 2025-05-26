@@ -134,6 +134,33 @@ Custom exceptions in `src/Exceptions/` for different error scenarios:
 
 ## Current Development Status
 
+### Gmail Label Management (Added in v1.0.4)
+
+**Feature**: Complete Gmail label management functionality for email organization.
+
+**Implementation**:
+- **`addLabelsToMessage()`** - Add labels to messages (starring, marking important)
+- **`removeLabelsFromMessage()`** - Remove labels (mark read, archive)
+- **`modifyMessageLabels()`** - Add and remove labels in single API call
+- **`ModifyMessageLabelsRequest`** - Proper Gmail API integration using messages.modify endpoint
+
+**Common Use Cases**:
+```php
+// ⭐ Star a message
+$client->addLabelsToMessage($messageId, ['STARRED']);
+
+// 📥 Mark as read
+$client->removeLabelsFromMessage($messageId, ['UNREAD']);
+
+// 📂 Archive message  
+$client->removeLabelsFromMessage($messageId, ['INBOX']);
+
+// ⚡ Efficient batch operations
+$client->modifyMessageLabels($messageId, ['STARRED'], ['UNREAD']);
+```
+
+**GitHub Issue**: [#16](https://github.com/PartridgeRocks/laravel-gmail-client/issues/16) - Completed ✅
+
 ### OAuth Authentication Bug (Fixed in v1.0.2)
 
 **Issue**: Missing `fromOAuthError()` method in `AuthenticationException` causing OAuth failures.
@@ -148,9 +175,73 @@ Custom exceptions in `src/Exceptions/` for different error scenarios:
 - **GitHub Issue**: [#11](https://github.com/PartridgeRocks/laravel-gmail-client/issues/11)
 - **PR Status**: Merged ✅
 
+### Comprehensive OAuth & Exception Testing (v1.0.3)
+
+**Enhancement**: Added extensive test coverage for OAuth authentication and exception handling.
+
+**Implementation**:
+- **24 new test cases** covering OAuth authentication flows
+- **Exception chaining** throughout all factory methods with `?\Throwable $previous`
+- **Type-safe constants** replacing magic strings (`AuthenticationErrorDTO::OAUTH_ERROR`)
+- **Enhanced error context** with OAuth flow metadata and timestamps
+
+**Impact**:
+- **Test coverage**: Improved from ~45% to ~75%
+- **Total tests**: Increased from 25 to 67 passing tests
+- **Assertions**: Grew from 77 to 185 total assertions
+- **Quality assurance**: All PHPStan Level 5 checks passing
+
 ### OAuth Integration Testing
 
 For detailed OAuth testing instructions, see [TESTING.md](TESTING.md).
+
+## Development Workflow & Best Practices
+
+### Git Workflow
+**Important**: Always use feature branches instead of pushing directly to `master`.
+
+```bash
+# ✅ Proper workflow
+git checkout -b feature/new-functionality
+# ... implement feature ...
+git push -u origin feature/new-functionality
+gh pr create --title "Add New Functionality" --body "..."
+
+# ❌ Avoid direct master commits
+git push origin master  # Bypasses code review!
+```
+
+### Testing Strategy
+1. **Saloon MockClient**: Use `MockClient` and `MockResponse` for API testing, not Laravel's `Http::fake()`
+2. **Complete mock data**: Include all required fields (`sizeEstimate`, `internalDate`, etc.)
+3. **Error scenarios**: Test 401, 404, 429 status codes with proper exception assertions
+4. **Real-world scenarios**: Test common Gmail operations (star, archive, mark read)
+
+### Architecture Patterns
+- **Exception chaining**: Always include `?\Throwable $previous` parameters
+- **Type-safe constants**: Use class constants instead of magic strings
+- **Consistent error handling**: Follow established patterns across all methods
+- **Comprehensive documentation**: Include PHPDoc with `@throws` annotations
+
+### Code Quality Pipeline
+```bash
+composer test           # 67 tests, 185 assertions
+composer analyse        # PHPStan Level 5
+composer format         # Laravel Pint
+```
+
+### Issue Resolution Process
+1. **Identify root cause** - Missing method, inadequate testing, etc.
+2. **Plan implementation** - Use TodoWrite to track progress
+3. **Implement with tests** - TDD approach with comprehensive coverage
+4. **Quality assurance** - All linting and analysis tools must pass
+5. **Documentation** - Update CLAUDE.md and issue tracking
+
+### Key Learnings
+- **OAuth complexity**: Requires extensive testing for production readiness
+- **Saloon integration**: Proper mocking requires understanding of Saloon's architecture
+- **Gmail API patterns**: Label management follows specific endpoint conventions
+- **Laravel package development**: Balance between Laravel conventions and Gmail API requirements
 
 ## Additional Notes
 
