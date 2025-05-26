@@ -64,7 +64,7 @@ class AuthenticationException extends GmailClientException
             $message
         );
 
-        return new static('OAuth authentication failed: ' . $message, 401, null, $error);
+        return new static('OAuth authentication failed: '.$message, 401, null, $error);
     }
 
     /**
