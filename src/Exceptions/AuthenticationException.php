@@ -55,6 +55,19 @@ class AuthenticationException extends GmailClientException
     }
 
     /**
+     * Create from an OAuth error
+     */
+    public static function fromOAuthError(string $message): self
+    {
+        $error = AuthenticationErrorDTO::fromType(
+            'oauth_error',
+            $message
+        );
+
+        return new static('OAuth authentication failed: ' . $message, 401, null, $error);
+    }
+
+    /**
      * Create from a 401 response
      */
     public static function fromResponse(array $response, ?string $message = null): self
