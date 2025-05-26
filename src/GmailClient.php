@@ -654,4 +654,229 @@ class GmailClient
             );
         }
     }
+
+    /**
+     * Get account statistics with optimized batch retrieval.
+     *
+     * @param  array  $options  Configuration options for statistics retrieval
+     * @return array Comprehensive account statistics
+     *
+     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     */
+    public function getAccountStatistics(array $options = []): array
+    {
+        $defaults = [
+            'unread_limit' => config('gmail-client.performance.count_estimation_threshold', 25),
+            'today_limit' => 15,
+            'include_labels' => true,
+            'estimate_large_counts' => config('gmail-client.performance.enable_smart_counting', true),
+            'background_mode' => false,
+            'timeout' => config('gmail-client.performance.api_timeout', 30),
+        ];
+
+        $config = array_merge($defaults, $options);
+        $statistics = [
+            'unread_count' => null,
+            'today_count' => null,
+            'labels_count' => null,
+            'estimated_total' => null,
+            'api_calls_made' => 0,
+            'last_updated' => now()->toISOString(),
+            'partial_failure' => false,
+        ];
+
+        try {
+            // Get unread messages count with smart estimation
+            $statistics = $this->getUnreadCount($statistics, $config);
+
+            // Get today's messages count
+            $statistics = $this->getTodayCount($statistics, $config);
+
+            // Get labels count if requested
+            if ($config['include_labels']) {
+                $statistics = $this->getLabelsCount($statistics, $config);
+            }
+
+            // Get total mailbox estimation
+            $statistics = $this->getMailboxEstimation($statistics, $config);
+
+        } catch (\Exception $e) {
+            $statistics['partial_failure'] = true;
+            $statistics['error'] = $e->getMessage();
+
+            // In background mode, don't throw exceptions
+            if (! $config['background_mode']) {
+                throw $e;
+            }
+        }
+
+        return $statistics;
+    }
+
+    /**
+     * Get unread messages count with smart estimation.
+     */
+    protected function getUnreadCount(array $statistics, array $config): array
+    {
+        try {
+            $unreadQuery = ['q' => 'is:unread', 'maxResults' => $config['unread_limit']];
+            $response = $this->messages()->list($unreadQuery);
+            $data = $response->json();
+
+            $statistics['api_calls_made']++;
+            $messageCount = count($data['messages'] ?? []);
+
+            // Smart estimation for large counts
+            if ($config['estimate_large_counts'] && $messageCount >= $config['unread_limit']) {
+                $statistics['unread_count'] = $config['unread_limit'].'+';
+            } else {
+                $statistics['unread_count'] = $messageCount;
+            }
+
+            // Store estimated total if available
+            if (isset($data['resultSizeEstimate'])) {
+                $statistics['unread_estimate'] = $data['resultSizeEstimate'];
+            }
+
+        } catch (\Exception $e) {
+            $statistics['api_calls_made']++;
+            $statistics['unread_count'] = '?';
+            $statistics['partial_failure'] = true;
+        }
+
+        return $statistics;
+    }
+
+    /**
+     * Get today's messages count.
+     */
+    protected function getTodayCount(array $statistics, array $config): array
+    {
+        try {
+            $today = now()->format('Y/m/d');
+            $todayQuery = ['q' => "after:{$today}", 'maxResults' => $config['today_limit']];
+            $response = $this->messages()->list($todayQuery);
+            $data = $response->json();
+
+            $statistics['api_calls_made']++;
+            $messageCount = count($data['messages'] ?? []);
+
+            // Today's count is usually reasonable, so exact count unless very large
+            if ($config['estimate_large_counts'] && $messageCount >= $config['today_limit']) {
+                $statistics['today_count'] = $config['today_limit'].'+';
+            } else {
+                $statistics['today_count'] = $messageCount;
+            }
+
+        } catch (\Exception $e) {
+            $statistics['api_calls_made']++;
+            $statistics['today_count'] = '?';
+            $statistics['partial_failure'] = true;
+        }
+
+        return $statistics;
+    }
+
+    /**
+     * Get labels count.
+     */
+    protected function getLabelsCount(array $statistics, array $config): array
+    {
+        try {
+            $response = $this->labels()->list();
+            $data = $response->json();
+
+            $statistics['api_calls_made']++;
+            $statistics['labels_count'] = count($data['labels'] ?? []);
+
+        } catch (\Exception $e) {
+            $statistics['api_calls_made']++;
+            $statistics['labels_count'] = '?';
+            $statistics['partial_failure'] = true;
+        }
+
+        return $statistics;
+    }
+
+    /**
+     * Get mailbox size estimation.
+     */
+    protected function getMailboxEstimation(array $statistics, array $config): array
+    {
+        try {
+            // Use a broad query to get total mailbox estimation
+            $response = $this->messages()->list(['q' => 'in:anywhere', 'maxResults' => 1]);
+            $data = $response->json();
+
+            $statistics['api_calls_made']++;
+
+            if (isset($data['resultSizeEstimate'])) {
+                $statistics['estimated_total'] = $data['resultSizeEstimate'];
+            }
+
+        } catch (\Exception $e) {
+            $statistics['api_calls_made']++;
+            $statistics['estimated_total'] = null;
+            // Don't mark as partial failure for this optional metric
+        }
+
+        return $statistics;
+    }
+
+    /**
+     * Get account health information.
+     *
+     * @return array Health status including connection, token, and API quota info
+     *
+     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     */
+    public function getAccountHealth(): array
+    {
+        $health = [
+            'connected' => false,
+            'token_expires_in' => null,
+            'api_quota_remaining' => null,
+            'last_successful_call' => null,
+            'errors' => [],
+            'status' => 'unknown',
+        ];
+
+        try {
+            // Test connection with a minimal API call
+            $response = $this->labels()->list();
+
+            if ($response->successful()) {
+                $health['connected'] = true;
+                $health['last_successful_call'] = now()->toISOString();
+                $health['status'] = 'healthy';
+
+                // Check for rate limit headers if available
+                $remaining = $response->header('X-RateLimit-Remaining');
+                if ($remaining !== null) {
+                    $health['api_quota_remaining'] = (int) $remaining;
+                }
+            } else {
+                $health['status'] = 'unhealthy';
+                $health['errors'][] = "API call failed with status: {$response->status()}";
+            }
+
+        } catch (AuthenticationException $e) {
+            $health['status'] = 'authentication_failed';
+            $health['errors'][] = $e->getMessage();
+        } catch (RateLimitException $e) {
+            $health['status'] = 'rate_limited';
+            $health['api_quota_remaining'] = 0;
+            $health['errors'][] = $e->getMessage();
+        } catch (\Exception $e) {
+            $health['status'] = 'error';
+            $health['errors'][] = $e->getMessage();
+        }
+
+        // Note: Token expiration checking would require extending the authenticator
+        // This is a future enhancement opportunity
+
+        return $health;
+    }
 }
