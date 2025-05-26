@@ -479,4 +479,179 @@ class GmailClient
 
         return Label::fromApiResponse($data);
     }
+
+    /**
+     * Add labels to a message.
+     *
+     * @param  string  $messageId  The message ID to modify
+     * @param  array  $labelIds  Array of label IDs to add
+     *
+     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     */
+    public function addLabelsToMessage(string $messageId, array $labelIds): Email
+    {
+        try {
+            $response = $this->messages()->addLabels($messageId, $labelIds);
+
+            if ($response->status() === 404) {
+                throw NotFoundException::message($messageId);
+            }
+
+            if ($response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response->status() === 429) {
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
+
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            $data = $response->json();
+
+            return Email::fromApiResponse($data);
+        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
+            $response = $e->getResponse();
+
+            if ($response && $response->status() === 404) {
+                throw NotFoundException::message($messageId);
+            }
+
+            if ($response && $response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response && $response->status() === 429) {
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
+
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            throw new GmailClientException(
+                "Error adding labels to message with ID '{$messageId}': ".$e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
+    }
+
+    /**
+     * Remove labels from a message.
+     *
+     * @param  string  $messageId  The message ID to modify
+     * @param  array  $labelIds  Array of label IDs to remove
+     *
+     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     */
+    public function removeLabelsFromMessage(string $messageId, array $labelIds): Email
+    {
+        try {
+            $response = $this->messages()->removeLabels($messageId, $labelIds);
+
+            if ($response->status() === 404) {
+                throw NotFoundException::message($messageId);
+            }
+
+            if ($response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response->status() === 429) {
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
+
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            $data = $response->json();
+
+            return Email::fromApiResponse($data);
+        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
+            $response = $e->getResponse();
+
+            if ($response && $response->status() === 404) {
+                throw NotFoundException::message($messageId);
+            }
+
+            if ($response && $response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response && $response->status() === 429) {
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
+
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            throw new GmailClientException(
+                "Error removing labels from message with ID '{$messageId}': ".$e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
+    }
+
+    /**
+     * Modify labels on a message (add and/or remove labels).
+     *
+     * @param  string  $messageId  The message ID to modify
+     * @param  array  $addLabelIds  Array of label IDs to add (optional)
+     * @param  array  $removeLabelIds  Array of label IDs to remove (optional)
+     *
+     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
+     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     */
+    public function modifyMessageLabels(string $messageId, array $addLabelIds = [], array $removeLabelIds = []): Email
+    {
+        try {
+            $response = $this->messages()->modifyLabels($messageId, $addLabelIds, $removeLabelIds);
+
+            if ($response->status() === 404) {
+                throw NotFoundException::message($messageId);
+            }
+
+            if ($response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response->status() === 429) {
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
+
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            $data = $response->json();
+
+            return Email::fromApiResponse($data);
+        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
+            $response = $e->getResponse();
+
+            if ($response && $response->status() === 404) {
+                throw NotFoundException::message($messageId);
+            }
+
+            if ($response && $response->status() === 401) {
+                throw AuthenticationException::invalidToken();
+            }
+
+            if ($response && $response->status() === 429) {
+                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
+
+                throw RateLimitException::quotaExceeded($retryAfter);
+            }
+
+            throw new GmailClientException(
+                "Error modifying labels on message with ID '{$messageId}': ".$e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
+    }
 }
