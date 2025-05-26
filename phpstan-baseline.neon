@@ -22,7 +22,7 @@ parameters:
 
 		-
 			message: "#^Unsafe usage of new static\\(\\)\\.$#"
-			count: 7
+			count: 8
 			path: src/Exceptions/AuthenticationException.php
 
 		-
@@ -108,10 +108,6 @@ parameters:
 			count: 1
 			path: src/Gmail/Resources/AuthResource.php
 
-		-
-			message: "#^Call to an undefined static method PartridgeRocks\\\\GmailClient\\\\Exceptions\\\\AuthenticationException\\:\\:fromOAuthError\\(\\)\\.$#"
-			count: 2
-			path: src/Gmail/Resources/AuthResource.php
 
 		-
 			message: "#^Call to an undefined method Saloon\\\\Exceptions\\\\Request\\\\FatalRequestException\\:\\:getResponse\\(\\)\\.$#"

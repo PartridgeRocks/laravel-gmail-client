@@ -134,38 +134,23 @@ Custom exceptions in `src/Exceptions/` for different error scenarios:
 
 ## Current Development Status
 
-### Known Issues
+### OAuth Authentication Bug (Fixed in v1.0.2)
 
-**OAuth Authentication Bug (v1.0.2)**
-- **Issue**: Missing `fromOAuthError()` method in `AuthenticationException` class
-- **Impact**: OAuth authentication fails with "Call to undefined method" error
-- **GitHub Issue**: #11 - https://github.com/PartridgeRocks/gmail_client/issues/11
-- **Status**: Fix implemented, PR in progress
+**Issue**: Missing `fromOAuthError()` method in `AuthenticationException` causing OAuth failures.
 
-**Bug Details**:
-- `AuthResource.php` line 40 calls `AuthenticationException::fromOAuthError($e->getMessage())`
-- Method doesn't exist in `AuthenticationException` class
-- Breaks OAuth token exchange process
+**Details**:
+- `AuthResource.php:40` calls `AuthenticationException::fromOAuthError()` but method didn't exist
+- Error: `Call to undefined method PartridgeRocks\GmailClient\Exceptions\AuthenticationException::fromOAuthError()`
 
-**Fix Applied**:
-1. Added `fromOAuthError()` method to `AuthenticationException` class
-2. Added `oauth_error` type to `AuthenticationErrorDTO` error messages
-3. Maintains consistent error handling pattern with existing methods
+**Resolution**:
+- Added `fromOAuthError(string $message): self` method to `AuthenticationException`
+- Added `oauth_error` type to `AuthenticationErrorDTO`
+- **GitHub Issue**: [#11](https://github.com/PartridgeRocks/laravel-gmail-client/issues/11)
+- **PR Status**: Merged ✅
 
-### Testing OAuth Integration
+### OAuth Integration Testing
 
-For testing OAuth flows with this package:
-
-1. **Local Development**: Use Cloudflare tunnel for public HTTPS access
-   - Domain: `test.jordanpartridge.us`
-   - Required for OAuth callbacks from Google/GitHub
-
-2. **Environment Configuration**: 
-   ```bash
-   GMAIL_REDIRECT_URI=https://test.jordanpartridge.us/gmail/auth/callback
-   ```
-
-3. **Google Cloud Console**: Add tunnel domain to authorized redirect URIs
+For detailed OAuth testing instructions, see [TESTING.md](TESTING.md).
 
 ## Additional Notes
 

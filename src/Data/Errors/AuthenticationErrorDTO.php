@@ -4,6 +4,14 @@ namespace PartridgeRocks\GmailClient\Data\Errors;
 
 class AuthenticationErrorDTO extends ErrorDTO
 {
+    // Authentication error type constants
+    public const INVALID_TOKEN = 'invalid_token';
+    public const MISSING_TOKEN = 'missing_token';
+    public const REFRESH_FAILED = 'refresh_failed';
+    public const TOKEN_EXPIRED = 'token_expired';
+    public const UNAUTHORIZED = 'unauthorized';
+    public const OAUTH_ERROR = 'oauth_error';
+
     public function __construct(
         public string $code,
         public string $message,
@@ -21,12 +29,12 @@ class AuthenticationErrorDTO extends ErrorDTO
     public static function fromType(string $type, ?string $detail = null, ?array $context = null): self
     {
         $messages = [
-            'invalid_token' => 'The access token is invalid or has expired',
-            'missing_token' => 'No access token was provided for authentication',
-            'refresh_failed' => 'Failed to refresh the access token',
-            'token_expired' => 'The access token has expired',
-            'unauthorized' => 'Unauthorized access to the requested resource',
-            'oauth_error' => 'OAuth authentication process failed',
+            self::INVALID_TOKEN => 'The access token is invalid or has expired',
+            self::MISSING_TOKEN => 'No access token was provided for authentication',
+            self::REFRESH_FAILED => 'Failed to refresh the access token',
+            self::TOKEN_EXPIRED => 'The access token has expired',
+            self::UNAUTHORIZED => 'Unauthorized access to the requested resource',
+            self::OAUTH_ERROR => 'OAuth authentication process failed',
         ];
 
         return new self(

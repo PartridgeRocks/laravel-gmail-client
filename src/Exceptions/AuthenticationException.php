@@ -6,81 +6,83 @@ use PartridgeRocks\GmailClient\Data\Errors\AuthenticationErrorDTO;
 
 class AuthenticationException extends GmailClientException
 {
-    public static function missingToken(): self
+    public static function missingToken(?\Throwable $previous = null): self
     {
-        $error = AuthenticationErrorDTO::fromType('missing_token');
+        $error = AuthenticationErrorDTO::fromType(AuthenticationErrorDTO::MISSING_TOKEN);
 
-        return new static($error->message, 401, null, $error);
+        return new static($error->message, 401, $previous, $error);
     }
 
-    public static function invalidToken(): self
+    public static function invalidToken(?\Throwable $previous = null): self
     {
-        $error = AuthenticationErrorDTO::fromType('invalid_token');
+        $error = AuthenticationErrorDTO::fromType(AuthenticationErrorDTO::INVALID_TOKEN);
 
-        return new static($error->message, 401, null, $error);
+        return new static($error->message, 401, $previous, $error);
     }
 
-    public static function tokenExpired(): self
+    public static function tokenExpired(?\Throwable $previous = null): self
     {
-        $error = AuthenticationErrorDTO::fromType('token_expired');
+        $error = AuthenticationErrorDTO::fromType(AuthenticationErrorDTO::TOKEN_EXPIRED);
 
-        return new static($error->message, 401, null, $error);
+        return new static($error->message, 401, $previous, $error);
     }
 
-    public static function refreshFailed(?string $detail = null): self
+    public static function refreshFailed(?string $detail = null, ?\Throwable $previous = null): self
     {
-        $error = AuthenticationErrorDTO::fromType('refresh_failed', $detail);
+        $error = AuthenticationErrorDTO::fromType(AuthenticationErrorDTO::REFRESH_FAILED, $detail);
 
-        return new static($error->message, 401, null, $error);
+        return new static($error->message, 401, $previous, $error);
     }
 
-    public static function missingCredentials(): self
+    public static function missingCredentials(?\Throwable $previous = null): self
     {
         $error = AuthenticationErrorDTO::fromType(
-            'unauthorized',
+            AuthenticationErrorDTO::UNAUTHORIZED,
             'Missing required OAuth credentials. Please check your configuration.'
         );
 
-        return new static($error->message, 401, null, $error);
+        return new static($error->message, 401, $previous, $error);
     }
 
-    public static function authorizationFailed(?string $message = null): self
+    public static function authorizationFailed(?string $message = null, ?\Throwable $previous = null): self
     {
         $error = AuthenticationErrorDTO::fromType(
-            'unauthorized',
+            AuthenticationErrorDTO::UNAUTHORIZED,
             $message ?? 'Unknown error'
         );
 
-        return new static('Gmail authorization failed: '.($message ?? 'Unknown error'), 401, null, $error);
+        return new static('Gmail authorization failed: '.($message ?? 'Unknown error'), 401, $previous, $error);
     }
 
     /**
-     * Create from an OAuth error
+     * Create from OAuth authentication errors
      */
-    public static function fromOAuthError(string $message): self
+    public static function fromOAuthError(string $message, ?\Throwable $previous = null): self
     {
         $error = AuthenticationErrorDTO::fromType(
-            'oauth_error',
-            $message
+            AuthenticationErrorDTO::OAUTH_ERROR,
+            $message,
+            ['oauth_flow' => true, 'timestamp' => now()]
         );
 
-        return new static('OAuth authentication failed: '.$message, 401, null, $error);
+        return new static("OAuth authentication failed: {$message}", 401, $previous, $error);
     }
 
     /**
      * Create from a 401 response
      */
-    public static function fromResponse(array $response, ?string $message = null): self
+    public static function fromResponse(array $response, ?string $message = null, ?\Throwable $previous = null): self
     {
         $errorData = $response['error'] ?? $response;
-        $type = 'unauthorized';
+        $type = AuthenticationErrorDTO::UNAUTHORIZED;
 
-        // Try to determine more specific type
+        // Try to determine more specific type based on error description
         if (isset($errorData['error_description'])) {
-            if (strpos($errorData['error_description'], 'expired') !== false) {
-                $type = 'token_expired';
-            } elseif (strpos($errorData['error_description'], 'invalid') !== false) {
-                $type = 'invalid_token';
+            $description = strtolower($errorData['error_description']);
+            if (str_contains($description, 'expired')) {
+                $type = AuthenticationErrorDTO::TOKEN_EXPIRED;
+            } elseif (str_contains($description, 'invalid')) {
+                $type = AuthenticationErrorDTO::INVALID_TOKEN;
             }
         }
 
@@ -90,6 +92,6 @@ class AuthenticationException extends GmailClientException
             $response
         );
 
-        return new static($error->message, 401, null, $error);
+        return new static($error->message, 401, $previous, $error);
     }
 }
