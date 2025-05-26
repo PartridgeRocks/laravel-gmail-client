@@ -668,13 +668,12 @@ class GmailClient
     public function getAccountStatistics(array $options = []): array
     {
         $defaults = [
-            'unread_limit' => 25,
+            'unread_limit' => config('gmail-client.performance.count_estimation_threshold', 25),
             'today_limit' => 15,
             'include_labels' => true,
-            'estimate_large_counts' => true,
+            'estimate_large_counts' => config('gmail-client.performance.enable_smart_counting', true),
             'background_mode' => false,
-            'cache_results' => false,
-            'timeout' => 30,
+            'timeout' => config('gmail-client.performance.api_timeout', 30),
         ];
 
         $config = array_merge($defaults, $options);
@@ -742,6 +741,7 @@ class GmailClient
             }
 
         } catch (\Exception $e) {
+            $statistics['api_calls_made']++;
             $statistics['unread_count'] = '?';
             $statistics['partial_failure'] = true;
         }
@@ -771,6 +771,7 @@ class GmailClient
             }
 
         } catch (\Exception $e) {
+            $statistics['api_calls_made']++;
             $statistics['today_count'] = '?';
             $statistics['partial_failure'] = true;
         }
@@ -791,6 +792,7 @@ class GmailClient
             $statistics['labels_count'] = count($data['labels'] ?? []);
 
         } catch (\Exception $e) {
+            $statistics['api_calls_made']++;
             $statistics['labels_count'] = '?';
             $statistics['partial_failure'] = true;
         }
@@ -815,6 +817,7 @@ class GmailClient
             }
 
         } catch (\Exception $e) {
+            $statistics['api_calls_made']++;
             $statistics['estimated_total'] = null;
             // Don't mark as partial failure for this optional metric
         }

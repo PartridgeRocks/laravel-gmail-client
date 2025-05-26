@@ -143,7 +143,6 @@ return [
     */
     'multi_account' => [
         'max_accounts_per_user' => env('GMAIL_MAX_ACCOUNTS', 5),
-        'auto_refresh_tokens' => env('GMAIL_AUTO_REFRESH', true),
         'health_check_interval' => env('GMAIL_HEALTH_CHECK_INTERVAL', 3600),
         'enable_bulk_operations' => env('GMAIL_BULK_OPERATIONS', true),
     ],
