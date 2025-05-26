@@ -115,4 +115,36 @@ return [
     |
     */
     'route_middleware' => ['web'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Performance Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for performance optimizations and batch operations.
+    |
+    */
+    'performance' => [
+        'enable_smart_counting' => env('GMAIL_SMART_COUNTING', true),
+        'count_estimation_threshold' => env('GMAIL_COUNT_THRESHOLD', 50),
+        'default_cache_ttl' => env('GMAIL_CACHE_TTL', 300),
+        'max_concurrent_requests' => env('GMAIL_MAX_CONCURRENT', 3),
+        'enable_circuit_breaker' => env('GMAIL_CIRCUIT_BREAKER', true),
+        'api_timeout' => env('GMAIL_API_TIMEOUT', 30),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Multi-Account Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for managing multiple Gmail accounts per user.
+    |
+    */
+    'multi_account' => [
+        'max_accounts_per_user' => env('GMAIL_MAX_ACCOUNTS', 5),
+        'auto_refresh_tokens' => env('GMAIL_AUTO_REFRESH', true),
+        'health_check_interval' => env('GMAIL_HEALTH_CHECK_INTERVAL', 3600),
+        'enable_bulk_operations' => env('GMAIL_BULK_OPERATIONS', true),
+    ],
 ];
