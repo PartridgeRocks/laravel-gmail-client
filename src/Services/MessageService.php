@@ -93,6 +93,7 @@ class MessageService
 
         if ($response->status() === 429) {
             $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
+
             throw RateLimitException::quotaExceeded($retryAfter);
         }
 
