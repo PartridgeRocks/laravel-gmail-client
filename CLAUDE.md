@@ -238,18 +238,39 @@ For detailed OAuth testing instructions, see [TESTING.md](TESTING.md).
 ## Development Workflow & Best Practices
 
 ### Git Workflow
-**Important**: Always use feature branches instead of pushing directly to `master`.
+**Important**: Always use feature branches with rebase (not merge) for clean history.
 
 ```bash
-# ✅ Proper workflow
+# ✅ Proper workflow with rebase
 git checkout -b feature/new-functionality
 # ... implement feature ...
+
+# Before creating PR - rebase to latest master
+git fetch origin master
+git rebase origin/master
 git push -u origin feature/new-functionality
 gh pr create --title "Add New Functionality" --body "..."
 
+# If conflicts arise after PR created
+git fetch origin master  
+git rebase origin/master
+# Fix conflicts in each commit during rebase
+git rebase --continue
+git push --force-with-lease origin feature/new-functionality
+
 # ❌ Avoid direct master commits
 git push origin master  # Bypasses code review!
+
+# ❌ Avoid merge commits for conflict resolution
+git merge origin/master  # Creates merge commit noise in history
 ```
+
+**Why Rebase > Merge for Conflicts:**
+- **Clean linear history** - no unnecessary merge commits
+- **Cleaner PR history** - each commit tells a clear story  
+- **Easier code review** - reviewers see actual changes, not merge noise
+- **Better git log** - `git log --oneline` stays readable
+- **Standard practice** - most teams prefer rebasing feature branches
 
 ### Testing Strategy
 1. **Saloon MockClient**: Use `MockClient` and `MockResponse` for API testing, not Laravel's `Http::fake()`
