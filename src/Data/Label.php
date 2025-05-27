@@ -4,6 +4,25 @@ namespace PartridgeRocks\GmailClient\Data;
 
 use Spatie\LaravelData\Data;
 
+/**
+ * Gmail Label Data Object - represents a Gmail label with all properties.
+ *
+ * This data class encapsulates Gmail label information including system labels
+ * (INBOX, SENT, DRAFT, etc.) and custom user-created labels. Provides access
+ * to label metadata, visibility settings, color customization, and message/thread counts.
+ *
+ * Label Types:
+ * - System labels: Built-in labels like INBOX, SENT, DRAFT (cannot be modified/deleted)
+ * - User labels: Custom labels created by users (can be modified/deleted)
+ *
+ * Key Properties:
+ * - Visibility settings for message and label lists
+ * - Color customization (background and text colors)
+ * - Message and thread counts (total and unread)
+ * - Label type classification
+ *
+ * @see https://developers.google.com/gmail/api/reference/rest/v1/users.labels#Label
+ */
 class Label extends Data
 {
     /**

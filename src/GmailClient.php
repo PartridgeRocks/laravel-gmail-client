@@ -20,6 +20,41 @@ use PartridgeRocks\GmailClient\Services\AuthService;
 use PartridgeRocks\GmailClient\Services\LabelService;
 use PartridgeRocks\GmailClient\Services\MessageService;
 
+/**
+ * Gmail Client - Main interface for Gmail API operations.
+ *
+ * This is the primary entry point for interacting with the Gmail API. It provides
+ * a unified interface for authentication, message management, label operations,
+ * and various Gmail-specific utilities. The client uses dependency injection
+ * for flexibility and testability.
+ *
+ * Key Features:
+ * - OAuth2 authentication with automatic token management
+ * - Complete message CRUD operations (list, get, send, modify)
+ * - Label management (create, update, delete, organize)
+ * - Safe operation methods with graceful error handling
+ * - Pagination support for large datasets
+ * - CRM-friendly contact parsing and domain filtering
+ * - Account statistics and health monitoring
+ *
+ * Usage Examples:
+ * ```php
+ * // Basic usage
+ * $client = new GmailClient('your-access-token');
+ * $messages = $client->listMessages(['q' => 'is:unread']);
+ *
+ * // OAuth flow
+ * $client = new GmailClient();
+ * $authUrl = $client->getAuthorizationUrl('redirect-uri', ['gmail.readonly']);
+ * $tokens = $client->exchangeCode('auth-code', 'redirect-uri');
+ *
+ * // Safe operations (won't throw exceptions)
+ * $messages = $client->safeListMessages();
+ * $isConnected = $client->isConnected();
+ * ```
+ *
+ * @see https://developers.google.com/gmail/api
+ */
 class GmailClient
 {
     use GmailClientHelpers;
