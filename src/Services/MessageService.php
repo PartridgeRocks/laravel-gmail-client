@@ -81,35 +81,24 @@ class MessageService
      */
     public function getMessage(string $id): Email
     {
-        try {
-            $response = $this->getMessageResource()->get($id, ['format' => 'full']);
+        $response = $this->getMessageResource()->get($id, ['format' => 'full']);
 
-            if ($response->status() === 404) {
-                throw NotFoundException::message($id);
-            }
-
-            if ($response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            $data = $response->json();
-
-            return Email::fromApiResponse($data);
-        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
-            $response = $e->getResponse();
-
-            if ($response && $response->status() === 404) {
-                throw NotFoundException::message($id);
-            }
-
-            throw $e;
+        if ($response->status() === 404) {
+            throw NotFoundException::message($id);
         }
+
+        if ($response->status() === 401) {
+            throw AuthenticationException::invalidToken();
+        }
+
+        if ($response->status() === 429) {
+            $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
+            throw RateLimitException::quotaExceeded($retryAfter);
+        }
+
+        $data = $response->json();
+
+        return Email::fromApiResponse($data);
     }
 
     /**
