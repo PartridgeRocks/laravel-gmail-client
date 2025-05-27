@@ -879,4 +879,169 @@ class GmailClient
 
         return $health;
     }
+
+    /**
+     * Safely attempt to list labels, returning empty collection on failure.
+     *
+     * @param  bool  $paginate  Whether to return a paginator for all results
+     * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
+     * @param  int  $maxResults  Maximum number of results per page
+     * @return \Illuminate\Support\Collection|GmailPaginator|Gmail\Pagination\GmailLazyCollection
+     */
+    public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
+    {
+        try {
+            return $this->listLabels($paginate, $lazy, $maxResults);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            logger()->warning('Failed to list Gmail labels: '.$e->getMessage());
+
+            // Return appropriate empty structure based on requested format
+            if ($paginate) {
+                return $this->paginateLabels($maxResults);
+            }
+
+            if ($lazy) {
+                return $this->lazyLoadLabels();
+            }
+
+            return collect();
+        }
+    }
+
+    /**
+     * Safely attempt to list messages, returning empty collection on failure.
+     *
+     * @param  array  $query  Query parameters for filtering messages
+     * @param  bool  $paginate  Whether to return a paginator for all results
+     * @param  int  $maxResults  Maximum number of results per page
+     * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
+     * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
+     * @return \Illuminate\Support\Collection|GmailPaginator|\Illuminate\Support\LazyCollection
+     */
+    public function safeListMessages(
+        array $query = [],
+        bool $paginate = false,
+        int $maxResults = 100,
+        bool $lazy = false,
+        bool $fullDetails = true
+    ): mixed {
+        try {
+            return $this->listMessages($query, $paginate, $maxResults, $lazy, $fullDetails);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            logger()->warning('Failed to list Gmail messages: '.$e->getMessage(), [
+                'query' => $query,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Return appropriate empty structure based on requested format
+            if ($lazy) {
+                return collect()->lazy();
+            }
+
+            if ($paginate) {
+                return $this->paginateMessages($query, $maxResults);
+            }
+
+            return collect();
+        }
+    }
+
+    /**
+     * Safely get a message, returning null on failure.
+     *
+     * @param  string  $id  Message ID
+     */
+    public function safeGetMessage(string $id): ?Email
+    {
+        try {
+            return $this->getMessage($id);
+        } catch (NotFoundException $e) {
+            // Message not found is expected in some cases
+            return null;
+        } catch (\Exception $e) {
+            // Log unexpected errors
+            logger()->warning("Failed to get Gmail message {$id}: ".$e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Safely get account statistics with graceful fallback.
+     *
+     * @param  array  $options  Configuration options for statistics retrieval
+     * @return array Statistics with partial_failure flag if needed
+     */
+    public function safeGetAccountStatistics(array $options = []): array
+    {
+        try {
+            return $this->getAccountStatistics(array_merge(['background_mode' => true], $options));
+        } catch (\Exception $e) {
+            logger()->warning('Failed to get Gmail account statistics: '.$e->getMessage());
+
+            return [
+                'unread_count' => '?',
+                'today_count' => '?',
+                'labels_count' => '?',
+                'estimated_total' => null,
+                'api_calls_made' => 0,
+                'last_updated' => now()->toISOString(),
+                'partial_failure' => true,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Check if the client is properly authenticated and connected.
+     */
+    public function isConnected(): bool
+    {
+        try {
+            $health = $this->getAccountHealth();
+
+            return $health['connected'] && $health['status'] === 'healthy';
+        } catch (\Exception) {
+            return false;
+        }
+    }
+
+    /**
+     * Get a summary of Gmail account status with safe fallbacks.
+     */
+    public function getAccountSummary(): array
+    {
+        $summary = [
+            'connected' => false,
+            'labels_count' => 0,
+            'has_unread' => false,
+            'errors' => [],
+        ];
+
+        try {
+            // Check connection
+            $summary['connected'] = $this->isConnected();
+
+            if ($summary['connected']) {
+                // Get safe statistics
+                $stats = $this->safeGetAccountStatistics([
+                    'unread_limit' => 1, // Just check if any unread exist
+                    'include_labels' => true,
+                ]);
+
+                $summary['labels_count'] = is_numeric($stats['labels_count']) ? $stats['labels_count'] : 0;
+                $summary['has_unread'] = ! in_array($stats['unread_count'], ['?', 0, '0']);
+
+                if ($stats['partial_failure']) {
+                    $summary['errors'][] = $stats['error'] ?? 'Partial failure getting statistics';
+                }
+            }
+        } catch (\Exception $e) {
+            $summary['errors'][] = $e->getMessage();
+        }
+
+        return $summary;
+    }
 }
