@@ -3,6 +3,9 @@
 namespace PartridgeRocks\GmailClient;
 
 use Illuminate\Support\Collection;
+use PartridgeRocks\GmailClient\Contracts\AuthServiceInterface;
+use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
+use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Data\Label;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
@@ -22,21 +25,30 @@ class GmailClient
     use GmailClientHelpers;
 
     protected GmailConnector $connector;
-    protected AuthService $authService;
-    protected LabelService $labelService;
-    protected MessageService $messageService;
+    protected AuthServiceInterface $authService;
+    protected LabelServiceInterface $labelService;
+    protected MessageServiceInterface $messageService;
 
     /**
      * Create a new GmailClient instance.
      *
      * @param  string|null  $accessToken  Optional access token to authenticate with
+     * @param  AuthServiceInterface|null  $authService  Optional auth service implementation
+     * @param  LabelServiceInterface|null  $labelService  Optional label service implementation
+     * @param  MessageServiceInterface|null  $messageService  Optional message service implementation
+     * @param  GmailConnector|null  $connector  Optional Gmail connector implementation
      */
-    public function __construct(?string $accessToken = null)
-    {
-        $this->connector = new GmailConnector;
-        $this->authService = new AuthService($this->connector);
-        $this->labelService = new LabelService($this->connector);
-        $this->messageService = new MessageService($this->connector);
+    public function __construct(
+        ?string $accessToken = null,
+        ?AuthServiceInterface $authService = null,
+        ?LabelServiceInterface $labelService = null,
+        ?MessageServiceInterface $messageService = null,
+        ?GmailConnector $connector = null
+    ) {
+        $this->connector = $connector ?? new GmailConnector;
+        $this->authService = $authService ?? new AuthService($this->connector);
+        $this->labelService = $labelService ?? new LabelService($this->connector);
+        $this->messageService = $messageService ?? new MessageService($this->connector);
 
         if ($accessToken) {
             $this->authenticate($accessToken);

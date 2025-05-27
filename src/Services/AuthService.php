@@ -3,12 +3,13 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use DateTimeInterface;
+use PartridgeRocks\GmailClient\Contracts\AuthServiceInterface;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\GmailOAuthAuthenticator;
 use PartridgeRocks\GmailClient\Gmail\Resources\AuthResource;
 
-class AuthService
+class AuthService implements AuthServiceInterface
 {
     public function __construct(
         private GmailConnector $connector

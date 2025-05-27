@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Constants\ConfigDefaults;
 use PartridgeRocks\GmailClient\Constants\GmailConstants;
 use PartridgeRocks\GmailClient\Constants\HttpStatus;
+use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
 use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
@@ -16,7 +17,7 @@ use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use PartridgeRocks\GmailClient\Gmail\Resources\MessageResource;
 
-class MessageService
+class MessageService implements MessageServiceInterface
 {
     use GmailClientHelpers;
 
