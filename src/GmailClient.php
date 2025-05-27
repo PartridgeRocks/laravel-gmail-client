@@ -881,6 +881,28 @@ class GmailClient
     }
 
     /**
+     * Execute a callable safely with error handling and logging.
+     *
+     * @param  callable  $callback  The operation to execute safely
+     * @param  mixed  $fallback  The fallback value to return on error
+     * @param  string  $operation  Description of the operation for logging
+     * @param  array  $context  Additional context for logging
+     */
+    private function safeCall(callable $callback, mixed $fallback, string $operation, array $context = []): mixed
+    {
+        try {
+            return $callback();
+        } catch (\Exception $e) {
+            logger()->warning("Gmail operation failed: {$operation} - {$e->getMessage()}", array_merge([
+                'operation' => $operation,
+                'error_type' => get_class($e),
+            ], $context));
+
+            return $fallback;
+        }
+    }
+
+    /**
      * Safely attempt to list labels, returning empty collection on failure.
      *
      * @param  bool  $paginate  Whether to return a paginator for all results
@@ -890,23 +912,28 @@ class GmailClient
      */
     public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
     {
-        try {
-            return $this->listLabels($paginate, $lazy, $maxResults);
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            logger()->warning('Failed to list Gmail labels: '.$e->getMessage());
+        return $this->safeCall(
+            callback: fn () => $this->listLabels($paginate, $lazy, $maxResults),
+            fallback: $this->getEmptyLabelsStructure($paginate, $lazy, $maxResults),
+            operation: 'list labels',
+            context: ['paginate' => $paginate, 'lazy' => $lazy, 'maxResults' => $maxResults]
+        );
+    }
 
-            // Return appropriate empty structure based on requested format
-            if ($paginate) {
-                return $this->paginateLabels($maxResults);
-            }
-
-            if ($lazy) {
-                return $this->lazyLoadLabels();
-            }
-
-            return collect();
+    /**
+     * Get appropriate empty structure for labels based on requested format.
+     */
+    private function getEmptyLabelsStructure(bool $paginate, bool $lazy, int $maxResults): mixed
+    {
+        if ($paginate) {
+            return $this->paginateLabels($maxResults);
         }
+
+        if ($lazy) {
+            return $this->lazyLoadLabels();
+        }
+
+        return collect();
     }
 
     /**
@@ -926,26 +953,28 @@ class GmailClient
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed {
-        try {
-            return $this->listMessages($query, $paginate, $maxResults, $lazy, $fullDetails);
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            logger()->warning('Failed to list Gmail messages: '.$e->getMessage(), [
-                'query' => $query,
-                'error' => $e->getMessage(),
-            ]);
+        return $this->safeCall(
+            callback: fn () => $this->listMessages($query, $paginate, $maxResults, $lazy, $fullDetails),
+            fallback: $this->getEmptyMessagesStructure($query, $paginate, $lazy, $maxResults),
+            operation: 'list messages',
+            context: ['query' => $query, 'paginate' => $paginate, 'lazy' => $lazy, 'maxResults' => $maxResults]
+        );
+    }
 
-            // Return appropriate empty structure based on requested format
-            if ($lazy) {
-                return collect()->lazy();
-            }
-
-            if ($paginate) {
-                return $this->paginateMessages($query, $maxResults);
-            }
-
-            return collect();
+    /**
+     * Get appropriate empty structure for messages based on requested format.
+     */
+    private function getEmptyMessagesStructure(array $query, bool $paginate, bool $lazy, int $maxResults): mixed
+    {
+        if ($lazy) {
+            return collect()->lazy();
         }
+
+        if ($paginate) {
+            return $this->paginateMessages($query, $maxResults);
+        }
+
+        return collect();
     }
 
     /**
@@ -958,11 +987,14 @@ class GmailClient
         try {
             return $this->getMessage($id);
         } catch (NotFoundException $e) {
-            // Message not found is expected in some cases
+            // Message not found is expected in some cases - don't log as warning
             return null;
         } catch (\Exception $e) {
-            // Log unexpected errors
-            logger()->warning("Failed to get Gmail message {$id}: ".$e->getMessage());
+            logger()->warning("Gmail operation failed: get message - {$e->getMessage()}", [
+                'operation' => 'get message',
+                'error_type' => get_class($e),
+                'message_id' => $id,
+            ]);
 
             return null;
         }
@@ -1035,11 +1067,15 @@ class GmailClient
                 $summary['has_unread'] = ! in_array($stats['unread_count'], ['?', 0, '0']);
 
                 if ($stats['partial_failure']) {
-                    $summary['errors'][] = $stats['error'] ?? 'Partial failure getting statistics';
+                    $summary['errors'][] = 'STATISTICS_UNAVAILABLE';
                 }
             }
         } catch (\Exception $e) {
-            $summary['errors'][] = $e->getMessage();
+            logger()->warning("Gmail operation failed: get account summary - {$e->getMessage()}", [
+                'operation' => 'get account summary',
+                'error_type' => get_class($e),
+            ]);
+            $summary['errors'][] = 'ACCOUNT_SUMMARY_ERROR';
         }
 
         return $summary;

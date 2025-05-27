@@ -105,3 +105,108 @@ test('safe methods handle rate limit errors gracefully', function () {
     expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class)
         ->and($result)->toBeEmpty();
 });
+
+test('safeGetAccountStatistics returns valid data structure on API failures', function () {
+    $mockClient = new MockClient([
+        '*' => MockResponse::make([], 500),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $result = $this->client->safeGetAccountStatistics();
+
+    // The method should return a valid structure even when API calls fail
+    expect($result)->toBeArray()
+        ->and($result)->toHaveKey('partial_failure')
+        ->and($result)->toHaveKey('unread_count')
+        ->and($result)->toHaveKey('labels_count')
+        ->and($result)->toHaveKey('last_updated')
+        ->and($result['api_calls_made'])->toBeGreaterThan(0);
+});
+
+test('getAccountSummary handles connection failures with safe error messages', function () {
+    $mockClient = new MockClient([
+        '*' => MockResponse::make([], 401),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $result = $this->client->getAccountSummary();
+
+    expect($result['connected'])->toBeFalse()
+        ->and($result['errors'])->toBeArray()
+        ->and($result['labels_count'])->toBe(0)
+        ->and($result['has_unread'])->toBeFalse();
+});
+
+test('safeListLabels works with paginate option', function () {
+    $mockClient = new MockClient([
+        '*users/me/labels*' => MockResponse::make([], 500),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $result = $this->client->safeListLabels(paginate: true);
+
+    expect($result)->not->toBeNull();
+});
+
+test('safeListLabels works with lazy option', function () {
+    $mockClient = new MockClient([
+        '*users/me/labels*' => MockResponse::make([], 500),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $result = $this->client->safeListLabels(lazy: true);
+
+    expect($result)->not->toBeNull();
+});
+
+test('safeListMessages works with lazy option', function () {
+    $mockClient = new MockClient([
+        '*users/me/messages*' => MockResponse::make([], 500),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $result = $this->client->safeListMessages(lazy: true);
+
+    expect($result)->not->toBeNull();
+});
+
+test('safeListMessages works with paginate option', function () {
+    $mockClient = new MockClient([
+        '*users/me/messages*' => MockResponse::make([], 500),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $result = $this->client->safeListMessages(paginate: true);
+
+    expect($result)->not->toBeNull();
+});
+
+test('getAccountSummary returns basic structure', function () {
+    $mockClient = new MockClient([
+        // Health check for isConnected()
+        '*users/me/labels*' => MockResponse::make([
+            'labels' => [
+                ['id' => 'INBOX', 'name' => 'INBOX'],
+                ['id' => 'SENT', 'name' => 'SENT'],
+            ],
+        ], 200),
+        // All other calls fail
+        '*' => MockResponse::make([], 500),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $result = $this->client->getAccountSummary();
+
+    expect($result)->toBeArray()
+        ->and($result)->toHaveKey('connected')
+        ->and($result)->toHaveKey('labels_count')
+        ->and($result)->toHaveKey('has_unread')
+        ->and($result)->toHaveKey('errors');
+});
