@@ -3,6 +3,9 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use Illuminate\Support\Collection;
+use PartridgeRocks\GmailClient\Constants\ConfigDefaults;
+use PartridgeRocks\GmailClient\Constants\GmailConstants;
+use PartridgeRocks\GmailClient\Constants\HttpStatus;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
 use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
@@ -83,15 +86,15 @@ class MessageService
     {
         $response = $this->getMessageResource()->get($id, ['format' => 'full']);
 
-        if ($response->status() === 404) {
+        if ($response->status() === HttpStatus::NOT_FOUND) {
             throw NotFoundException::message($id);
         }
 
-        if ($response->status() === 401) {
+        if ($response->status() === HttpStatus::UNAUTHORIZED) {
             throw AuthenticationException::invalidToken();
         }
 
-        if ($response->status() === 429) {
+        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
             $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
             throw RateLimitException::quotaExceeded($retryAfter);
