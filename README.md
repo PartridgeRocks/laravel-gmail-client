@@ -25,6 +25,7 @@ A Laravel package that integrates with the Gmail API to seamlessly manage emails
 - [Advanced Usage](#-advanced-usage)
   - [Pagination](#pagination-support)
   - [Memory-Efficient Processing](#memory-efficiency)
+  - [Null-Safe Methods](#null-safe-methods-for-robust-applications)
   - [Error Handling](#enhanced-error-handling)
   - [Token Refreshing](#refresh-a-token)
   - [CLI Testing](#command-line-testing)
@@ -61,6 +62,7 @@ A Laravel package that integrates with the Gmail API to seamlessly manage emails
   - Strongly-typed data objects with Laravel Data
   - Full Laravel service container integration
   - Comprehensive exception handling
+  - Null-safe methods for robust applications (dashboards, background processing)
   - Command-line testing utilities
 
 ## 📋 Requirements
@@ -596,6 +598,38 @@ foreach ($messageIds as $messageData) {
     }
 }
 ```
+
+### Null-Safe Methods for Robust Applications
+
+For applications that need graceful degradation (dashboards, background processing), use the null-safe methods that never throw exceptions:
+
+```php
+// ✅ Safe for dashboards - returns empty collection on any error
+$labels = GmailClient::safeListLabels();
+$messages = GmailClient::safeListMessages(['q' => 'is:unread']);
+
+// ✅ Returns null instead of throwing NotFoundException
+$message = GmailClient::safeGetMessage('message-id');
+
+// ✅ Connection health check - never throws exceptions
+if (GmailClient::isConnected()) {
+    // Safe to proceed with Gmail operations
+}
+
+// ✅ Account overview with fallback data
+$summary = GmailClient::getAccountSummary();
+// Returns: ['connected' => true, 'labels_count' => 15, 'has_unread' => true, 'errors' => []]
+
+// ✅ Statistics with graceful degradation
+$stats = GmailClient::safeGetAccountStatistics();
+// Returns fallback data if API fails: ['unread_count' => '?', 'partial_failure' => true]
+```
+
+**Perfect for:**
+- Dashboard widgets that should never crash
+- Background sync processes
+- Health monitoring systems
+- Any UI requiring robust error handling
 
 ### Enhanced Error Handling
 

@@ -161,6 +161,46 @@ $client->modifyMessageLabels($messageId, ['STARRED'], ['UNREAD']);
 
 **GitHub Issue**: [#16](https://github.com/PartridgeRocks/laravel-gmail-client/issues/16) - Completed ✅
 
+### Null-Safe Methods for Robust Applications (Added in v1.0.5)
+
+**Feature**: Comprehensive null-safe method suite for graceful degradation in production applications.
+
+**Implementation**:
+- **`safeListLabels()`** - Returns empty collection on failure instead of throwing exceptions
+- **`safeListMessages()`** - Returns empty collection on errors (auth, rate limits, etc.)
+- **`safeGetMessage()`** - Returns null when message not found or API fails
+- **`safeGetAccountStatistics()`** - Returns fallback data with error indicators when API unavailable
+- **`isConnected()`** - Simple health check for Gmail API connection status
+- **`getAccountSummary()`** - Safe overview of account status, labels count, and message statistics
+- **Common `safeCall()` helper** - DRY error handling with consistent logging and fallback patterns
+
+**Common Use Cases**:
+```php
+// ✅ Dashboard widgets - never crash on API failures
+$labels = $client->safeListLabels();
+$summary = $client->getAccountSummary();
+
+// ✅ Background processing with error tolerance
+$messages = $client->safeListMessages(['q' => 'is:unread']);
+if ($client->isConnected()) {
+    // Safe to proceed with operations
+}
+
+// ✅ Health monitoring with graceful degradation
+$stats = $client->safeGetAccountStatistics();
+if ($stats['partial_failure']) {
+    // Handle degraded service gracefully
+}
+```
+
+**Benefits**:
+- **Dashboard reliability** - UI components never crash due to Gmail API failures
+- **Background processing** - Sync processes continue with partial data instead of failing
+- **Health monitoring** - Connection status checks without exception handling complexity
+- **Production stability** - Graceful degradation for user-facing applications
+
+**GitHub Issue**: Response to user request for null-safe `listLabels()` method - Completed ✅
+
 ### OAuth Authentication Bug (Fixed in v1.0.2)
 
 **Issue**: Missing `fromOAuthError()` method in `AuthenticationException` causing OAuth failures.
