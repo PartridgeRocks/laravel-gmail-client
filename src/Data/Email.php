@@ -7,6 +7,23 @@ use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
 
+/**
+ * Gmail Email Data Object - represents a complete Gmail message.
+ *
+ * This data class encapsulates all properties and metadata of a Gmail message,
+ * providing structured access to headers, body content, recipients, and labels.
+ * Includes automatic parsing of contact information and utility methods for
+ * common email operations like domain filtering and recipient management.
+ *
+ * Key Features:
+ * - Automatic header parsing and normalization
+ * - Base64 body content decoding
+ * - Contact parsing with domain extraction
+ * - Label and thread management
+ * - CRM-friendly contact utilities
+ *
+ * @see https://developers.google.com/gmail/api/reference/rest/v1/users.messages#Message
+ */
 class Email extends Data
 {
     /**

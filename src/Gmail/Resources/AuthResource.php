@@ -7,16 +7,36 @@ use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\BaseResource;
 use Saloon\Http\Response;
 
+/**
+ * Gmail Authentication Resource - handles OAuth2 authentication flows.
+ *
+ * This resource manages the OAuth2 authentication process for Gmail API access,
+ * including authorization URL generation, code exchange, and token refresh operations.
+ * It implements the standard OAuth2 authorization code flow.
+ *
+ * @see https://developers.google.com/gmail/api/auth/about-auth
+ * @see https://developers.google.com/identity/protocols/oauth2
+ */
 class AuthResource extends BaseResource
 {
     /**
      * Exchange an authorization code for an access token.
      *
-     * @param  string  $code  The authorization code
-     * @param  string|null  $redirectUri  Optional override for the redirect URI
-     * @return array The token response data
+     * This method completes the OAuth2 authorization code flow by exchanging
+     * the authorization code received from the authorization server for an access token.
      *
-     * @throws AuthenticationException
+     * @param  string  $code  The authorization code from OAuth callback
+     * @param  string|null  $redirectUri  Override for redirect URI (must match authorization request)
+     * @return array Token response containing:
+     *               - access_token: string The access token for API requests
+     *               - refresh_token: string Token for refreshing access when expired
+     *               - expires_in: int Token lifetime in seconds
+     *               - token_type: string Usually 'Bearer'
+     *               - scope: string Granted OAuth scopes
+     *
+     * @throws AuthenticationException When code exchange fails or token is invalid
+     *
+     * @see https://developers.google.com/identity/protocols/oauth2/web-server#exchange-authorization-code
      */
     public function exchangeCode(string $code, ?string $redirectUri = null): array
     {
@@ -44,10 +64,20 @@ class AuthResource extends BaseResource
     /**
      * Refresh an access token using a refresh token.
      *
-     * @param  string  $refreshToken  The refresh token
-     * @return array The token response data
+     * When an access token expires, use this method to obtain a new access token
+     * without requiring user re-authorization. The refresh token is long-lived
+     * and can be used multiple times.
      *
-     * @throws AuthenticationException
+     * @param  string  $refreshToken  The refresh token from initial authorization
+     * @return array New token response containing:
+     *               - access_token: string New access token for API requests
+     *               - expires_in: int New token lifetime in seconds
+     *               - token_type: string Usually 'Bearer'
+     *               - scope: string Granted OAuth scopes
+     *
+     * @throws AuthenticationException When refresh fails or refresh token is invalid
+     *
+     * @see https://developers.google.com/identity/protocols/oauth2/web-server#refresh
      */
     public function refreshToken(string $refreshToken): array
     {
@@ -67,14 +97,23 @@ class AuthResource extends BaseResource
     }
 
     /**
-     * Get the authorization URL.
+     * Get the authorization URL for OAuth2 flow.
      *
-     * @param  string|null  $redirectUri  Optional override for the redirect URI
-     * @param  array  $scopes  Optional override for scopes
-     * @param  array  $additionalParams  Additional query parameters
-     * @return string The authorization URL
+     * Generates the URL where users should be redirected to grant permissions.
+     * Users will authenticate with Google and authorize your application to access their Gmail.
      *
-     * @throws \RuntimeException
+     * @param  string|null  $redirectUri  Override for redirect URI (where user returns after auth)
+     * @param  array  $scopes  Override for OAuth scopes (e.g., ['https://www.googleapis.com/auth/gmail.readonly'])
+     * @param  array  $additionalParams  Additional OAuth parameters:
+     *                                   - state: string CSRF protection token
+     *                                   - access_type: string 'offline' for refresh tokens
+     *                                   - prompt: string 'consent' to force consent screen
+     *                                   - login_hint: string Email address hint for user
+     * @return string Complete authorization URL for user redirection
+     *
+     * @throws \RuntimeException When OAuth configuration is invalid
+     *
+     * @see https://developers.google.com/identity/protocols/oauth2/web-server#creatingclient
      */
     public function getAuthorizationUrl(
         ?string $redirectUri = null,

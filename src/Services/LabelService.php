@@ -5,12 +5,13 @@ namespace PartridgeRocks\GmailClient\Services;
 use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Constants\ConfigDefaults;
 use PartridgeRocks\GmailClient\Constants\GmailConstants;
-use PartridgeRocks\GmailClient\Constants\HttpStatus;
 use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
 use PartridgeRocks\GmailClient\Data\Label;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
 use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
 use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
+use PartridgeRocks\GmailClient\Exceptions\ValidationException;
+use PartridgeRocks\GmailClient\Gmail\ExceptionHandling;
 use PartridgeRocks\GmailClient\Gmail\GmailClientHelpers;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
@@ -19,6 +20,7 @@ use PartridgeRocks\GmailClient\Gmail\Resources\LabelResource;
 
 class LabelService implements LabelServiceInterface
 {
+    use ExceptionHandling;
     use GmailClientHelpers;
 
     public function __construct(
@@ -27,6 +29,14 @@ class LabelService implements LabelServiceInterface
 
     /**
      * List labels with various options.
+     *
+     * @param  bool  $paginate  Whether to return a paginator instance
+     * @param  bool  $lazy  Whether to return a lazy collection
+     * @param  int  $maxResults  Maximum number of results per page
+     * @return mixed Collection, Paginator, or LazyCollection based on parameters
+     *
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
      */
     public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): mixed
     {
@@ -72,27 +82,18 @@ class LabelService implements LabelServiceInterface
     /**
      * Get a specific label.
      *
-     * @throws NotFoundException
-     * @throws AuthenticationException
-     * @throws RateLimitException
+     * @param  string  $id  The label ID to retrieve
+     * @return Label The label data
+     *
+     * @throws NotFoundException When the label is not found
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
      */
     public function getLabel(string $id): Label
     {
         $response = $this->getLabelResource()->get($id);
 
-        if ($response->status() === HttpStatus::NOT_FOUND) {
-            throw NotFoundException::label($id);
-        }
-
-        if ($response->status() === HttpStatus::UNAUTHORIZED) {
-            throw AuthenticationException::invalidToken();
-        }
-
-        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
-            $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-            throw RateLimitException::quotaExceeded($retryAfter);
-        }
+        $this->handleApiResponse($response, 'label', $id);
 
         $data = $response->json();
 
@@ -101,6 +102,18 @@ class LabelService implements LabelServiceInterface
 
     /**
      * Create a new label.
+     *
+     * @param  string  $name  The label name
+     * @param  array  $options  Optional settings:
+     *                          - messageListVisibility: string Visibility in message list
+     *                          - labelListVisibility: string Visibility in label list
+     *                          - backgroundColor: string Background color hex code
+     *                          - textColor: string Text color hex code
+     * @return Label The created label data
+     *
+     * @throws ValidationException When label data is invalid
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
      */
     public function createLabel(string $name, array $options = []): Label
     {
@@ -121,19 +134,7 @@ class LabelService implements LabelServiceInterface
 
         $response = $this->getLabelResource()->create($labelData);
 
-        if ($response->status() === HttpStatus::BAD_REQUEST) {
-            throw new \PartridgeRocks\GmailClient\Exceptions\ValidationException('Invalid label data provided');
-        }
-
-        if ($response->status() === HttpStatus::UNAUTHORIZED) {
-            throw AuthenticationException::invalidToken();
-        }
-
-        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
-            $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-            throw RateLimitException::quotaExceeded($retryAfter);
-        }
+        $this->handleApiResponse($response, 'label');
 
         $data = $response->json();
 
@@ -142,28 +143,21 @@ class LabelService implements LabelServiceInterface
 
     /**
      * Update an existing label.
+     *
+     * @param  string  $id  The label ID to update
+     * @param  array  $updates  Array of label properties to update
+     * @return Label The updated label data
+     *
+     * @throws NotFoundException When the label is not found
+     * @throws ValidationException When update data is invalid
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
      */
     public function updateLabel(string $id, array $updates): Label
     {
         $response = $this->getLabelResource()->update($id, $updates);
 
-        if ($response->status() === HttpStatus::NOT_FOUND) {
-            throw NotFoundException::label($id);
-        }
-
-        if ($response->status() === HttpStatus::BAD_REQUEST) {
-            throw new \PartridgeRocks\GmailClient\Exceptions\ValidationException('Invalid label data provided');
-        }
-
-        if ($response->status() === HttpStatus::UNAUTHORIZED) {
-            throw AuthenticationException::invalidToken();
-        }
-
-        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
-            $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-            throw RateLimitException::quotaExceeded($retryAfter);
-        }
+        $this->handleApiResponse($response, 'label', $id);
 
         $data = $response->json();
 
@@ -172,30 +166,30 @@ class LabelService implements LabelServiceInterface
 
     /**
      * Delete a label.
+     *
+     * @param  string  $id  The label ID to delete
+     * @return bool True if deletion was successful
+     *
+     * @throws NotFoundException When the label is not found
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
      */
     public function deleteLabel(string $id): bool
     {
         $response = $this->getLabelResource()->delete($id);
 
-        if ($response->status() === HttpStatus::NOT_FOUND) {
-            throw NotFoundException::label($id);
-        }
-
-        if ($response->status() === HttpStatus::UNAUTHORIZED) {
-            throw AuthenticationException::invalidToken();
-        }
-
-        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
-            $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-            throw RateLimitException::quotaExceeded($retryAfter);
-        }
+        $this->handleApiResponse($response, 'label', $id);
 
         return $response->successful();
     }
 
     /**
      * Safely list labels, returning empty collection on failure.
+     *
+     * @param  bool  $paginate  Whether to return a paginator instance
+     * @param  bool  $lazy  Whether to return a lazy collection
+     * @param  int  $maxResults  Maximum number of results per page
+     * @return mixed Collection, Paginator, or LazyCollection based on parameters
      */
     public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): mixed
     {
@@ -205,23 +199,6 @@ class LabelService implements LabelServiceInterface
             operation: 'list labels',
             context: ['paginate' => $paginate, 'lazy' => $lazy, 'maxResults' => $maxResults]
         );
-    }
-
-    /**
-     * Execute a callable safely with error handling and logging.
-     */
-    private function safeCall(callable $callback, mixed $fallback, string $operation, array $context = []): mixed
-    {
-        try {
-            return $callback();
-        } catch (\Exception $e) {
-            logger()->warning("Gmail operation failed: {$operation} - {$e->getMessage()}", array_merge([
-                'operation' => $operation,
-                'error_type' => get_class($e),
-            ], $context));
-
-            return $fallback;
-        }
     }
 
     /**
@@ -242,8 +219,11 @@ class LabelService implements LabelServiceInterface
 
     /**
      * Parse the Retry-After header value.
+     *
+     * @param  string  $value  The Retry-After header value
+     * @return int Number of seconds to wait before retrying
      */
-    private function parseRetryAfterHeader(string $value): int
+    protected function parseRetryAfterHeader(string $value): int
     {
         if (is_numeric($value)) {
             return (int) $value;

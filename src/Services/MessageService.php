@@ -5,12 +5,13 @@ namespace PartridgeRocks\GmailClient\Services;
 use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Constants\ConfigDefaults;
 use PartridgeRocks\GmailClient\Constants\GmailConstants;
-use PartridgeRocks\GmailClient\Constants\HttpStatus;
 use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
 use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
 use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
+use PartridgeRocks\GmailClient\Exceptions\ValidationException;
+use PartridgeRocks\GmailClient\Gmail\ExceptionHandling;
 use PartridgeRocks\GmailClient\Gmail\GmailClientHelpers;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
@@ -19,6 +20,7 @@ use PartridgeRocks\GmailClient\Gmail\Resources\MessageResource;
 
 class MessageService implements MessageServiceInterface
 {
+    use ExceptionHandling;
     use GmailClientHelpers;
 
     public function __construct(
@@ -27,6 +29,16 @@ class MessageService implements MessageServiceInterface
 
     /**
      * List messages with various options.
+     *
+     * @param  array  $query  Search/filter parameters (e.g., ['q' => 'is:unread'])
+     * @param  bool  $paginate  Whether to return a paginator instance
+     * @param  int  $maxResults  Maximum number of results per page
+     * @param  bool  $lazy  Whether to return a lazy collection
+     * @param  bool  $fullDetails  Whether to fetch full message details
+     * @return mixed Collection, Paginator, or LazyCollection based on parameters
+     *
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
      */
     public function listMessages(
         array $query = [],
@@ -55,6 +67,10 @@ class MessageService implements MessageServiceInterface
 
     /**
      * Create a paginator for messages.
+     *
+     * @param  array  $query  Search/filter parameters
+     * @param  int  $maxResults  Maximum number of results per page
+     * @return GmailPaginator Paginator instance for messages
      */
     public function paginateMessages(array $query = [], int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): GmailPaginator
     {
@@ -69,6 +85,11 @@ class MessageService implements MessageServiceInterface
     /**
      * Create a lazy-loading collection for messages.
      * Note: Lazy loading should be handled by GmailClient directly.
+     *
+     * @param  array  $query  Search/filter parameters
+     * @param  int  $maxResults  Maximum number of results per page
+     * @param  bool  $fullDetails  Whether to fetch full message details
+     * @return \Illuminate\Support\LazyCollection Empty lazy collection (implementation placeholder)
      */
     public function lazyLoadMessages(array $query = [], int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS, bool $fullDetails = true): \Illuminate\Support\LazyCollection
     {
@@ -79,27 +100,19 @@ class MessageService implements MessageServiceInterface
     /**
      * Get a specific message.
      *
-     * @throws NotFoundException
-     * @throws AuthenticationException
-     * @throws RateLimitException
+     * @param  string  $id  The message ID to retrieve
+     * @return Email The message data
+     *
+     * @throws NotFoundException When the message is not found
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
+     * @throws ValidationException When the request is malformed
      */
     public function getMessage(string $id): Email
     {
         $response = $this->getMessageResource()->get($id, ['format' => 'full']);
 
-        if ($response->status() === HttpStatus::NOT_FOUND) {
-            throw NotFoundException::message($id);
-        }
-
-        if ($response->status() === HttpStatus::UNAUTHORIZED) {
-            throw AuthenticationException::invalidToken();
-        }
-
-        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
-            $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-            throw RateLimitException::quotaExceeded($retryAfter);
-        }
+        $this->handleApiResponse($response, 'message', $id);
 
         $data = $response->json();
 
@@ -107,7 +120,22 @@ class MessageService implements MessageServiceInterface
     }
 
     /**
-     * Send an email.
+     * Send an email message.
+     *
+     * @param  string  $to  Recipient email address
+     * @param  string  $subject  Email subject line
+     * @param  string  $body  Email body content
+     * @param  array  $options  Optional settings:
+     *                          - from: string Sender email (default: config value)
+     *                          - from_name: string Sender display name
+     *                          - cc: array CC recipients
+     *                          - bcc: array BCC recipients
+     *                          - html: bool Whether body is HTML (default: false)
+     * @return Email The sent message data
+     *
+     * @throws ValidationException When email addresses or required fields are invalid
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
      */
     public function sendEmail(string $to, string $subject, string $body, array $options = []): Email
     {
@@ -125,19 +153,7 @@ class MessageService implements MessageServiceInterface
 
         $response = $this->getMessageResource()->send(['raw' => $this->base64UrlEncode($rawMessage)]);
 
-        if ($response->status() === HttpStatus::BAD_REQUEST) {
-            throw new \PartridgeRocks\GmailClient\Exceptions\ValidationException('Invalid email data provided');
-        }
-
-        if ($response->status() === HttpStatus::UNAUTHORIZED) {
-            throw AuthenticationException::invalidToken();
-        }
-
-        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
-            $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-            throw RateLimitException::quotaExceeded($retryAfter);
-        }
+        $this->handleApiResponse($response, 'message');
 
         $data = $response->json();
 
@@ -146,6 +162,15 @@ class MessageService implements MessageServiceInterface
 
     /**
      * Add labels to a message.
+     *
+     * @param  string  $messageId  The message ID to modify
+     * @param  array  $labelIds  Array of label IDs to add
+     * @return Email The updated message data
+     *
+     * @throws NotFoundException When the message is not found
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
+     * @throws ValidationException When label IDs are invalid
      */
     public function addLabelsToMessage(string $messageId, array $labelIds): Email
     {
@@ -154,6 +179,15 @@ class MessageService implements MessageServiceInterface
 
     /**
      * Remove labels from a message.
+     *
+     * @param  string  $messageId  The message ID to modify
+     * @param  array  $labelIds  Array of label IDs to remove
+     * @return Email The updated message data
+     *
+     * @throws NotFoundException When the message is not found
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
+     * @throws ValidationException When label IDs are invalid
      */
     public function removeLabelsFromMessage(string $messageId, array $labelIds): Email
     {
@@ -162,18 +196,22 @@ class MessageService implements MessageServiceInterface
 
     /**
      * Modify message labels (add and/or remove).
+     *
+     * @param  string  $messageId  The message ID to modify
+     * @param  array  $addLabelIds  Array of label IDs to add to the message
+     * @param  array  $removeLabelIds  Array of label IDs to remove from the message
+     * @return Email The updated message data
+     *
+     * @throws NotFoundException When the message is not found
+     * @throws AuthenticationException When authentication fails or token is invalid
+     * @throws RateLimitException When API rate limit is exceeded
+     * @throws ValidationException When label IDs are invalid
      */
     public function modifyMessageLabels(string $messageId, array $addLabelIds = [], array $removeLabelIds = []): Email
     {
         $response = $this->getMessageResource()->modifyLabels($messageId, $addLabelIds, $removeLabelIds);
 
-        if ($response->status() === HttpStatus::NOT_FOUND) {
-            throw NotFoundException::message($messageId);
-        }
-
-        if ($response->status() === HttpStatus::UNAUTHORIZED) {
-            throw AuthenticationException::invalidToken();
-        }
+        $this->handleApiResponse($response, 'message', $messageId);
 
         $data = $response->json();
 
@@ -182,27 +220,29 @@ class MessageService implements MessageServiceInterface
 
     /**
      * Safely get a message, returning null on failure.
+     *
+     * @param  string  $id  The message ID to retrieve
+     * @return Email|null The message data or null if not found/error
      */
     public function safeGetMessage(string $id): ?Email
     {
-        try {
-            return $this->getMessage($id);
-        } catch (NotFoundException $e) {
-            // Message not found is expected in some cases - don't log as warning
-            return null;
-        } catch (\Exception $e) {
-            logger()->warning("Gmail operation failed: get message - {$e->getMessage()}", [
-                'operation' => 'get message',
-                'error_type' => get_class($e),
-                'message_id' => $id,
-            ]);
-
-            return null;
-        }
+        return $this->safeCall(
+            callback: fn () => $this->getMessage($id),
+            fallback: null,
+            operation: 'get message',
+            context: ['message_id' => $id]
+        );
     }
 
     /**
      * Safely list messages, returning empty collection on failure.
+     *
+     * @param  array  $query  Search/filter parameters
+     * @param  bool  $paginate  Whether to return a paginator instance
+     * @param  int  $maxResults  Maximum number of results per page
+     * @param  bool  $lazy  Whether to return a lazy collection
+     * @param  bool  $fullDetails  Whether to fetch full message details
+     * @return mixed Collection, Paginator, or LazyCollection based on parameters
      */
     public function safeListMessages(
         array $query = [],
@@ -217,23 +257,6 @@ class MessageService implements MessageServiceInterface
             operation: 'list messages',
             context: ['query' => $query, 'paginate' => $paginate, 'lazy' => $lazy, 'maxResults' => $maxResults]
         );
-    }
-
-    /**
-     * Execute a callable safely with error handling and logging.
-     */
-    private function safeCall(callable $callback, mixed $fallback, string $operation, array $context = []): mixed
-    {
-        try {
-            return $callback();
-        } catch (\Exception $e) {
-            logger()->warning("Gmail operation failed: {$operation} - {$e->getMessage()}", array_merge([
-                'operation' => $operation,
-                'error_type' => get_class($e),
-            ], $context));
-
-            return $fallback;
-        }
     }
 
     /**
