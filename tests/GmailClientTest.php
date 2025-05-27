@@ -4,6 +4,7 @@ use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Data\Label;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
+use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
 use PartridgeRocks\GmailClient\Exceptions\ValidationException;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\GmailClient;
@@ -121,6 +122,72 @@ it('can create a label', function () {
     expect($label)
         ->toBeInstanceOf(Label::class)
         ->and($label->name)->toBe('Test Label');
+});
+
+it('can update a label', function () {
+    $updatedLabelJson = json_decode(file_get_contents(__DIR__.'/fixtures/label.json'), true);
+    $updatedLabelJson['name'] = 'Updated Label Name';
+    $updatedLabelJson['color']['backgroundColor'] = '#ff0000';
+
+    $mockClient = new MockClient([
+        '*labels/Label_123*' => MockResponse::make($updatedLabelJson, 200),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $this->client->authenticate('test-token');
+    $label = $this->client->updateLabel('Label_123', [
+        'name' => 'Updated Label Name',
+        'color' => ['backgroundColor' => '#ff0000'],
+    ]);
+
+    expect($label)
+        ->toBeInstanceOf(Label::class)
+        ->and($label->name)->toBe('Updated Label Name')
+        ->and($label->id)->toBe('Label_123');
+});
+
+it('can delete a label', function () {
+    $mockClient = new MockClient([
+        '*labels/Label_123*' => MockResponse::make('', 204),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $this->client->authenticate('test-token');
+    $result = $this->client->deleteLabel('Label_123');
+
+    expect($result)->toBe(true);
+});
+
+it('deleteLabel throws NotFoundException when label not found', function () {
+    $mockClient = new MockClient([
+        '*labels/nonexistent*' => MockResponse::make([
+            'error' => ['code' => 404, 'message' => 'Label not found'],
+        ], 404),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $this->client->authenticate('test-token');
+
+    expect(fn () => $this->client->deleteLabel('nonexistent'))
+        ->toThrow(NotFoundException::class);
+});
+
+it('updateLabel throws NotFoundException when label not found', function () {
+    $mockClient = new MockClient([
+        '*labels/nonexistent*' => MockResponse::make([
+            'error' => ['code' => 404, 'message' => 'Label not found'],
+        ], 404),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $this->client->authenticate('test-token');
+
+    expect(fn () => $this->client->updateLabel('nonexistent', ['name' => 'New Name']))
+        ->toThrow(NotFoundException::class);
 });
 
 it('can generate an authorization URL', function () {

@@ -2,30 +2,29 @@
 
 namespace PartridgeRocks\GmailClient;
 
-use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Data\Label;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
-use PartridgeRocks\GmailClient\Exceptions\GmailClientException;
-use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
 use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
 use PartridgeRocks\GmailClient\Exceptions\ValidationException;
 use PartridgeRocks\GmailClient\Gmail\GmailClientHelpers;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
-use PartridgeRocks\GmailClient\Gmail\GmailOAuthAuthenticator;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
-use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
-use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
-use PartridgeRocks\GmailClient\Gmail\Resources\AuthResource;
 use PartridgeRocks\GmailClient\Gmail\Resources\LabelResource;
 use PartridgeRocks\GmailClient\Gmail\Resources\MessageResource;
+use PartridgeRocks\GmailClient\Services\AuthService;
+use PartridgeRocks\GmailClient\Services\LabelService;
+use PartridgeRocks\GmailClient\Services\MessageService;
 
 class GmailClient
 {
     use GmailClientHelpers;
 
     protected GmailConnector $connector;
+    protected AuthService $authService;
+    protected LabelService $labelService;
+    protected MessageService $messageService;
 
     /**
      * Create a new GmailClient instance.
@@ -35,6 +34,9 @@ class GmailClient
     public function __construct(?string $accessToken = null)
     {
         $this->connector = new GmailConnector;
+        $this->authService = new AuthService($this->connector);
+        $this->labelService = new LabelService($this->connector);
+        $this->messageService = new MessageService($this->connector);
 
         if ($accessToken) {
             $this->authenticate($accessToken);
@@ -61,22 +63,9 @@ class GmailClient
         ?string $refreshToken = null,
         ?\DateTimeInterface $expiresAt = null
     ): self {
-        if (empty($accessToken)) {
-            throw AuthenticationException::missingToken();
-        }
-
-        $authenticator = new GmailOAuthAuthenticator($accessToken, $refreshToken, 'Bearer', $expiresAt);
-        $this->connector->authenticate($authenticator);
+        $this->authService->authenticate($accessToken, $refreshToken, $expiresAt);
 
         return $this;
-    }
-
-    /**
-     * Get the authentication resource.
-     */
-    protected function auth(): AuthResource
-    {
-        return new AuthResource($this->connector);
     }
 
     /**
@@ -87,7 +76,7 @@ class GmailClient
         array $scopes = [],
         array $additionalParams = []
     ): string {
-        return $this->auth()->getAuthorizationUrl($redirectUri, $scopes, $additionalParams);
+        return $this->authService->getAuthorizationUrl($redirectUri, $scopes, $additionalParams);
     }
 
     /**
@@ -95,35 +84,7 @@ class GmailClient
      */
     public function exchangeCode(string $code, string $redirectUri): array
     {
-        $response = $this->auth()->exchangeCode($code, $redirectUri);
-        $data = $response->json();
-
-        // Check for error in response
-        if (isset($data['error'])) {
-            $errorMessage = $data['error_description'] ?? $data['error'];
-
-            throw new AuthenticationException("OAuth error: {$errorMessage}");
-        }
-
-        // Verify required keys exist
-        if (! isset($data['access_token'])) {
-            throw new AuthenticationException('Invalid OAuth response: missing access_token');
-        }
-
-        // Set the current token
-        $expiresAt = null;
-        if (isset($data['expires_in'])) {
-            $expiresAt = new DateTimeImmutable;
-            $expiresAt = $expiresAt->modify("+{$data['expires_in']} seconds");
-        }
-
-        $this->authenticate(
-            $data['access_token'],
-            $data['refresh_token'] ?? null,
-            $expiresAt
-        );
-
-        return $data;
+        return $this->authService->exchangeCode($code, $redirectUri);
     }
 
     /**
@@ -131,35 +92,7 @@ class GmailClient
      */
     public function refreshToken(string $refreshToken): array
     {
-        $response = $this->auth()->refreshToken($refreshToken);
-        $data = $response->json();
-
-        // Check for error in response
-        if (isset($data['error'])) {
-            $errorMessage = $data['error_description'] ?? $data['error'];
-
-            throw new AuthenticationException("OAuth error: {$errorMessage}");
-        }
-
-        // Verify required keys exist
-        if (! isset($data['access_token'])) {
-            throw new AuthenticationException('Invalid OAuth response: missing access_token');
-        }
-
-        // Set the current token
-        $expiresAt = null;
-        if (isset($data['expires_in'])) {
-            $expiresAt = new DateTimeImmutable;
-            $expiresAt = $expiresAt->modify("+{$data['expires_in']} seconds");
-        }
-
-        $this->authenticate(
-            $data['access_token'],
-            $data['refresh_token'] ?? $refreshToken,
-            $expiresAt
-        );
-
-        return $data;
+        return $this->authService->refreshToken($refreshToken);
     }
 
     /**
@@ -199,18 +132,7 @@ class GmailClient
             return $this->lazyLoadMessages($query, $maxResults, $fullDetails);
         }
 
-        if ($paginate) {
-            return $this->paginateMessages($query, $maxResults);
-        }
-
-        $response = $this->messages()->list($query);
-        $data = $response->json();
-
-        $messages = collect($data['messages'] ?? []);
-
-        return $messages->map(function ($message) {
-            return $this->getMessage($message['id']);
-        });
+        return $this->messageService->listMessages($query, $paginate, $maxResults, false, $fullDetails);
     }
 
     /**
@@ -221,14 +143,7 @@ class GmailClient
      */
     public function paginateMessages(array $query = [], int $maxResults = 100): GmailPaginator
     {
-        $paginator = new GmailPaginator(
-            $this->connector,
-            ListMessagesRequest::class,
-            'messages',
-            $maxResults
-        );
-
-        return $paginator;
+        return $this->messageService->paginateMessages($query, $maxResults);
     }
 
     /**
@@ -263,49 +178,7 @@ class GmailClient
      */
     public function getMessage(string $id): Email
     {
-        try {
-            $response = $this->messages()->get($id, ['format' => 'full']);
-
-            if ($response->status() === 404) {
-                throw NotFoundException::message($id);
-            }
-
-            if ($response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            $data = $response->json();
-
-            return Email::fromApiResponse($data);
-        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
-            $response = $e->getResponse();
-
-            if ($response && $response->status() === 404) {
-                throw NotFoundException::message($id);
-            }
-
-            if ($response && $response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response && $response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            throw new GmailClientException(
-                "Error retrieving message with ID '{$id}': ".$e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
+        return $this->messageService->getMessage($id);
     }
 
     /**
@@ -318,55 +191,7 @@ class GmailClient
      */
     public function sendEmail(string $to, string $subject, string $body, array $options = []): Email
     {
-        // Validate email address
-        if (! filter_var($to, FILTER_VALIDATE_EMAIL)) {
-            throw ValidationException::invalidEmailAddress($to);
-        }
-
-        // Validate required fields
-        if (empty($subject)) {
-            throw ValidationException::missingRequiredField('subject');
-        }
-
-        try {
-            $message = $this->createEmailRaw($to, $subject, $body, $options);
-
-            $response = $this->messages()->send([
-                'raw' => $message,
-            ]);
-
-            if ($response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            $data = $response->json();
-
-            return $this->getMessage($data['id']);
-        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
-            $response = $e->getResponse();
-
-            if ($response && $response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response && $response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            throw new GmailClientException(
-                'Error sending email: '.$e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
+        return $this->messageService->sendEmail($to, $subject, $body, $options);
     }
 
     /**
@@ -421,20 +246,11 @@ class GmailClient
      */
     public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
     {
-        if ($paginate) {
-            return $this->paginateLabels($maxResults);
-        }
-
         if ($lazy) {
             return $this->lazyLoadLabels();
         }
 
-        $response = $this->labels()->list();
-        $data = $response->json();
-
-        return collect($data['labels'] ?? [])->map(function ($label) {
-            return Label::fromApiResponse($label);
-        });
+        return $this->labelService->listLabels($paginate, false, $maxResults);
     }
 
     /**
@@ -444,14 +260,7 @@ class GmailClient
      */
     public function paginateLabels(int $maxResults = 100): GmailPaginator
     {
-        $paginator = new GmailPaginator(
-            $this->connector,
-            ListLabelsRequest::class,
-            'labels',
-            $maxResults
-        );
-
-        return $paginator;
+        return $this->labelService->paginateLabels($maxResults);
     }
 
     /**
@@ -459,10 +268,7 @@ class GmailClient
      */
     public function getLabel(string $id): Label
     {
-        $response = $this->labels()->get($id);
-        $data = $response->json();
-
-        return Label::fromApiResponse($data);
+        return $this->labelService->getLabel($id);
     }
 
     /**
@@ -470,14 +276,23 @@ class GmailClient
      */
     public function createLabel(string $name, array $options = []): Label
     {
-        $response = $this->labels()->create([
-            'name' => $name,
-            ...$options,
-        ]);
+        return $this->labelService->createLabel($name, $options);
+    }
 
-        $data = $response->json();
+    /**
+     * Update an existing label.
+     */
+    public function updateLabel(string $id, array $updates): Label
+    {
+        return $this->labelService->updateLabel($id, $updates);
+    }
 
-        return Label::fromApiResponse($data);
+    /**
+     * Delete a label.
+     */
+    public function deleteLabel(string $id): bool
+    {
+        return $this->labelService->deleteLabel($id);
     }
 
     /**
@@ -493,49 +308,7 @@ class GmailClient
      */
     public function addLabelsToMessage(string $messageId, array $labelIds): Email
     {
-        try {
-            $response = $this->messages()->addLabels($messageId, $labelIds);
-
-            if ($response->status() === 404) {
-                throw NotFoundException::message($messageId);
-            }
-
-            if ($response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            $data = $response->json();
-
-            return Email::fromApiResponse($data);
-        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
-            $response = $e->getResponse();
-
-            if ($response && $response->status() === 404) {
-                throw NotFoundException::message($messageId);
-            }
-
-            if ($response && $response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response && $response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            throw new GmailClientException(
-                "Error adding labels to message with ID '{$messageId}': ".$e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
+        return $this->messageService->addLabelsToMessage($messageId, $labelIds);
     }
 
     /**
@@ -551,49 +324,7 @@ class GmailClient
      */
     public function removeLabelsFromMessage(string $messageId, array $labelIds): Email
     {
-        try {
-            $response = $this->messages()->removeLabels($messageId, $labelIds);
-
-            if ($response->status() === 404) {
-                throw NotFoundException::message($messageId);
-            }
-
-            if ($response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            $data = $response->json();
-
-            return Email::fromApiResponse($data);
-        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
-            $response = $e->getResponse();
-
-            if ($response && $response->status() === 404) {
-                throw NotFoundException::message($messageId);
-            }
-
-            if ($response && $response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response && $response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            throw new GmailClientException(
-                "Error removing labels from message with ID '{$messageId}': ".$e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
+        return $this->messageService->removeLabelsFromMessage($messageId, $labelIds);
     }
 
     /**
@@ -610,49 +341,7 @@ class GmailClient
      */
     public function modifyMessageLabels(string $messageId, array $addLabelIds = [], array $removeLabelIds = []): Email
     {
-        try {
-            $response = $this->messages()->modifyLabels($messageId, $addLabelIds, $removeLabelIds);
-
-            if ($response->status() === 404) {
-                throw NotFoundException::message($messageId);
-            }
-
-            if ($response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            $data = $response->json();
-
-            return Email::fromApiResponse($data);
-        } catch (\Saloon\Exceptions\Request\FatalRequestException $e) {
-            $response = $e->getResponse();
-
-            if ($response && $response->status() === 404) {
-                throw NotFoundException::message($messageId);
-            }
-
-            if ($response && $response->status() === 401) {
-                throw AuthenticationException::invalidToken();
-            }
-
-            if ($response && $response->status() === 429) {
-                $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
-
-                throw RateLimitException::quotaExceeded($retryAfter);
-            }
-
-            throw new GmailClientException(
-                "Error modifying labels on message with ID '{$messageId}': ".$e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
+        return $this->messageService->modifyMessageLabels($messageId, $addLabelIds, $removeLabelIds);
     }
 
     /**
@@ -881,59 +570,33 @@ class GmailClient
     }
 
     /**
-     * Execute a callable safely with error handling and logging.
-     *
-     * @param  callable  $callback  The operation to execute safely
-     * @param  mixed  $fallback  The fallback value to return on error
-     * @param  string  $operation  Description of the operation for logging
-     * @param  array  $context  Additional context for logging
-     */
-    private function safeCall(callable $callback, mixed $fallback, string $operation, array $context = []): mixed
-    {
-        try {
-            return $callback();
-        } catch (\Exception $e) {
-            logger()->warning("Gmail operation failed: {$operation} - {$e->getMessage()}", array_merge([
-                'operation' => $operation,
-                'error_type' => get_class($e),
-            ], $context));
-
-            return $fallback;
-        }
-    }
-
-    /**
      * Safely attempt to list labels, returning empty collection on failure.
      *
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  int  $maxResults  Maximum number of results per page
-     * @return \Illuminate\Support\Collection|GmailPaginator|Gmail\Pagination\GmailLazyCollection
+     * @return \Illuminate\Support\Collection|GmailPaginator|Gmail\Pagination\GmailLazyCollection|\Illuminate\Support\LazyCollection
      */
     public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
     {
-        return $this->safeCall(
-            callback: fn () => $this->listLabels($paginate, $lazy, $maxResults),
-            fallback: $this->getEmptyLabelsStructure($paginate, $lazy, $maxResults),
-            operation: 'list labels',
-            context: ['paginate' => $paginate, 'lazy' => $lazy, 'maxResults' => $maxResults]
-        );
-    }
-
-    /**
-     * Get appropriate empty structure for labels based on requested format.
-     */
-    private function getEmptyLabelsStructure(bool $paginate, bool $lazy, int $maxResults): mixed
-    {
-        if ($paginate) {
-            return $this->paginateLabels($maxResults);
-        }
-
         if ($lazy) {
-            return $this->lazyLoadLabels();
+            try {
+                return $this->lazyLoadLabels();
+            } catch (\Exception $e) {
+                logger()->warning("Gmail operation failed: list labels (lazy) - {$e->getMessage()}", [
+                    'operation' => 'list labels',
+                    'error_type' => get_class($e),
+                    'lazy' => true,
+                ]);
+
+                // Return empty GmailLazyCollection for consistency
+                return new Gmail\Pagination\GmailLazyCollection(function () {
+                    return collect();
+                });
+            }
         }
 
-        return collect();
+        return $this->labelService->safeListLabels($paginate, false, $maxResults);
     }
 
     /**
@@ -953,28 +616,25 @@ class GmailClient
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed {
-        return $this->safeCall(
-            callback: fn () => $this->listMessages($query, $paginate, $maxResults, $lazy, $fullDetails),
-            fallback: $this->getEmptyMessagesStructure($query, $paginate, $lazy, $maxResults),
-            operation: 'list messages',
-            context: ['query' => $query, 'paginate' => $paginate, 'lazy' => $lazy, 'maxResults' => $maxResults]
-        );
-    }
-
-    /**
-     * Get appropriate empty structure for messages based on requested format.
-     */
-    private function getEmptyMessagesStructure(array $query, bool $paginate, bool $lazy, int $maxResults): mixed
-    {
         if ($lazy) {
-            return collect()->lazy();
+            try {
+                return $this->lazyLoadMessages($query, $maxResults, $fullDetails);
+            } catch (\Exception $e) {
+                logger()->warning("Gmail operation failed: list messages (lazy) - {$e->getMessage()}", [
+                    'operation' => 'list messages',
+                    'error_type' => get_class($e),
+                    'query' => $query,
+                    'lazy' => true,
+                ]);
+
+                // Return empty GmailLazyCollection for consistency
+                return new Gmail\Pagination\GmailLazyCollection(function () {
+                    return collect();
+                });
+            }
         }
 
-        if ($paginate) {
-            return $this->paginateMessages($query, $maxResults);
-        }
-
-        return collect();
+        return $this->messageService->safeListMessages($query, $paginate, $maxResults, false, $fullDetails);
     }
 
     /**
@@ -984,20 +644,7 @@ class GmailClient
      */
     public function safeGetMessage(string $id): ?Email
     {
-        try {
-            return $this->getMessage($id);
-        } catch (NotFoundException $e) {
-            // Message not found is expected in some cases - don't log as warning
-            return null;
-        } catch (\Exception $e) {
-            logger()->warning("Gmail operation failed: get message - {$e->getMessage()}", [
-                'operation' => 'get message',
-                'error_type' => get_class($e),
-                'message_id' => $id,
-            ]);
-
-            return null;
-        }
+        return $this->messageService->safeGetMessage($id);
     }
 
     /**

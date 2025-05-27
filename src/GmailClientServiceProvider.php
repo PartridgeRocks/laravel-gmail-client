@@ -3,6 +3,10 @@
 namespace PartridgeRocks\GmailClient;
 
 use PartridgeRocks\GmailClient\Commands\GmailClientCommand;
+use PartridgeRocks\GmailClient\Gmail\GmailConnector;
+use PartridgeRocks\GmailClient\Services\AuthService;
+use PartridgeRocks\GmailClient\Services\LabelService;
+use PartridgeRocks\GmailClient\Services\MessageService;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -33,6 +37,25 @@ class GmailClientServiceProvider extends PackageServiceProvider
      */
     public function packageRegistered(): void
     {
+        // Register core Gmail connector
+        $this->app->singleton(GmailConnector::class, function ($app) {
+            return new GmailConnector;
+        });
+
+        // Register individual services
+        $this->app->singleton(AuthService::class, function ($app) {
+            return new AuthService($app->make(GmailConnector::class));
+        });
+
+        $this->app->singleton(LabelService::class, function ($app) {
+            return new LabelService($app->make(GmailConnector::class));
+        });
+
+        $this->app->singleton(MessageService::class, function ($app) {
+            return new MessageService($app->make(GmailConnector::class));
+        });
+
+        // Register main Gmail client
         $this->app->singleton(GmailClient::class, function ($app) {
             $client = new GmailClient;
 
