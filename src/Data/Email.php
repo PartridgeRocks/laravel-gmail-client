@@ -26,6 +26,10 @@ class Email extends Data
      * @param  array|null  $to  Optional list of recipient addresses.
      * @param  array|null  $cc  Optional list of CC recipient addresses.
      * @param  array|null  $bcc  Optional list of BCC recipient addresses.
+     * @param  Contact|null  $fromContact  Optional parsed sender contact.
+     * @param  array<Contact>|null  $toContacts  Optional list of parsed recipient contacts.
+     * @param  array<Contact>|null  $ccContacts  Optional list of parsed CC contacts.
+     * @param  array<Contact>|null  $bccContacts  Optional list of parsed BCC contacts.
      */
     public function __construct(
         public string $id,
@@ -42,7 +46,11 @@ class Email extends Data
         public ?string $from = null,
         public ?array $to = null,
         public ?array $cc = null,
-        public ?array $bcc = null
+        public ?array $bcc = null,
+        public ?Contact $fromContact = null,
+        public ?array $toContacts = null,
+        public ?array $ccContacts = null,
+        public ?array $bccContacts = null
     ) {}
 
     /**
@@ -76,13 +84,13 @@ class Email extends Data
                         $from = $header['value'];
                         break;
                     case 'To':
-                        $to = explode(',', $header['value']);
+                        $to = array_map('trim', explode(',', $header['value']));
                         break;
                     case 'Cc':
-                        $cc = explode(',', $header['value']);
+                        $cc = array_map('trim', explode(',', $header['value']));
                         break;
                     case 'Bcc':
-                        $bcc = explode(',', $header['value']);
+                        $bcc = array_map('trim', explode(',', $header['value']));
                         break;
                 }
             }
@@ -100,6 +108,12 @@ class Email extends Data
             }
         }
 
+        // Parse contacts from the string data
+        $fromContact = $from ? Contact::parse($from) : null;
+        $toContacts = $to ? Contact::parseMultiple(implode(', ', $to)) : null;
+        $ccContacts = $cc ? Contact::parseMultiple(implode(', ', $cc)) : null;
+        $bccContacts = $bcc ? Contact::parseMultiple(implode(', ', $bcc)) : null;
+
         return new self(
             id: $data['id'],
             threadId: $data['threadId'],
@@ -114,7 +128,99 @@ class Email extends Data
             from: $from,
             to: $to,
             cc: $cc,
-            bcc: $bcc
+            bcc: $bcc,
+            fromContact: $fromContact,
+            toContacts: $toContacts,
+            ccContacts: $ccContacts,
+            bccContacts: $bccContacts
+        );
+    }
+
+    /**
+     * Get all recipients (to, cc, bcc) as Contact objects.
+     *
+     * @return array<Contact>
+     */
+    public function getAllRecipients(): array
+    {
+        $recipients = [];
+
+        if ($this->toContacts) {
+            $recipients = array_merge($recipients, $this->toContacts);
+        }
+
+        if ($this->ccContacts) {
+            $recipients = array_merge($recipients, $this->ccContacts);
+        }
+
+        if ($this->bccContacts) {
+            $recipients = array_merge($recipients, $this->bccContacts);
+        }
+
+        return $recipients;
+    }
+
+    /**
+     * Get all contacts involved in this email (sender + all recipients).
+     *
+     * @return array<Contact>
+     */
+    public function getAllContacts(): array
+    {
+        $contacts = $this->getAllRecipients();
+
+        if ($this->fromContact) {
+            array_unshift($contacts, $this->fromContact);
+        }
+
+        return $contacts;
+    }
+
+    /**
+     * Get unique email domains from all contacts.
+     *
+     * @return array<string>
+     */
+    public function getContactDomains(): array
+    {
+        $domains = [];
+
+        foreach ($this->getAllContacts() as $contact) {
+            if ($contact->domain) {
+                $domains[] = $contact->domain;
+            }
+        }
+
+        return array_unique($domains);
+    }
+
+    /**
+     * Check if any contact belongs to a specific domain.
+     *
+     * @param  string  $domain  The domain to check
+     */
+    public function hasContactFromDomain(string $domain): bool
+    {
+        foreach ($this->getAllContacts() as $contact) {
+            if ($contact->isFromDomain($domain)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get contacts that belong to a specific domain.
+     *
+     * @param  string  $domain  The domain to filter by
+     * @return array<Contact>
+     */
+    public function getContactsFromDomain(string $domain): array
+    {
+        return array_filter(
+            $this->getAllContacts(),
+            fn (Contact $contact) => $contact->isFromDomain($domain)
         );
     }
 }
