@@ -591,7 +591,7 @@ class GmailClient
 
                 // Return empty GmailLazyCollection for consistency
                 return new Gmail\Pagination\GmailLazyCollection(function () {
-                    return collect();
+                    yield from [];
                 });
             }
         }
@@ -629,7 +629,7 @@ class GmailClient
 
                 // Return empty GmailLazyCollection for consistency
                 return new Gmail\Pagination\GmailLazyCollection(function () {
-                    return collect();
+                    yield from [];
                 });
             }
         }

@@ -49,6 +49,7 @@ class AuthService
     public function exchangeCode(string $code, string $redirectUri): array
     {
         $response = $this->getAuthResource()->exchangeCode($code, $redirectUri);
+        /** @var array $data */
         $data = $response->json();
 
         // Auto-authenticate with the new token
@@ -73,6 +74,7 @@ class AuthService
     public function refreshToken(string $refreshToken): array
     {
         $response = $this->getAuthResource()->refreshToken($refreshToken);
+        /** @var array $data */
         $data = $response->json();
 
         // Auto-authenticate with the new token

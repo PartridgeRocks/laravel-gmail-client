@@ -30,7 +30,7 @@ class MessageService
     public function listMessages(
         array $query = [],
         bool $paginate = false,
-        int $maxResults = 100,
+        int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS,
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed {
@@ -55,7 +55,7 @@ class MessageService
     /**
      * Create a paginator for messages.
      */
-    public function paginateMessages(array $query = [], int $maxResults = 100): GmailPaginator
+    public function paginateMessages(array $query = [], int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): GmailPaginator
     {
         return new GmailPaginator(
             $this->connector,
@@ -69,7 +69,7 @@ class MessageService
      * Create a lazy-loading collection for messages.
      * Note: Lazy loading should be handled by GmailClient directly.
      */
-    public function lazyLoadMessages(array $query = [], int $maxResults = 100, bool $fullDetails = true): \Illuminate\Support\LazyCollection
+    public function lazyLoadMessages(array $query = [], int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS, bool $fullDetails = true): \Illuminate\Support\LazyCollection
     {
         // Return empty lazy collection since lazy loading requires GmailClient instance
         return collect()->lazy();
@@ -124,15 +124,15 @@ class MessageService
 
         $response = $this->getMessageResource()->send(['raw' => $this->base64UrlEncode($rawMessage)]);
 
-        if ($response->status() === 400) {
+        if ($response->status() === HttpStatus::BAD_REQUEST) {
             throw new \PartridgeRocks\GmailClient\Exceptions\ValidationException('Invalid email data provided');
         }
 
-        if ($response->status() === 401) {
+        if ($response->status() === HttpStatus::UNAUTHORIZED) {
             throw AuthenticationException::invalidToken();
         }
 
-        if ($response->status() === 429) {
+        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
             $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
             throw RateLimitException::quotaExceeded($retryAfter);
@@ -166,11 +166,11 @@ class MessageService
     {
         $response = $this->getMessageResource()->modifyLabels($messageId, $addLabelIds, $removeLabelIds);
 
-        if ($response->status() === 404) {
+        if ($response->status() === HttpStatus::NOT_FOUND) {
             throw NotFoundException::message($messageId);
         }
 
-        if ($response->status() === 401) {
+        if ($response->status() === HttpStatus::UNAUTHORIZED) {
             throw AuthenticationException::invalidToken();
         }
 
@@ -206,7 +206,7 @@ class MessageService
     public function safeListMessages(
         array $query = [],
         bool $paginate = false,
-        int $maxResults = 100,
+        int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS,
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed {
@@ -309,7 +309,7 @@ class MessageService
             return max(0, $timestamp - time());
         }
 
-        return 60; // Default to 60 seconds
+        return ConfigDefaults::DEFAULT_RETRY_AFTER_SECONDS;
     }
 
     /**
