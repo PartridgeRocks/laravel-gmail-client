@@ -18,6 +18,7 @@ A Laravel package that integrates with the Gmail API to seamlessly manage emails
 - [Usage](#-usage)
   - [Authentication](#authentication)
   - [Working with Emails](#working-with-emails)
+  - [Contact Parsing & CRM Integration](#contact-parsing--crm-integration)
   - [Working with Labels](#working-with-labels)
   - [Using Without Facade](#using-without-facade)
   - [Integration with User Model](#integration-with-your-user-model)
@@ -44,6 +45,7 @@ A Laravel package that integrates with the Gmail API to seamlessly manage emails
   - Read emails and threads with full content and attachments
   - Send emails with HTML content
   - Support for CC, BCC, and custom sender addresses
+  - Automatic contact parsing for CRM integration
 - **Label Management**:
   - List, create, update, and delete email labels
   - Organize emails with custom label hierarchies
@@ -344,6 +346,103 @@ if ($health['status'] === 'rate_limited') {
     // Handle rate limiting gracefully
     $retryAfter = $health['retry_after'] ?? 60;
 }
+```
+
+### Contact Parsing & CRM Integration
+
+The package automatically parses email addresses and names from Gmail messages, making it easy to integrate with CRM systems:
+
+```php
+// Get an email message
+$email = GmailClient::getMessage('message-id');
+
+// Access parsed contact information
+$sender = $email->fromContact;
+echo "Sender: {$sender->name} <{$sender->email}>\n";
+echo "Domain: {$sender->domain}\n";
+
+// Access recipient contacts
+foreach ($email->toContacts as $contact) {
+    echo "To: {$contact->getDisplayName()} - {$contact->email}\n";
+}
+
+// Get all contacts involved in the email
+$allContacts = $email->getAllContacts();
+
+// Find contacts from specific domain (useful for CRM)
+$externalContacts = array_filter(
+    $allContacts,
+    fn($contact) => !$contact->isFromDomain('mycompany.com')
+);
+
+// Get unique domains for company identification
+$domains = $email->getContactDomains();
+// Returns: ['example.com', 'client.com', 'mycompany.com']
+
+// Check if email involves specific company
+if ($email->hasContactFromDomain('important-client.com')) {
+    // Handle VIP client email
+}
+
+// Get all contacts from a domain
+$clientContacts = $email->getContactsFromDomain('acme-corp.com');
+```
+
+#### Manual Contact Parsing
+
+You can also parse email strings manually:
+
+```php
+use PartridgeRocks\GmailClient\Data\Contact;
+
+// Parse single email address
+$contact = Contact::parse('"John Doe" <john@example.com>');
+echo $contact->name;    // "John Doe"  
+echo $contact->email;   // "john@example.com"
+echo $contact->domain;  // "example.com"
+
+// Parse multiple addresses
+$contacts = Contact::parseMultiple('john@example.com, "Jane Doe" <jane@example.com>');
+
+// Access contact properties
+foreach ($contacts as $contact) {
+    echo "Name: " . ($contact->name ?? 'No name') . "\n";
+    echo "Email: {$contact->email}\n";
+    echo "Domain: {$contact->domain}\n";
+    echo "Local part: {$contact->getLocalPart()}\n";
+    echo "Display name: {$contact->getDisplayName()}\n";
+    echo "Formatted: {$contact->format()}\n";
+}
+```
+
+#### CRM Integration Examples
+
+```php
+// Find all emails from a specific company
+$companyEmails = collect($emails)->filter(function ($email) {
+    return $email->hasContactFromDomain('target-company.com');
+});
+
+// Extract contact data for CRM import
+$crmData = [];
+foreach ($emails as $email) {
+    foreach ($email->getAllContacts() as $contact) {
+        if (!$contact->isFromDomain('mycompany.com')) {
+            $crmData[] = [
+                'name' => $contact->name,
+                'email' => $contact->email,
+                'company_domain' => $contact->domain,
+                'first_contact' => $email->internalDate,
+            ];
+        }
+    }
+}
+
+// Group contacts by company domain
+$contactsByCompany = collect($emails)
+    ->flatMap(fn($email) => $email->getAllContacts())
+    ->groupBy('domain')
+    ->map(fn($contacts) => $contacts->unique('email'));
 ```
 
 ### Working with Labels
