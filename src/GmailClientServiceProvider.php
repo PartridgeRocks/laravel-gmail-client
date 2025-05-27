@@ -3,6 +3,9 @@
 namespace PartridgeRocks\GmailClient;
 
 use PartridgeRocks\GmailClient\Commands\GmailClientCommand;
+use PartridgeRocks\GmailClient\Contracts\AuthServiceInterface;
+use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
+use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Services\AuthService;
 use PartridgeRocks\GmailClient\Services\LabelService;
@@ -42,28 +45,34 @@ class GmailClientServiceProvider extends PackageServiceProvider
             return new GmailConnector;
         });
 
-        // Register individual services
+        // Register service interfaces and implementations
+        $this->app->singleton(AuthServiceInterface::class, AuthService::class);
         $this->app->singleton(AuthService::class, function ($app) {
             return new AuthService($app->make(GmailConnector::class));
         });
 
+        $this->app->singleton(LabelServiceInterface::class, LabelService::class);
         $this->app->singleton(LabelService::class, function ($app) {
             return new LabelService($app->make(GmailConnector::class));
         });
 
+        $this->app->singleton(MessageServiceInterface::class, MessageService::class);
         $this->app->singleton(MessageService::class, function ($app) {
             return new MessageService($app->make(GmailConnector::class));
         });
 
         // Register main Gmail client
         $this->app->singleton(GmailClient::class, function ($app) {
-            $client = new GmailClient;
-
             // If we have a token in session/config, authenticate the client
             $token = session('gmail_access_token') ?? config('gmail-client.access_token');
-            if ($token) {
-                $client->authenticate($token);
-            }
+
+            $client = new GmailClient(
+                $token,
+                $app->make(AuthServiceInterface::class),
+                $app->make(LabelServiceInterface::class),
+                $app->make(MessageServiceInterface::class),
+                $app->make(GmailConnector::class)
+            );
 
             return $client;
         });

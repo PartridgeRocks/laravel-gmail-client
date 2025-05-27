@@ -3,6 +3,7 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use Illuminate\Support\Collection;
+use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
 use PartridgeRocks\GmailClient\Data\Label;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
 use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
@@ -13,7 +14,7 @@ use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
 use PartridgeRocks\GmailClient\Gmail\Resources\LabelResource;
 
-class LabelService
+class LabelService implements LabelServiceInterface
 {
     use GmailClientHelpers;
 
