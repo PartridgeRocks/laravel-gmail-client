@@ -24,12 +24,12 @@ class SendMessageRequest extends BaseRequest
     /**
      * Create a new send message request.
      *
-     * @param array $data Message data:
-     *   - raw: string Base64url-encoded RFC2822 formatted message (required)
-     *     Must include headers: From, To, Subject, Date, Message-ID
-     *     Body content should be properly encoded for HTML/plain text
-     *   - threadId: string Optional thread ID for replies/conversation threading
-     *     Use this to reply to existing conversations
+     * @param  array  $data  Message data:
+     *                       - raw: string Base64url-encoded RFC2822 formatted message (required)
+     *                       Must include headers: From, To, Subject, Date, Message-ID
+     *                       Body content should be properly encoded for HTML/plain text
+     *                       - threadId: string Optional thread ID for replies/conversation threading
+     *                       Use this to reply to existing conversations
      */
     public function __construct(array $data)
     {

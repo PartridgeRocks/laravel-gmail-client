@@ -39,7 +39,7 @@ class LabelResource extends BaseResource
     /**
      * Get a specific label by ID.
      *
-     * @param string $id The label ID to retrieve (e.g., 'INBOX', 'Label_123')
+     * @param  string  $id  The label ID to retrieve (e.g., 'INBOX', 'Label_123')
      * @return Response Gmail API response containing label details
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.labels/get
@@ -52,13 +52,13 @@ class LabelResource extends BaseResource
     /**
      * Create a new custom label.
      *
-     * @param array $data Label data:
-     *   - name: string Label name (required)
-     *   - messageListVisibility: string 'show'|'hide' visibility in message list
-     *   - labelListVisibility: string 'labelShow'|'labelHide' visibility in label list
-     *   - color: array Optional color settings:
-     *     - backgroundColor: string Hex color for background
-     *     - textColor: string Hex color for text
+     * @param  array  $data  Label data:
+     *                       - name: string Label name (required)
+     *                       - messageListVisibility: string 'show'|'hide' visibility in message list
+     *                       - labelListVisibility: string 'labelShow'|'labelHide' visibility in label list
+     *                       - color: array Optional color settings:
+     *                       - backgroundColor: string Hex color for background
+     *                       - textColor: string Hex color for text
      * @return Response Gmail API response containing created label data
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.labels/create
@@ -73,8 +73,8 @@ class LabelResource extends BaseResource
      *
      * Only custom labels can be updated. System labels will return an error.
      *
-     * @param string $id The label ID to update
-     * @param array $data Updated label properties (same format as create)
+     * @param  string  $id  The label ID to update
+     * @param  array  $data  Updated label properties (same format as create)
      * @return Response Gmail API response containing updated label data
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.labels/update
@@ -90,7 +90,7 @@ class LabelResource extends BaseResource
      * Only custom labels can be deleted. System labels will return an error.
      * Deleting a label removes it from all messages that had the label applied.
      *
-     * @param string $id The label ID to delete
+     * @param  string  $id  The label ID to delete
      * @return Response Gmail API response (empty on success)
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.labels/delete

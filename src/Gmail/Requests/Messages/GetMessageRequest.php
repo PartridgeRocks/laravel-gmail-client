@@ -25,14 +25,14 @@ class GetMessageRequest extends BaseRequest
     /**
      * Create a new get message request.
      *
-     * @param string $id The Gmail message ID to retrieve
-     * @param array $query Optional query parameters:
-     *   - format: string Message format ('minimal'|'full'|'raw'|'metadata')
-     *     - minimal: Returns only message ID and labels
-     *     - full: Returns full message data (default)
-     *     - raw: Returns raw RFC2822 message
-     *     - metadata: Returns only headers and metadata
-     *   - metadataHeaders: array Specific headers when format=metadata
+     * @param  string  $id  The Gmail message ID to retrieve
+     * @param  array  $query  Optional query parameters:
+     *                        - format: string Message format ('minimal'|'full'|'raw'|'metadata')
+     *                        - minimal: Returns only message ID and labels
+     *                        - full: Returns full message data (default)
+     *                        - raw: Returns raw RFC2822 message
+     *                        - metadata: Returns only headers and metadata
+     *                        - metadataHeaders: array Specific headers when format=metadata
      */
     public function __construct(string $id, array $query = [])
     {

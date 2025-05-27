@@ -25,14 +25,14 @@ class AuthResource extends BaseResource
      * This method completes the OAuth2 authorization code flow by exchanging
      * the authorization code received from the authorization server for an access token.
      *
-     * @param string $code The authorization code from OAuth callback
-     * @param string|null $redirectUri Override for redirect URI (must match authorization request)
+     * @param  string  $code  The authorization code from OAuth callback
+     * @param  string|null  $redirectUri  Override for redirect URI (must match authorization request)
      * @return array Token response containing:
-     *   - access_token: string The access token for API requests
-     *   - refresh_token: string Token for refreshing access when expired
-     *   - expires_in: int Token lifetime in seconds
-     *   - token_type: string Usually 'Bearer'
-     *   - scope: string Granted OAuth scopes
+     *               - access_token: string The access token for API requests
+     *               - refresh_token: string Token for refreshing access when expired
+     *               - expires_in: int Token lifetime in seconds
+     *               - token_type: string Usually 'Bearer'
+     *               - scope: string Granted OAuth scopes
      *
      * @throws AuthenticationException When code exchange fails or token is invalid
      *
@@ -68,12 +68,12 @@ class AuthResource extends BaseResource
      * without requiring user re-authorization. The refresh token is long-lived
      * and can be used multiple times.
      *
-     * @param string $refreshToken The refresh token from initial authorization
+     * @param  string  $refreshToken  The refresh token from initial authorization
      * @return array New token response containing:
-     *   - access_token: string New access token for API requests
-     *   - expires_in: int New token lifetime in seconds
-     *   - token_type: string Usually 'Bearer'
-     *   - scope: string Granted OAuth scopes
+     *               - access_token: string New access token for API requests
+     *               - expires_in: int New token lifetime in seconds
+     *               - token_type: string Usually 'Bearer'
+     *               - scope: string Granted OAuth scopes
      *
      * @throws AuthenticationException When refresh fails or refresh token is invalid
      *
@@ -102,13 +102,13 @@ class AuthResource extends BaseResource
      * Generates the URL where users should be redirected to grant permissions.
      * Users will authenticate with Google and authorize your application to access their Gmail.
      *
-     * @param string|null $redirectUri Override for redirect URI (where user returns after auth)
-     * @param array $scopes Override for OAuth scopes (e.g., ['https://www.googleapis.com/auth/gmail.readonly'])
-     * @param array $additionalParams Additional OAuth parameters:
-     *   - state: string CSRF protection token
-     *   - access_type: string 'offline' for refresh tokens
-     *   - prompt: string 'consent' to force consent screen
-     *   - login_hint: string Email address hint for user
+     * @param  string|null  $redirectUri  Override for redirect URI (where user returns after auth)
+     * @param  array  $scopes  Override for OAuth scopes (e.g., ['https://www.googleapis.com/auth/gmail.readonly'])
+     * @param  array  $additionalParams  Additional OAuth parameters:
+     *                                   - state: string CSRF protection token
+     *                                   - access_type: string 'offline' for refresh tokens
+     *                                   - prompt: string 'consent' to force consent screen
+     *                                   - login_hint: string Email address hint for user
      * @return string Complete authorization URL for user redirection
      *
      * @throws \RuntimeException When OAuth configuration is invalid

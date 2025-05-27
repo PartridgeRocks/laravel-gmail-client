@@ -24,15 +24,15 @@ class CreateLabelRequest extends BaseRequest
     /**
      * Create a new label creation request.
      *
-     * @param array $data Label data:
-     *   - name: string Label name (required, must be unique)
-     *   - messageListVisibility: string 'show'|'hide' (default 'show')
-     *     Controls if label appears in message list
-     *   - labelListVisibility: string 'labelShow'|'labelHide' (default 'labelShow')
-     *     Controls if label appears in label list
-     *   - color: array Optional color settings:
-     *     - backgroundColor: string Hex color code (e.g., '#ff0000')
-     *     - textColor: string Hex color code for text
+     * @param  array  $data  Label data:
+     *                       - name: string Label name (required, must be unique)
+     *                       - messageListVisibility: string 'show'|'hide' (default 'show')
+     *                       Controls if label appears in message list
+     *                       - labelListVisibility: string 'labelShow'|'labelHide' (default 'labelShow')
+     *                       Controls if label appears in label list
+     *                       - color: array Optional color settings:
+     *                       - backgroundColor: string Hex color code (e.g., '#ff0000')
+     *                       - textColor: string Hex color code for text
      */
     public function __construct(array $data)
     {
