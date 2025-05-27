@@ -3,6 +3,9 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use Illuminate\Support\Collection;
+use PartridgeRocks\GmailClient\Constants\ConfigDefaults;
+use PartridgeRocks\GmailClient\Constants\GmailConstants;
+use PartridgeRocks\GmailClient\Constants\HttpStatus;
 use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
 use PartridgeRocks\GmailClient\Data\Label;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
@@ -25,7 +28,7 @@ class LabelService implements LabelServiceInterface
     /**
      * List labels with various options.
      */
-    public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
+    public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): mixed
     {
         if ($lazy) {
             return $this->lazyLoadLabels();
@@ -46,7 +49,7 @@ class LabelService implements LabelServiceInterface
     /**
      * Create a paginator for labels.
      */
-    public function paginateLabels(int $maxResults = 100): GmailPaginator
+    public function paginateLabels(int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): GmailPaginator
     {
         return new GmailPaginator(
             $this->connector,
@@ -77,15 +80,15 @@ class LabelService implements LabelServiceInterface
     {
         $response = $this->getLabelResource()->get($id);
 
-        if ($response->status() === 404) {
+        if ($response->status() === HttpStatus::NOT_FOUND) {
             throw NotFoundException::label($id);
         }
 
-        if ($response->status() === 401) {
+        if ($response->status() === HttpStatus::UNAUTHORIZED) {
             throw AuthenticationException::invalidToken();
         }
 
-        if ($response->status() === 429) {
+        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
             $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
             throw RateLimitException::quotaExceeded($retryAfter);
@@ -103,8 +106,8 @@ class LabelService implements LabelServiceInterface
     {
         $labelData = [
             'name' => $name,
-            'messageListVisibility' => $options['messageListVisibility'] ?? 'show',
-            'labelListVisibility' => $options['labelListVisibility'] ?? 'labelShow',
+            'messageListVisibility' => $options['messageListVisibility'] ?? GmailConstants::VISIBILITY_SHOW,
+            'labelListVisibility' => $options['labelListVisibility'] ?? GmailConstants::LABEL_LIST_VISIBILITY_SHOW,
         ];
 
         // Add optional properties
@@ -118,15 +121,15 @@ class LabelService implements LabelServiceInterface
 
         $response = $this->getLabelResource()->create($labelData);
 
-        if ($response->status() === 400) {
+        if ($response->status() === HttpStatus::BAD_REQUEST) {
             throw new \PartridgeRocks\GmailClient\Exceptions\ValidationException('Invalid label data provided');
         }
 
-        if ($response->status() === 401) {
+        if ($response->status() === HttpStatus::UNAUTHORIZED) {
             throw AuthenticationException::invalidToken();
         }
 
-        if ($response->status() === 429) {
+        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
             $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
             throw RateLimitException::quotaExceeded($retryAfter);
@@ -144,19 +147,19 @@ class LabelService implements LabelServiceInterface
     {
         $response = $this->getLabelResource()->update($id, $updates);
 
-        if ($response->status() === 404) {
+        if ($response->status() === HttpStatus::NOT_FOUND) {
             throw NotFoundException::label($id);
         }
 
-        if ($response->status() === 400) {
+        if ($response->status() === HttpStatus::BAD_REQUEST) {
             throw new \PartridgeRocks\GmailClient\Exceptions\ValidationException('Invalid label data provided');
         }
 
-        if ($response->status() === 401) {
+        if ($response->status() === HttpStatus::UNAUTHORIZED) {
             throw AuthenticationException::invalidToken();
         }
 
-        if ($response->status() === 429) {
+        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
             $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
             throw RateLimitException::quotaExceeded($retryAfter);
@@ -174,15 +177,15 @@ class LabelService implements LabelServiceInterface
     {
         $response = $this->getLabelResource()->delete($id);
 
-        if ($response->status() === 404) {
+        if ($response->status() === HttpStatus::NOT_FOUND) {
             throw NotFoundException::label($id);
         }
 
-        if ($response->status() === 401) {
+        if ($response->status() === HttpStatus::UNAUTHORIZED) {
             throw AuthenticationException::invalidToken();
         }
 
-        if ($response->status() === 429) {
+        if ($response->status() === HttpStatus::TOO_MANY_REQUESTS) {
             $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
 
             throw RateLimitException::quotaExceeded($retryAfter);
@@ -194,7 +197,7 @@ class LabelService implements LabelServiceInterface
     /**
      * Safely list labels, returning empty collection on failure.
      */
-    public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
+    public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): mixed
     {
         return $this->safeCall(
             callback: fn () => $this->listLabels($paginate, $lazy, $maxResults),
@@ -251,7 +254,7 @@ class LabelService implements LabelServiceInterface
             return max(0, $timestamp - time());
         }
 
-        return 60; // Default to 60 seconds
+        return ConfigDefaults::DEFAULT_RETRY_AFTER_SECONDS;
     }
 
     /**
