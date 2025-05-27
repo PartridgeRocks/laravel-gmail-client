@@ -9,6 +9,7 @@ This document provides detailed examples of how to use the PartridgeRocks Larave
 - [Performance Features](#performance-features)
 - [Working with Messages](#working-with-messages)
 - [Working with Labels](#working-with-labels)
+- [Null-Safe Methods](#null-safe-methods)
 - [Error Handling](#error-handling)
 - [Pagination](#pagination)
 - [Testing](#testing)
@@ -488,6 +489,127 @@ $updatedLabel = GmailClient->labels()->update($label->id, [
 
 // Delete a label (using the LabelResource directly)
 GmailClient->labels()->delete($label->id);
+```
+
+## Null-Safe Methods
+
+For applications that need graceful degradation (dashboards, background processing), use the null-safe methods that never throw exceptions:
+
+### Safe Operations
+
+```php
+// Safe label listing - returns empty collection on any error
+$labels = GmailClient::safeListLabels();
+$labels = GmailClient::safeListLabels(paginate: true, maxResults: 50);
+$labels = GmailClient::safeListLabels(lazy: true); // Memory-efficient
+
+// Safe message operations
+$messages = GmailClient::safeListMessages(['q' => 'is:unread']);
+$messages = GmailClient::safeListMessages([], paginate: true, maxResults: 100);
+
+// Returns null instead of throwing NotFoundException
+$message = GmailClient::safeGetMessage('message-id-123');
+if ($message) {
+    // Message exists and was retrieved successfully
+    echo $message->subject;
+}
+```
+
+### Connection Health
+
+```php
+// Check if Gmail API is accessible
+if (GmailClient::isConnected()) {
+    // Safe to proceed with Gmail operations
+    $messages = GmailClient::listMessages();
+} else {
+    // Handle offline/error state gracefully
+    $messages = collect(); // Empty collection fallback
+}
+```
+
+### Account Summary
+
+```php
+// Get safe overview of account status
+$summary = GmailClient::getAccountSummary();
+
+// Returns array with guaranteed structure:
+// [
+//     'connected' => true,           // Connection status
+//     'labels_count' => 15,          // Number of labels (0 if failed)
+//     'has_unread' => true,          // Whether unread messages exist
+//     'errors' => []                 // Array of error codes (not raw messages)
+// ]
+
+// Use in dashboard widgets
+if ($summary['connected']) {
+    echo "Labels: {$summary['labels_count']}";
+    echo $summary['has_unread'] ? '🔴 New mail' : '✅ All read';
+}
+```
+
+### Statistics with Fallback
+
+```php
+// Get account statistics with graceful degradation
+$stats = GmailClient::safeGetAccountStatistics([
+    'unread_limit' => 25,
+    'include_labels' => true,
+]);
+
+// Handle partial failures
+if ($stats['partial_failure']) {
+    // Some metrics may show "?" instead of numbers
+    $unreadDisplay = $stats['unread_count'] === '?' ? 'Unknown' : $stats['unread_count'];
+} else {
+    // All metrics retrieved successfully
+    $unreadCount = $stats['unread_count'];
+    $todayCount = $stats['today_count'];
+    $labelsCount = $stats['labels_count'];
+}
+```
+
+### Best Practices
+
+```php
+// ✅ Dashboard components - robust against API failures
+class GmailDashboard 
+{
+    public function getMetrics(): array
+    {
+        return [
+            'summary' => GmailClient::getAccountSummary(),
+            'recent_messages' => GmailClient::safeListMessages(
+                ['q' => 'newer_than:1d'], 
+                maxResults: 10
+            ),
+            'unread_count' => GmailClient::safeGetAccountStatistics()['unread_count'],
+        ];
+    }
+}
+
+// ✅ Background sync jobs - continue with partial data
+class SyncGmailJob implements ShouldQueue
+{
+    public function handle(): void
+    {
+        if (!GmailClient::isConnected()) {
+            $this->fail('Gmail API not accessible');
+            return;
+        }
+
+        $messages = GmailClient::safeListMessages(['q' => 'is:unread']);
+        
+        foreach ($messages as $message) {
+            // Process each message safely
+            $fullMessage = GmailClient::safeGetMessage($message->id);
+            if ($fullMessage) {
+                $this->processMessage($fullMessage);
+            }
+        }
+    }
+}
 ```
 
 ## Error Handling
