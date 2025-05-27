@@ -3,6 +3,7 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use Illuminate\Support\Collection;
+use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
 use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
@@ -13,7 +14,7 @@ use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use PartridgeRocks\GmailClient\Gmail\Resources\MessageResource;
 
-class MessageService
+class MessageService implements MessageServiceInterface
 {
     use GmailClientHelpers;
 
@@ -93,6 +94,7 @@ class MessageService
 
         if ($response->status() === 429) {
             $retryAfter = $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0');
+
             throw RateLimitException::quotaExceeded($retryAfter);
         }
 
