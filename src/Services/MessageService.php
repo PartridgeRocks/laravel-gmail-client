@@ -127,11 +127,11 @@ class MessageService implements MessageServiceInterface
      * @param  string  $subject  Email subject line
      * @param  string  $body  Email body content
      * @param  array<string, mixed>  $options  Optional settings:
-     *                          - from: string Sender email (default: config value)
-     *                          - from_name: string Sender display name
-     *                          - cc: array CC recipients
-     *                          - bcc: array BCC recipients
-     *                          - html: bool Whether body is HTML (default: false)
+     *                                         - from: string Sender email (default: config value)
+     *                                         - from_name: string Sender display name
+     *                                         - cc: array CC recipients
+     *                                         - bcc: array BCC recipients
+     *                                         - html: bool Whether body is HTML (default: false)
      * @return Email The sent message data
      *
      * @throws ValidationException When email addresses or required fields are invalid
@@ -323,7 +323,6 @@ class MessageService implements MessageServiceInterface
 
         return implode("\r\n", $headers)."\r\n\r\n".$body;
     }
-
 
     /**
      * Get the message resource.

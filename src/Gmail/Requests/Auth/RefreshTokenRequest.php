@@ -24,7 +24,8 @@ class RefreshTokenRequest extends Request
 
     /**
      * Convert array data to form-urlencoded format
-     * @param array<string, mixed> $data
+     *
+     * @param  array<string, mixed>  $data
      */
     protected function formatFormData(array $data): string
     {

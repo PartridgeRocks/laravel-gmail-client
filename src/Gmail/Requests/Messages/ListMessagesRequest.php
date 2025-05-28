@@ -26,18 +26,18 @@ class ListMessagesRequest extends BaseRequest
      * Create a new list messages request.
      *
      * @param  array<string, mixed>  $query  Optional query parameters:
-     *                        - q: string Gmail search query syntax:
-     *                        - 'is:unread' - Unread messages
-     *                        - 'is:starred' - Starred messages
-     *                        - 'from:example@gmail.com' - From specific sender
-     *                        - 'subject:"Test Subject"' - Messages with subject
-     *                        - 'has:attachment' - Messages with attachments
-     *                        - 'after:2023/01/01' - Messages after date
-     *                        - 'before:2023/12/31' - Messages before date
-     *                        - labelIds: array Filter by specific label IDs
-     *                        - maxResults: int Max results (1-500, default 100)
-     *                        - pageToken: string Pagination token
-     *                        - includeSpamTrash: bool Include spam/trash (default false)
+     *                                       - q: string Gmail search query syntax:
+     *                                       - 'is:unread' - Unread messages
+     *                                       - 'is:starred' - Starred messages
+     *                                       - 'from:example@gmail.com' - From specific sender
+     *                                       - 'subject:"Test Subject"' - Messages with subject
+     *                                       - 'has:attachment' - Messages with attachments
+     *                                       - 'after:2023/01/01' - Messages after date
+     *                                       - 'before:2023/12/31' - Messages before date
+     *                                       - labelIds: array Filter by specific label IDs
+     *                                       - maxResults: int Max results (1-500, default 100)
+     *                                       - pageToken: string Pagination token
+     *                                       - includeSpamTrash: bool Include spam/trash (default false)
      */
     public function __construct(array $query = [])
     {

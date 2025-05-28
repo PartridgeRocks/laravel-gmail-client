@@ -21,7 +21,7 @@ class ValidationErrorDTO extends ErrorDTO
      * Create a validation error for a specific field
      */
     /**
-     * @param array<string, mixed>|null $context
+     * @param  array<string, mixed>|null  $context
      */
     public static function forField(string $field, string $message, ?array $context = null): self
     {
@@ -38,8 +38,8 @@ class ValidationErrorDTO extends ErrorDTO
      * Create a validation error with multiple field errors
      */
     /**
-     * @param array<string, mixed> $errors
-     * @param array<string, mixed>|null $context
+     * @param  array<string, mixed>  $errors
+     * @param  array<string, mixed>|null  $context
      */
     public static function withErrors(array $errors, ?array $context = null): self
     {
@@ -56,7 +56,7 @@ class ValidationErrorDTO extends ErrorDTO
      * Create a missing required field error
      */
     /**
-     * @param array<string, mixed>|null $context
+     * @param  array<string, mixed>|null  $context
      */
     public static function missingRequiredField(string $field, ?array $context = null): self
     {

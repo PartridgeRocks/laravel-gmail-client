@@ -49,7 +49,7 @@ class RateLimitException extends GmailClientException
     /**
      * Create a rate limit exception from a response with retry information
      *
-     * @param array<string, mixed> $response
+     * @param  array<string, mixed>  $response
      */
     public static function fromRateLimitResponse(array $response, int $retryAfter = 0): self
     {
@@ -83,8 +83,8 @@ class RateLimitException extends GmailClientException
     /**
      * Create an exception from a response array
      *
-     * @param array<string, mixed> $response The response data
-     * @param string|null $message Optional custom message
+     * @param  array<string, mixed>  $response  The response data
+     * @param  string|null  $message  Optional custom message
      */
     public static function fromResponse(array $response, ?string $message = null): self
     {

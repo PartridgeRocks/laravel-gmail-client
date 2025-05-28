@@ -21,7 +21,7 @@ class NotFoundErrorDTO extends ErrorDTO
      * Create a not found error for a specific resource
      */
     /**
-     * @param array<string, mixed>|null $context
+     * @param  array<string, mixed>|null  $context
      */
     public static function forResource(string $resourceType, string $resourceId, ?string $detail = null, ?array $context = null): self
     {

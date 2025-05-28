@@ -117,8 +117,9 @@ class GmailClient
 
     /**
      * Get the authorization URL for the OAuth flow.
-     * @param array<string> $scopes
-     * @param array<string, mixed> $additionalParams
+     *
+     * @param  array<string>  $scopes
+     * @param  array<string, mixed>  $additionalParams
      */
     public function getAuthorizationUrl(
         string $redirectUri,
@@ -130,6 +131,7 @@ class GmailClient
 
     /**
      * Exchange an authorization code for an access token.
+     *
      * @return array<string, mixed>
      */
     public function exchangeCode(string $code, string $redirectUri): array
@@ -139,6 +141,7 @@ class GmailClient
 
     /**
      * Refresh an access token using a refresh token.
+     *
      * @return array<string, mixed>
      */
     public function refreshToken(string $refreshToken): array
@@ -215,7 +218,7 @@ class GmailClient
     /**
      * Create a lazy-loading collection for labels.
      * This provides memory-efficient iteration over labels.
-     * 
+     *
      * @return Gmail\Pagination\GmailLazyCollection<Label>
      */
     public function lazyLoadLabels(): Gmail\Pagination\GmailLazyCollection
@@ -239,7 +242,8 @@ class GmailClient
     /**
      * Send a new email message.
      *
-     * @param array<string, mixed> $options
+     * @param  array<string, mixed>  $options
+     *
      * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
@@ -288,7 +292,8 @@ class GmailClient
 
     /**
      * Create a new label.
-     * @param array<string, mixed> $options
+     *
+     * @param  array<string, mixed>  $options
      */
     public function createLabel(string $name, array $options = []): Label
     {
@@ -297,7 +302,8 @@ class GmailClient
 
     /**
      * Update an existing label.
-     * @param array<string, mixed> $updates
+     *
+     * @param  array<string, mixed>  $updates
      */
     public function updateLabel(string $id, array $updates): Label
     {
@@ -487,6 +493,7 @@ class GmailClient
 
     /**
      * Get a summary of Gmail account status with safe fallbacks.
+     *
      * @return array<string, mixed>
      */
     public function getAccountSummary(): array

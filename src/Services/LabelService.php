@@ -50,7 +50,7 @@ class LabelService implements LabelServiceInterface
 
         $response = $this->getLabelResource()->list();
         $data = $response->json();
-        
+
         /** @var array<int, array<string, mixed>> $labels */
         $labels = $data['labels'] ?? [];
 
@@ -61,7 +61,7 @@ class LabelService implements LabelServiceInterface
 
     /**
      * Create a paginator for labels.
-     * 
+     *
      * @return GmailPaginator<Label>
      */
     public function paginateLabels(int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): GmailPaginator
@@ -110,10 +110,10 @@ class LabelService implements LabelServiceInterface
      *
      * @param  string  $name  The label name
      * @param  array<string, mixed>  $options  Optional settings:
-     *                          - messageListVisibility: string Visibility in message list
-     *                          - labelListVisibility: string Visibility in label list
-     *                          - backgroundColor: string Background color hex code
-     *                          - textColor: string Text color hex code
+     *                                         - messageListVisibility: string Visibility in message list
+     *                                         - labelListVisibility: string Visibility in label list
+     *                                         - backgroundColor: string Background color hex code
+     *                                         - textColor: string Text color hex code
      * @return Label The created label data
      *
      * @throws ValidationException When label data is invalid

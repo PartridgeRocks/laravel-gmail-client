@@ -18,6 +18,7 @@ interface LabelServiceInterface
 
     /**
      * Create a paginator for labels.
+     *
      * @return GmailPaginator<Label>
      */
     public function paginateLabels(int $maxResults = 100): GmailPaginator;

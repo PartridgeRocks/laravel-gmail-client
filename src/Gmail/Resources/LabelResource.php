@@ -53,12 +53,12 @@ class LabelResource extends BaseResource
      * Create a new custom label.
      *
      * @param  array<string, mixed>  $data  Label data:
-     *                       - name: string Label name (required)
-     *                       - messageListVisibility: string 'show'|'hide' visibility in message list
-     *                       - labelListVisibility: string 'labelShow'|'labelHide' visibility in label list
-     *                       - color: array Optional color settings:
-     *                       - backgroundColor: string Hex color for background
-     *                       - textColor: string Hex color for text
+     *                                      - name: string Label name (required)
+     *                                      - messageListVisibility: string 'show'|'hide' visibility in message list
+     *                                      - labelListVisibility: string 'labelShow'|'labelHide' visibility in label list
+     *                                      - color: array Optional color settings:
+     *                                      - backgroundColor: string Hex color for background
+     *                                      - textColor: string Hex color for text
      * @return Response Gmail API response containing created label data
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.labels/create

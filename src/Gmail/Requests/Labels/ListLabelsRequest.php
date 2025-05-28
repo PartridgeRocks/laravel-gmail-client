@@ -14,7 +14,7 @@ class ListLabelsRequest extends BaseRequest
     protected array $customQuery = [];
 
     /**
-     * @param array<string, mixed> $query
+     * @param  array<string, mixed>  $query
      */
     public function __construct(array $query = [])
     {

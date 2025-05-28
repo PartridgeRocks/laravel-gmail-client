@@ -22,7 +22,7 @@ class TokenDTO extends ResponseDTO
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function fromApiResponse(array $data): static
     {

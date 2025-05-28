@@ -19,7 +19,7 @@ class ErrorDTO extends Data
      * Create an error DTO from a response array
      */
     /**
-     * @param array<string, mixed> $errorData
+     * @param  array<string, mixed>  $errorData
      */
     public static function fromResponse(array $errorData): self
     {

@@ -44,7 +44,7 @@ class GmailClientException extends Exception
     /**
      * Create an exception from a response array
      *
-     * @param array<string, mixed> $response
+     * @param  array<string, mixed>  $response
      */
     public static function fromResponse(array $response, ?string $message = null): self
     {

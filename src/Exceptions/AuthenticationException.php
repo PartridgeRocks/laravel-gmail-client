@@ -71,7 +71,7 @@ class AuthenticationException extends GmailClientException
     /**
      * Create from a 401 response
      *
-     * @param array<string, mixed> $response
+     * @param  array<string, mixed>  $response
      */
     public static function fromResponse(array $response, ?string $message = null, ?\Throwable $previous = null): self
     {

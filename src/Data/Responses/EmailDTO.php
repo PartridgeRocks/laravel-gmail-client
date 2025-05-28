@@ -10,12 +10,12 @@ use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 class EmailDTO extends ResponseDTO
 {
     /**
-     * @param array<int, string> $labelIds
-     * @param array<string, mixed> $payload
-     * @param array<string, string>|null $headers
-     * @param array<int, string>|null $to
-     * @param array<int, string>|null $cc
-     * @param array<int, string>|null $bcc
+     * @param  array<int, string>  $labelIds
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, string>|null  $headers
+     * @param  array<int, string>|null  $to
+     * @param  array<int, string>|null  $cc
+     * @param  array<int, string>|null  $bcc
      */
     public function __construct(
         public string $id,
@@ -40,7 +40,7 @@ class EmailDTO extends ResponseDTO
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function fromApiResponse(array $data): static
     {
@@ -112,7 +112,7 @@ class EmailDTO extends ResponseDTO
     /**
      * Create a collection of EmailDTO objects from a list response
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return Collection<int, self>
      */
     public static function collectionFromApiResponse(array $data): Collection
@@ -124,6 +124,7 @@ class EmailDTO extends ResponseDTO
         if (empty($messages)) {
             /** @var Collection<int, EmailDTO> $emptyCollection */
             $emptyCollection = collect();
+
             return $emptyCollection;
         }
 

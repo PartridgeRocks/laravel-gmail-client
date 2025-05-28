@@ -46,6 +46,7 @@ class ModifyMessageLabelsRequest extends BaseRequest implements HasBody
 
     /**
      * Define the request body for label modification
+     *
      * @return array<string, array<string>>
      */
     public function defaultBody(): array

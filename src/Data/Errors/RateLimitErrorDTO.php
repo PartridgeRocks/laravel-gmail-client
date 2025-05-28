@@ -22,7 +22,7 @@ class RateLimitErrorDTO extends ErrorDTO
      * Create a rate limit error DTO with retry information
      */
     /**
-     * @param array<string, mixed>|null $context
+     * @param  array<string, mixed>|null  $context
      */
     public static function withRetry(int $retryAfter, ?string $detail = null, ?array $context = null): self
     {
@@ -39,7 +39,7 @@ class RateLimitErrorDTO extends ErrorDTO
      * Create a quota exceeded error DTO
      */
     /**
-     * @param array<string, mixed>|null $context
+     * @param  array<string, mixed>|null  $context
      */
     public static function quotaExceeded(int $quota, string $period = 'day', ?string $detail = null, ?array $context = null): self
     {

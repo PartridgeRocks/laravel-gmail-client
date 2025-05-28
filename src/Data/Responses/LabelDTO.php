@@ -8,9 +8,9 @@ use Illuminate\Support\Collection;
 class LabelDTO extends ResponseDTO
 {
     /**
-     * @param string|array<string, string>|null $messageListVisibility
-     * @param string|array<string, string>|null $labelListVisibility
-     * @param string|array<string, string>|null $color
+     * @param  string|array<string, string>|null  $messageListVisibility
+     * @param  string|array<string, string>|null  $labelListVisibility
+     * @param  string|array<string, string>|null  $color
      */
     public function __construct(
         public string $id,
@@ -30,7 +30,7 @@ class LabelDTO extends ResponseDTO
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function fromApiResponse(array $data): static
     {
@@ -53,13 +53,14 @@ class LabelDTO extends ResponseDTO
     /**
      * Create a collection of LabelDTO objects from a list response
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return Collection<int, self>
      */
     public static function collectionFromApiResponse(array $data): Collection
     {
         /** @var array<int, array<string, mixed>> $labelsData */
         $labelsData = $data['labels'] ?? [];
+
         return collect($labelsData)->map(function (array $label) {
             return static::fromApiResponse($label);
         });

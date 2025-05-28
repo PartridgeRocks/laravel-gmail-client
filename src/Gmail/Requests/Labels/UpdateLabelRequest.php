@@ -16,7 +16,7 @@ class UpdateLabelRequest extends BaseRequest
     protected array $labelData;
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function __construct(string $id, array $data)
     {

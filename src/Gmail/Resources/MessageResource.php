@@ -23,11 +23,11 @@ class MessageResource extends BaseResource
      * List messages in the user's mailbox.
      *
      * @param  array<string, mixed>  $query  Optional query parameters:
-     *                        - q: string Search query (e.g., 'is:unread', 'from:example@gmail.com')
-     *                        - labelIds: array Filter by label IDs
-     *                        - maxResults: int Maximum number of messages to return (1-500, default 100)
-     *                        - pageToken: string Token for pagination
-     *                        - includeSpamTrash: bool Include spam and trash in results
+     *                                       - q: string Search query (e.g., 'is:unread', 'from:example@gmail.com')
+     *                                       - labelIds: array Filter by label IDs
+     *                                       - maxResults: int Maximum number of messages to return (1-500, default 100)
+     *                                       - pageToken: string Token for pagination
+     *                                       - includeSpamTrash: bool Include spam and trash in results
      * @return Response Gmail API response containing message list
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.messages/list
@@ -42,8 +42,8 @@ class MessageResource extends BaseResource
      *
      * @param  string  $id  The message ID to retrieve
      * @param  array<string, mixed>  $query  Optional query parameters:
-     *                        - format: string Message format ('minimal', 'full', 'raw', 'metadata')
-     *                        - metadataHeaders: array Specific headers to include when format=metadata
+     *                                       - format: string Message format ('minimal', 'full', 'raw', 'metadata')
+     *                                       - metadataHeaders: array Specific headers to include when format=metadata
      * @return Response Gmail API response containing full message data
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.messages/get
@@ -57,8 +57,8 @@ class MessageResource extends BaseResource
      * Send an email message.
      *
      * @param  array<string, mixed>  $data  Message data:
-     *                       - raw: string Base64url-encoded RFC2822 formatted message
-     *                       - threadId: string (optional) Thread ID to reply to
+     *                                      - raw: string Base64url-encoded RFC2822 formatted message
+     *                                      - threadId: string (optional) Thread ID to reply to
      * @return Response Gmail API response containing sent message data
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.messages/send

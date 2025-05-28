@@ -8,6 +8,7 @@ use PartridgeRocks\GmailClient\GmailClient;
 
 /**
  * @template TValue
+ *
  * @extends LazyCollection<int, TValue>
  */
 class GmailLazyCollection extends LazyCollection

@@ -83,6 +83,7 @@ class GmailPaginator
 
     /**
      * Get the next page of results.
+     *
      * @return Collection<int, TValue>
      */
     public function getNextPage(): Collection
@@ -101,6 +102,7 @@ class GmailPaginator
 
     /**
      * Get all results by iterating through all pages.
+     *
      * @return Collection<int, TValue>
      */
     public function getAllPages(): Collection
@@ -114,6 +116,7 @@ class GmailPaginator
 
     /**
      * Transform collection using a DTO's static method.
+     *
      * @return Collection<int, TValue>
      */
     public function transformUsingDTO(string $dtoClass, string $method = 'collectionFromApiResponse'): Collection
