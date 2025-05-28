@@ -3,7 +3,6 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use Illuminate\Support\Collection;
-use PartridgeRocks\GmailClient\Constants\GmailConstants;
 use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
@@ -42,10 +41,12 @@ class MessageService implements MessageServiceInterface
     public function listMessages(
         array $query = [],
         bool $paginate = false,
-        int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS,
+        ?int $maxResults = null,
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed {
+        $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
+        
         if ($lazy) {
             return $this->lazyLoadMessages($query, $maxResults, $fullDetails);
         }
@@ -73,8 +74,10 @@ class MessageService implements MessageServiceInterface
      * @param  int  $maxResults  Maximum number of results per page
      * @return GmailPaginator<Email> Paginator instance for messages
      */
-    public function paginateMessages(array $query = [], int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): GmailPaginator
+    public function paginateMessages(array $query = [], ?int $maxResults = null): GmailPaginator
     {
+        $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
+        
         return new GmailPaginator(
             $this->connector,
             ListMessagesRequest::class,
@@ -92,7 +95,7 @@ class MessageService implements MessageServiceInterface
      * @param  bool  $fullDetails  Whether to fetch full message details
      * @return \Illuminate\Support\LazyCollection<int, Email> Empty lazy collection (implementation placeholder)
      */
-    public function lazyLoadMessages(array $query = [], int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS, bool $fullDetails = true): \Illuminate\Support\LazyCollection
+    public function lazyLoadMessages(array $query = [], ?int $maxResults = null, bool $fullDetails = true): \Illuminate\Support\LazyCollection
     {
         // Return empty lazy collection since lazy loading requires GmailClient instance
         return collect()->lazy();
@@ -248,10 +251,12 @@ class MessageService implements MessageServiceInterface
     public function safeListMessages(
         array $query = [],
         bool $paginate = false,
-        int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS,
+        ?int $maxResults = null,
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed {
+        $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
+        
         return $this->safeCall(
             callback: fn () => $this->listMessages($query, $paginate, $maxResults, $lazy, $fullDetails),
             fallback: $this->getEmptyMessagesStructure($query, $paginate, $lazy, $maxResults),
