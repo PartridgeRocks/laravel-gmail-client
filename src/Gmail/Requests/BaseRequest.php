@@ -8,10 +8,8 @@ use PartridgeRocks\GmailClient\Exceptions\GmailClientException;
 use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
 use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
 use PartridgeRocks\GmailClient\Exceptions\ValidationException;
-// Ensure the correct namespace or class exists
-// Ensure the correct namespace or class exists
-use Saloon\Contracts\Response; // Ensure the Saloon package is installed and the namespace is correct
 use Saloon\Http\Request;
+use Saloon\Http\Response;
 
 abstract class BaseRequest extends Request
 {
@@ -35,7 +33,11 @@ abstract class BaseRequest extends Request
         }
 
         // Extract error data for better context
-        $errorData = $response->json() ?? [];
+        try {
+            $errorData = $response->json();
+        } catch (\JsonException) {
+            $errorData = [];
+        }
 
         // Handle specific error types based on status code and response content
         switch ($status) {
@@ -50,7 +52,7 @@ abstract class BaseRequest extends Request
 
                 throw NotFoundException::fromPath($path, $resourceId);
             case 429:
-                $retryAfter = (int) $response->header('Retry-After', 0);
+                $retryAfter = (int) ($response->header('Retry-After') ?? '0');
 
                 throw RateLimitException::quotaExceeded($retryAfter);
             default:

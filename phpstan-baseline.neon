@@ -59,36 +59,6 @@ parameters:
 			path: src/Gmail/GmailConnector.php
 
 		-
-			message: "#^Call to method getRequest\\(\\) on an unknown class Saloon\\\\Contracts\\\\Response\\.$#"
-			count: 1
-			path: src/Gmail/Requests/BaseRequest.php
-
-		-
-			message: "#^Call to method header\\(\\) on an unknown class Saloon\\\\Contracts\\\\Response\\.$#"
-			count: 1
-			path: src/Gmail/Requests/BaseRequest.php
-
-		-
-			message: "#^Call to method json\\(\\) on an unknown class Saloon\\\\Contracts\\\\Response\\.$#"
-			count: 1
-			path: src/Gmail/Requests/BaseRequest.php
-
-		-
-			message: "#^Call to method status\\(\\) on an unknown class Saloon\\\\Contracts\\\\Response\\.$#"
-			count: 1
-			path: src/Gmail/Requests/BaseRequest.php
-
-		-
-			message: "#^Method PartridgeRocks\\\\GmailClient\\\\Gmail\\\\Requests\\\\BaseRequest\\:\\:processResponse\\(\\) has invalid return type Saloon\\\\Contracts\\\\Response\\.$#"
-			count: 1
-			path: src/Gmail/Requests/BaseRequest.php
-
-		-
-			message: "#^Parameter \\$response of method PartridgeRocks\\\\GmailClient\\\\Gmail\\\\Requests\\\\BaseRequest\\:\\:processResponse\\(\\) has invalid type Saloon\\\\Contracts\\\\Response\\.$#"
-			count: 1
-			path: src/Gmail/Requests/BaseRequest.php
-
-		-
 			message: "#^Call to an undefined method Saloon\\\\Http\\\\Connector\\:\\:getAccessToken\\(\\)\\.$#"
 			count: 1
 			path: src/Gmail/Resources/AuthResource.php
