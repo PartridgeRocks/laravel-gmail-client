@@ -19,7 +19,7 @@ interface MessageServiceInterface
     public function listMessages(
         array $query = [],
         bool $paginate = false,
-        int $maxResults = 100,
+        ?int $maxResults = null,
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed;
@@ -30,7 +30,7 @@ interface MessageServiceInterface
      * @param  array<string, mixed>  $query
      * @return GmailPaginator<Email>
      */
-    public function paginateMessages(array $query = [], int $maxResults = 100): GmailPaginator;
+    public function paginateMessages(array $query = [], ?int $maxResults = null): GmailPaginator;
 
     /**
      * Create a lazy-loading collection for messages.
@@ -38,7 +38,7 @@ interface MessageServiceInterface
      * @param  array<string, mixed>  $query
      * @return LazyCollection<int, Email>
      */
-    public function lazyLoadMessages(array $query = [], int $maxResults = 100, bool $fullDetails = true): LazyCollection;
+    public function lazyLoadMessages(array $query = [], ?int $maxResults = null, bool $fullDetails = true): LazyCollection;
 
     /**
      * Get a specific message.
@@ -91,7 +91,7 @@ interface MessageServiceInterface
     public function safeListMessages(
         array $query = [],
         bool $paginate = false,
-        int $maxResults = 100,
+        ?int $maxResults = null,
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed;

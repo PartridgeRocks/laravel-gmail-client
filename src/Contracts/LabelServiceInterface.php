@@ -14,14 +14,14 @@ interface LabelServiceInterface
     /**
      * List labels with various options.
      */
-    public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed;
+    public function listLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed;
 
     /**
      * Create a paginator for labels.
      *
      * @return GmailPaginator<Label>
      */
-    public function paginateLabels(int $maxResults = 100): GmailPaginator;
+    public function paginateLabels(?int $maxResults = null): GmailPaginator;
 
     /**
      * Create a lazy-loading collection for labels.
@@ -61,5 +61,5 @@ interface LabelServiceInterface
     /**
      * Safely list labels, returning empty collection on failure.
      */
-    public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed;
+    public function safeListLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed;
 }

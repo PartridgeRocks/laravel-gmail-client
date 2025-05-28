@@ -3,8 +3,6 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use Illuminate\Support\Collection;
-use PartridgeRocks\GmailClient\Constants\ConfigDefaults;
-use PartridgeRocks\GmailClient\Constants\GmailConstants;
 use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
 use PartridgeRocks\GmailClient\Data\Label;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
@@ -38,8 +36,10 @@ class LabelService implements LabelServiceInterface
      * @throws AuthenticationException When authentication fails or token is invalid
      * @throws RateLimitException When API rate limit is exceeded
      */
-    public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): mixed
+    public function listLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed
     {
+        $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
+
         if ($lazy) {
             return $this->lazyLoadLabels();
         }
@@ -64,8 +64,10 @@ class LabelService implements LabelServiceInterface
      *
      * @return GmailPaginator<Label>
      */
-    public function paginateLabels(int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): GmailPaginator
+    public function paginateLabels(?int $maxResults = null): GmailPaginator
     {
+        $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
+
         return new GmailPaginator(
             $this->connector,
             ListLabelsRequest::class,
@@ -124,8 +126,8 @@ class LabelService implements LabelServiceInterface
     {
         $labelData = [
             'name' => $name,
-            'messageListVisibility' => $options['messageListVisibility'] ?? GmailConstants::VISIBILITY_SHOW,
-            'labelListVisibility' => $options['labelListVisibility'] ?? GmailConstants::LABEL_LIST_VISIBILITY_SHOW,
+            'messageListVisibility' => $options['messageListVisibility'] ?? config('gmail-client.labels.visibility.show'),
+            'labelListVisibility' => $options['labelListVisibility'] ?? config('gmail-client.labels.visibility.label_show'),
         ];
 
         // Add optional properties
@@ -196,8 +198,10 @@ class LabelService implements LabelServiceInterface
      * @param  int  $maxResults  Maximum number of results per page
      * @return mixed Collection, Paginator, or LazyCollection based on parameters
      */
-    public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): mixed
+    public function safeListLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed
     {
+        $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
+
         return $this->safeCall(
             callback: fn () => $this->listLabels($paginate, $lazy, $maxResults),
             fallback: $this->getEmptyLabelsStructure($paginate, $lazy, $maxResults),
@@ -239,7 +243,7 @@ class LabelService implements LabelServiceInterface
             return max(0, $timestamp - time());
         }
 
-        return ConfigDefaults::DEFAULT_RETRY_AFTER_SECONDS;
+        return config('gmail-client.api.default_retry_after_seconds', 60);
     }
 
     /**

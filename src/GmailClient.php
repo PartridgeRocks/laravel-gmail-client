@@ -170,7 +170,7 @@ class GmailClient
      *
      * @param  array<string, mixed>  $query  Query parameters for filtering messages
      * @param  bool  $paginate  Whether to return a paginator for all results
-     * @param  int  $maxResults  Maximum number of results per page
+     * @param  int|null  $maxResults  Maximum number of results per page
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
      * @return Collection<int, Email>|Gmail\Pagination\GmailPaginator<Email>|Gmail\Pagination\GmailLazyCollection<Email>
@@ -178,7 +178,7 @@ class GmailClient
     public function listMessages(
         array $query = [],
         bool $paginate = false,
-        int $maxResults = 100,
+        ?int $maxResults = null,
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed {
@@ -193,10 +193,10 @@ class GmailClient
      * Create a paginator for messages.
      *
      * @param  array<string, mixed>  $query  Query parameters for filtering messages
-     * @param  int  $maxResults  Maximum number of results per page
+     * @param  int|null  $maxResults  Maximum number of results per page
      * @return GmailPaginator<Email>
      */
-    public function paginateMessages(array $query = [], int $maxResults = 100): GmailPaginator
+    public function paginateMessages(array $query = [], ?int $maxResults = null): GmailPaginator
     {
         return $this->messageService->paginateMessages($query, $maxResults);
     }
@@ -206,12 +206,14 @@ class GmailClient
      * This provides memory-efficient iteration over messages.
      *
      * @param  array<string, mixed>  $query  Query parameters for filtering messages
-     * @param  int  $maxResults  Maximum number of results per page
+     * @param  int|null  $maxResults  Maximum number of results per page
      * @param  bool  $fullDetails  Whether to fetch full message details or just basic info
      * @return Gmail\Pagination\GmailLazyCollection<Email>
      */
-    public function lazyLoadMessages(array $query = [], int $maxResults = 100, bool $fullDetails = true): Gmail\Pagination\GmailLazyCollection
+    public function lazyLoadMessages(array $query = [], ?int $maxResults = null, bool $fullDetails = true): Gmail\Pagination\GmailLazyCollection
     {
+        $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
+
         return Gmail\Pagination\GmailLazyCollection::messages($this, $query, $maxResults, $fullDetails);
     }
 
@@ -259,10 +261,10 @@ class GmailClient
      *
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
-     * @param  int  $maxResults  Maximum number of results per page
+     * @param  int|null  $maxResults  Maximum number of results per page
      * @return Collection<int, Label>|Gmail\Pagination\GmailPaginator<Label>|Gmail\Pagination\GmailLazyCollection<Label>
      */
-    public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
+    public function listLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed
     {
         if ($lazy) {
             return $this->lazyLoadLabels();
@@ -274,10 +276,10 @@ class GmailClient
     /**
      * Create a paginator for labels.
      *
-     * @param  int  $maxResults  Maximum number of results per page
+     * @param  int|null  $maxResults  Maximum number of results per page
      * @return GmailPaginator<Label>
      */
-    public function paginateLabels(int $maxResults = 100): GmailPaginator
+    public function paginateLabels(?int $maxResults = null): GmailPaginator
     {
         return $this->labelService->paginateLabels($maxResults);
     }
@@ -399,10 +401,10 @@ class GmailClient
      *
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
-     * @param  int  $maxResults  Maximum number of results per page
+     * @param  int|null  $maxResults  Maximum number of results per page
      * @return Collection<int, Label>|Gmail\Pagination\GmailPaginator<Label>|Gmail\Pagination\GmailLazyCollection<Label>
      */
-    public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
+    public function safeListLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed
     {
         if ($lazy) {
             try {
@@ -429,7 +431,7 @@ class GmailClient
      *
      * @param  array<string, mixed>  $query  Query parameters for filtering messages
      * @param  bool  $paginate  Whether to return a paginator for all results
-     * @param  int  $maxResults  Maximum number of results per page
+     * @param  int|null  $maxResults  Maximum number of results per page
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
      * @return Collection<int, Email>|Gmail\Pagination\GmailPaginator<Email>|Gmail\Pagination\GmailLazyCollection<Email>
@@ -437,7 +439,7 @@ class GmailClient
     public function safeListMessages(
         array $query = [],
         bool $paginate = false,
-        int $maxResults = 100,
+        ?int $maxResults = null,
         bool $lazy = false,
         bool $fullDetails = true
     ): mixed {

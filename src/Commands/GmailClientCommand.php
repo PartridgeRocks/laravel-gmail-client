@@ -57,9 +57,12 @@ class GmailClientCommand extends Command
             try {
                 $messages = $this->client->listMessages(['maxResults' => 10]);
 
+                // Convert to collection for consistent interface
+                $messagesCollection = $messages instanceof \Illuminate\Support\Collection ? $messages : collect($messages);
+
                 $this->table(
                     ['ID', 'From', 'Subject', 'Date'],
-                    $messages->map(function ($message) {
+                    $messagesCollection->map(function ($message) {
                         return [
                             'id' => $message->id,
                             'from' => $message->from,
@@ -81,9 +84,12 @@ class GmailClientCommand extends Command
             try {
                 $labels = $this->client->listLabels();
 
+                // Convert to collection for consistent interface
+                $labelsCollection = $labels instanceof \Illuminate\Support\Collection ? $labels : collect($labels);
+
                 $this->table(
                     ['ID', 'Name', 'Type', 'Messages', 'Unread'],
-                    $labels->map(function ($label) {
+                    $labelsCollection->map(function ($label) {
                         return [
                             'id' => $label->id,
                             'name' => $label->name,
