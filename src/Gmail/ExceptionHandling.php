@@ -45,7 +45,7 @@ trait ExceptionHandling
      * @param  callable  $callback  The operation to execute
      * @param  mixed  $fallback  The fallback value to return on error
      * @param  string  $operation  Description of the operation for logging
-     * @param  array  $context  Additional context for logging
+     * @param  array<string, mixed>  $context  Additional context for logging
      * @return mixed Result of callback or fallback value
      */
     protected function safeCall(callable $callback, mixed $fallback, string $operation, array $context = []): mixed
@@ -67,7 +67,7 @@ trait ExceptionHandling
      *
      * @param  string  $operation  Description of the failed operation
      * @param  \Throwable  $exception  The exception that occurred
-     * @param  array  $context  Additional context for debugging
+     * @param  array<string, mixed>  $context  Additional context for debugging
      */
     protected function logOperationFailure(string $operation, \Throwable $exception, array $context = []): void
     {
@@ -86,7 +86,7 @@ trait ExceptionHandling
      *
      * @param  \Throwable  $exception  The retryable exception
      * @param  string  $operation  Description of the operation
-     * @param  array  $context  Additional context
+     * @param  array<string, mixed>  $context  Additional context
      */
     protected function logRetryableError(\Throwable $exception, string $operation, array $context = []): void
     {
@@ -104,7 +104,7 @@ trait ExceptionHandling
      *
      * @param  \Throwable  $exception  The authentication exception
      * @param  string  $operation  Description of the operation
-     * @param  array  $context  Additional context (avoid sensitive data)
+     * @param  array<string, mixed>  $context  Additional context (avoid sensitive data)
      */
     protected function logAuthenticationError(\Throwable $exception, string $operation, array $context = []): void
     {

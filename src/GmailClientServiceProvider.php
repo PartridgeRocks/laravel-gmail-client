@@ -112,7 +112,7 @@ class GmailClientServiceProvider extends PackageServiceProvider
      *
      * Defines GET routes for authentication redirect and callback under a configurable prefix and middleware group.
      */
-    protected function registerRoutes()
+    protected function registerRoutes(): void
     {
         // Only register routes if the configuration indicates to do so
         if (config('gmail-client.register_routes', false)) {

@@ -19,12 +19,13 @@ class CreateLabelRequest extends BaseRequest
     // Define the HTTP method
     protected Method $method = Method::POST;
 
+    /** @var array<string, mixed> */
     protected array $labelData;
 
     /**
      * Create a new label creation request.
      *
-     * @param  array  $data  Label data:
+     * @param  array<string, mixed>  $data  Label data:
      *                       - name: string Label name (required, must be unique)
      *                       - messageListVisibility: string 'show'|'hide' (default 'show')
      *                       Controls if label appears in message list
@@ -52,7 +53,7 @@ class CreateLabelRequest extends BaseRequest
     /**
      * Get the request body containing the label data.
      *
-     * @return array Label data to send to Gmail API
+     * @return array<string, mixed> Label data to send to Gmail API
      */
     public function defaultBody(): array
     {

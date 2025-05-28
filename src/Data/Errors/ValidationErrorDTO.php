@@ -8,8 +8,10 @@ class ValidationErrorDTO extends ErrorDTO
         public string $code,
         public string $message,
         public ?string $detail = null,
+        /** @var array<string, mixed>|null */
         public ?array $context = null,
         public ?string $service = 'Gmail API',
+        /** @var array<string, mixed> */
         public ?array $errors = []
     ) {
         parent::__construct($code, $message, $detail, $context, $service);
@@ -17,6 +19,9 @@ class ValidationErrorDTO extends ErrorDTO
 
     /**
      * Create a validation error for a specific field
+     */
+    /**
+     * @param array<string, mixed>|null $context
      */
     public static function forField(string $field, string $message, ?array $context = null): self
     {
@@ -32,6 +37,10 @@ class ValidationErrorDTO extends ErrorDTO
     /**
      * Create a validation error with multiple field errors
      */
+    /**
+     * @param array<string, mixed> $errors
+     * @param array<string, mixed>|null $context
+     */
     public static function withErrors(array $errors, ?array $context = null): self
     {
         return new self(
@@ -45,6 +54,9 @@ class ValidationErrorDTO extends ErrorDTO
 
     /**
      * Create a missing required field error
+     */
+    /**
+     * @param array<string, mixed>|null $context
      */
     public static function missingRequiredField(string $field, ?array $context = null): self
     {

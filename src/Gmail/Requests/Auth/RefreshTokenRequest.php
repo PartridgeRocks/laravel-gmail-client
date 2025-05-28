@@ -24,6 +24,7 @@ class RefreshTokenRequest extends Request
 
     /**
      * Convert array data to form-urlencoded format
+     * @param array<string, mixed> $data
      */
     protected function formatFormData(array $data): string
     {
@@ -39,6 +40,9 @@ class RefreshTokenRequest extends Request
         return 'raw';
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function defaultHeaders(): array
     {
         return [

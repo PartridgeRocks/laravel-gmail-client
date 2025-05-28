@@ -13,6 +13,7 @@ class TokenDTO extends ResponseDTO
         public ?string $tokenType = 'Bearer',
         public ?int $expiresIn = null,
         public ?Carbon $expiresAt = null,
+        /** @var array<string>|null */
         public ?array $scope = null,
         ?string $etag = null,
         ?Carbon $responseTime = null
@@ -20,6 +21,9 @@ class TokenDTO extends ResponseDTO
         parent::__construct($etag, $responseTime);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public static function fromApiResponse(array $data): static
     {
         $expiresAt = null;

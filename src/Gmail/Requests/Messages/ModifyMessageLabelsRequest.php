@@ -16,16 +16,18 @@ class ModifyMessageLabelsRequest extends BaseRequest implements HasBody
 
     protected string $messageId;
 
+    /** @var array<string> */
     protected array $addLabelIds;
 
+    /** @var array<string> */
     protected array $removeLabelIds;
 
     /**
      * Create a new modify message labels request
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $addLabelIds  Array of label IDs to add
-     * @param  array  $removeLabelIds  Array of label IDs to remove
+     * @param  array<string>  $addLabelIds  Array of label IDs to add
+     * @param  array<string>  $removeLabelIds  Array of label IDs to remove
      */
     public function __construct(string $messageId, array $addLabelIds = [], array $removeLabelIds = [])
     {
@@ -44,6 +46,7 @@ class ModifyMessageLabelsRequest extends BaseRequest implements HasBody
 
     /**
      * Define the request body for label modification
+     * @return array<string, array<string>>
      */
     public function defaultBody(): array
     {

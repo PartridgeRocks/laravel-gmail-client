@@ -67,9 +67,7 @@ class AuthService implements AuthServiceInterface
      */
     public function exchangeCode(string $code, string $redirectUri): array
     {
-        $response = $this->getAuthResource()->exchangeCode($code, $redirectUri);
-        /** @var array<string, mixed> $data */
-        $data = $response->json();
+        $data = $this->getAuthResource()->exchangeCode($code, $redirectUri);
 
         // Auto-authenticate with the new token
         if (isset($data['access_token'])) {
@@ -97,9 +95,7 @@ class AuthService implements AuthServiceInterface
      */
     public function refreshToken(string $refreshToken): array
     {
-        $response = $this->getAuthResource()->refreshToken($refreshToken);
-        /** @var array<string, mixed> $data */
-        $data = $response->json();
+        $data = $this->getAuthResource()->refreshToken($refreshToken);
 
         // Auto-authenticate with the new token
         if (isset($data['access_token'])) {

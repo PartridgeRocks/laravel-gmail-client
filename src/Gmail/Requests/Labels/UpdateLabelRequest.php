@@ -12,8 +12,12 @@ class UpdateLabelRequest extends BaseRequest
 
     protected string $labelId;
 
+    /** @var array<string, mixed> */
     protected array $labelData;
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function __construct(string $id, array $data)
     {
         $this->labelId = $id;
@@ -25,6 +29,9 @@ class UpdateLabelRequest extends BaseRequest
         return '/users/me/labels/'.$this->labelId;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function defaultBody(): array
     {
         return $this->labelData;

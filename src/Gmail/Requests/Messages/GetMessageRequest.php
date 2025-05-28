@@ -20,13 +20,14 @@ class GetMessageRequest extends BaseRequest
 
     protected string $messageId;
 
+    /** @var array<string, mixed> */
     protected array $customQuery = [];
 
     /**
      * Create a new get message request.
      *
      * @param  string  $id  The Gmail message ID to retrieve
-     * @param  array  $query  Optional query parameters:
+     * @param  array<string, mixed>  $query  Optional query parameters:
      *                        - format: string Message format ('minimal'|'full'|'raw'|'metadata')
      *                        - minimal: Returns only message ID and labels
      *                        - full: Returns full message data (default)
@@ -53,7 +54,7 @@ class GetMessageRequest extends BaseRequest
     /**
      * Get the default query parameters for this request.
      *
-     * @return array Query parameters passed to Gmail API
+     * @return array<string, mixed> Query parameters passed to Gmail API
      */
     public function defaultQuery(): array
     {

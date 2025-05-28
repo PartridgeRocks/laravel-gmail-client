@@ -19,12 +19,13 @@ class ListMessagesRequest extends BaseRequest
     // Define the HTTP method
     protected Method $method = Method::GET;
 
+    /** @var array<string, mixed> */
     protected array $customQuery = [];
 
     /**
      * Create a new list messages request.
      *
-     * @param  array  $query  Optional query parameters:
+     * @param  array<string, mixed>  $query  Optional query parameters:
      *                        - q: string Gmail search query syntax:
      *                        - 'is:unread' - Unread messages
      *                        - 'is:starred' - Starred messages
@@ -56,7 +57,7 @@ class ListMessagesRequest extends BaseRequest
     /**
      * Get the default query parameters for this request.
      *
-     * @return array Query parameters for filtering and pagination
+     * @return array<string, mixed> Query parameters for filtering and pagination
      */
     public function defaultQuery(): array
     {

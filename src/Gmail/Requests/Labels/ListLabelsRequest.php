@@ -10,8 +10,12 @@ class ListLabelsRequest extends BaseRequest
     // Define the HTTP method
     protected Method $method = Method::GET;
 
+    /** @var array<string, mixed> */
     protected array $customQuery = [];
 
+    /**
+     * @param array<string, mixed> $query
+     */
     public function __construct(array $query = [])
     {
         $this->customQuery = $query;
@@ -22,6 +26,9 @@ class ListLabelsRequest extends BaseRequest
         return '/users/me/labels';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function defaultQuery(): array
     {
         return $this->customQuery;

@@ -15,7 +15,7 @@ abstract class ResponseDTO extends Data
     /**
      * Create a response DTO from an API response
      *
-     * @param  array  $response  The API response data
+     * @param  array<string, mixed>  $response  The API response data
      */
     abstract public static function fromApiResponse(array $response): static;
 }

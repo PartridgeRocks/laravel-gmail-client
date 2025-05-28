@@ -19,12 +19,13 @@ class SendMessageRequest extends BaseRequest
     // Define the HTTP method
     protected Method $method = Method::POST;
 
+    /** @var array<string, mixed> */
     protected array $messageData;
 
     /**
      * Create a new send message request.
      *
-     * @param  array  $data  Message data:
+     * @param  array<string, mixed>  $data  Message data:
      *                       - raw: string Base64url-encoded RFC2822 formatted message (required)
      *                       Must include headers: From, To, Subject, Date, Message-ID
      *                       Body content should be properly encoded for HTML/plain text
@@ -49,7 +50,7 @@ class SendMessageRequest extends BaseRequest
     /**
      * Get the request body containing the message data.
      *
-     * @return array Message data to send to Gmail API
+     * @return array<string, mixed> Message data to send to Gmail API
      */
     public function defaultBody(): array
     {

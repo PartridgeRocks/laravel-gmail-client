@@ -31,18 +31,18 @@ class Email extends Data
      *
      * @param  string  $id  Unique identifier of the email.
      * @param  string  $threadId  Identifier of the email thread.
-     * @param  array  $labelIds  Labels associated with the email.
+     * @param  array<string>  $labelIds  Labels associated with the email.
      * @param  string|null  $snippet  Short snippet of the email content.
-     * @param  array  $payload  Raw payload data of the email.
+     * @param  array<string, mixed>  $payload  Raw payload data of the email.
      * @param  int  $sizeEstimate  Estimated size of the email in bytes.
      * @param  Carbon  $internalDate  Date and time the email was received.
-     * @param  array|null  $headers  Optional array of email headers.
+     * @param  array<string, string>|null  $headers  Optional array of email headers.
      * @param  string|null  $body  Optional decoded body content of the email.
      * @param  string|null  $subject  Optional subject line of the email.
      * @param  string|null  $from  Optional sender information.
-     * @param  array|null  $to  Optional list of recipient addresses.
-     * @param  array|null  $cc  Optional list of CC recipient addresses.
-     * @param  array|null  $bcc  Optional list of BCC recipient addresses.
+     * @param  array<string>|null  $to  Optional list of recipient addresses.
+     * @param  array<string>|null  $cc  Optional list of CC recipient addresses.
+     * @param  array<string>|null  $bcc  Optional list of BCC recipient addresses.
      * @param  Contact|null  $fromContact  Optional parsed sender contact.
      * @param  array<Contact>|null  $toContacts  Optional list of parsed recipient contacts.
      * @param  array<Contact>|null  $ccContacts  Optional list of parsed CC contacts.
@@ -51,22 +51,31 @@ class Email extends Data
     public function __construct(
         public string $id,
         public string $threadId,
+        /** @var array<string> */
         public array $labelIds,
         public ?string $snippet,
+        /** @var array<string, mixed> */
         public array $payload,
         public int $sizeEstimate,
         #[WithCast(DateTimeInterfaceCast::class)]
         public Carbon $internalDate,
+        /** @var array<string, string>|null */
         public ?array $headers = null,
         public ?string $body = null,
         public ?string $subject = null,
         public ?string $from = null,
+        /** @var array<string>|null */
         public ?array $to = null,
+        /** @var array<string>|null */
         public ?array $cc = null,
+        /** @var array<string>|null */
         public ?array $bcc = null,
         public ?Contact $fromContact = null,
+        /** @var array<Contact>|null */
         public ?array $toContacts = null,
+        /** @var array<Contact>|null */
         public ?array $ccContacts = null,
+        /** @var array<Contact>|null */
         public ?array $bccContacts = null
     ) {}
 
@@ -75,7 +84,7 @@ class Email extends Data
      *
      * Parses and normalizes header fields, decodes the email body, and extracts relevant metadata to populate the Email object.
      *
-     * @param  array  $data  Raw Gmail API response data for a single message.
+     * @param  array<string, mixed>  $data  Raw Gmail API response data for a single message.
      * @return self Populated Email instance with structured fields and decoded content.
      */
     public static function fromApiResponse(array $data): self

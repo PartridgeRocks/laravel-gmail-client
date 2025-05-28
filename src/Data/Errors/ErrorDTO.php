@@ -10,12 +10,16 @@ class ErrorDTO extends Data
         public string $code,
         public string $message,
         public ?string $detail = null,
+        /** @var array<string, mixed>|null */
         public ?array $context = null,
         public ?string $service = 'Gmail API'
     ) {}
 
     /**
      * Create an error DTO from a response array
+     */
+    /**
+     * @param array<string, mixed> $errorData
      */
     public static function fromResponse(array $errorData): self
     {

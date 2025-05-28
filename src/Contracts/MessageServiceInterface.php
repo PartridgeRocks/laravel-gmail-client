@@ -28,6 +28,7 @@ interface MessageServiceInterface
      * Create a paginator for messages.
      *
      * @param  array<string, mixed>  $query
+     * @return GmailPaginator<Email>
      */
     public function paginateMessages(array $query = [], int $maxResults = 100): GmailPaginator;
 
