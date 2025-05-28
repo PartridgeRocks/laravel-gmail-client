@@ -1,8 +1,8 @@
 # Laravel Gmail Client
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/partridgerocks/gmail-client.svg?style=flat-square)](https://packagist.org/packages/partridgerocks/gmail-client)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/partridgerocks/gmail-client/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/partridgerocks/gmail-client/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/partridgerocks/gmail-client/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/partridgerocks/gmail-client/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/partridgerocks/gmail-client/run-tests.yml?branch=master&label=tests&style=flat-square)](https://github.com/partridgerocks/gmail-client/actions?query=workflow%3Arun-tests+branch%3Amaster)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/partridgerocks/gmail-client/fix-php-code-style-issues.yml?branch=master&label=code%20style&style=flat-square)](https://github.com/partridgerocks/gmail-client/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amaster)
 [![Total Downloads](https://img.shields.io/packagist/dt/partridgerocks/gmail-client.svg?style=flat-square)](https://packagist.org/packages/partridgerocks/gmail-client)
 [![PHP Version Support](https://img.shields.io/packagist/php-v/partridgerocks/gmail-client.svg?style=flat-square)](https://packagist.org/packages/partridgerocks/gmail-client)
 [![Laravel Version Support](https://img.shields.io/badge/Laravel-10.x%20%7C%2011.x%20%7C%2012.x-orange?style=flat-square)](https://packagist.org/packages/partridgerocks/gmail-client)
