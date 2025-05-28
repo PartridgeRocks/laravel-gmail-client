@@ -9,6 +9,14 @@ use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 
 class EmailDTO extends ResponseDTO
 {
+    /**
+     * @param  array<int, string>  $labelIds
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, string>|null  $headers
+     * @param  array<int, string>|null  $to
+     * @param  array<int, string>|null  $cc
+     * @param  array<int, string>|null  $bcc
+     */
     public function __construct(
         public string $id,
         public string $threadId,
@@ -31,6 +39,9 @@ class EmailDTO extends ResponseDTO
         parent::__construct($etag, $responseTime);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public static function fromApiResponse(array $data): static
     {
         // Extract header info for easier access
@@ -100,13 +111,21 @@ class EmailDTO extends ResponseDTO
 
     /**
      * Create a collection of EmailDTO objects from a list response
+     *
+     * @param  array<string, mixed>  $data
+     * @return Collection<int, self>
      */
     public static function collectionFromApiResponse(array $data): Collection
     {
-        $messages = collect($data['messages'] ?? []);
+        /** @var array<int, array<string, mixed>> $messagesData */
+        $messagesData = $data['messages'] ?? [];
+        $messages = collect($messagesData);
 
         if (empty($messages)) {
-            return collect();
+            /** @var Collection<int, EmailDTO> $emptyCollection */
+            $emptyCollection = collect();
+
+            return $emptyCollection;
         }
 
         return $messages->map(function ($message) {

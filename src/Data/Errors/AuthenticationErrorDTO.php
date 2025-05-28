@@ -16,6 +16,7 @@ class AuthenticationErrorDTO extends ErrorDTO
         public string $code,
         public string $message,
         public ?string $detail = null,
+        /** @var array<string, mixed>|null */
         public ?array $context = null,
         public ?string $service = 'Gmail API',
         public ?string $authenticationSource = null
@@ -25,6 +26,9 @@ class AuthenticationErrorDTO extends ErrorDTO
 
     /**
      * Create an authentication error from a specific error type
+     */
+    /**
+     * @param  array<string, mixed>|null  $context
      */
     public static function fromType(string $type, ?string $detail = null, ?array $context = null): self
     {

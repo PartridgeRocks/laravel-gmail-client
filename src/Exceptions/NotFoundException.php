@@ -29,6 +29,8 @@ class NotFoundException extends GmailClientException
 
     /**
      * Create from a 404 response
+     *
+     * @param  array<string, mixed>  $response
      */
     public static function fromNotFoundResponse(array $response, string $resourceType, string $resourceId): self
     {
@@ -48,7 +50,7 @@ class NotFoundException extends GmailClientException
     /**
      * Create an exception from a response array
      *
-     * @param  array  $response  The response data
+     * @param  array<string, mixed>  $response  The response data
      * @param  string|null  $message  Optional custom message
      */
     public static function fromResponse(array $response, ?string $message = null): self

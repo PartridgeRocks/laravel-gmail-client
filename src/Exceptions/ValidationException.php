@@ -29,6 +29,8 @@ class ValidationException extends GmailClientException
 
     /**
      * Create a validation exception with multiple errors
+     *
+     * @param  array<string, mixed>  $errors
      */
     public static function withErrors(array $errors): self
     {
@@ -39,6 +41,8 @@ class ValidationException extends GmailClientException
 
     /**
      * Create from an API validation response
+     *
+     * @param  array<string, mixed>  $response
      */
     public static function fromValidationResponse(array $response): self
     {
@@ -70,7 +74,7 @@ class ValidationException extends GmailClientException
     /**
      * Create an exception from a response array
      *
-     * @param  array  $response  The response data
+     * @param  array<string, mixed>  $response  The response data
      * @param  string|null  $message  Optional custom message
      */
     public static function fromResponse(array $response, ?string $message = null): self

@@ -117,6 +117,9 @@ class GmailClient
 
     /**
      * Get the authorization URL for the OAuth flow.
+     *
+     * @param  array<string>  $scopes
+     * @param  array<string, mixed>  $additionalParams
      */
     public function getAuthorizationUrl(
         string $redirectUri,
@@ -128,6 +131,8 @@ class GmailClient
 
     /**
      * Exchange an authorization code for an access token.
+     *
+     * @return array<string, mixed>
      */
     public function exchangeCode(string $code, string $redirectUri): array
     {
@@ -136,6 +141,8 @@ class GmailClient
 
     /**
      * Refresh an access token using a refresh token.
+     *
+     * @return array<string, mixed>
      */
     public function refreshToken(string $refreshToken): array
     {
@@ -161,12 +168,12 @@ class GmailClient
     /**
      * List messages with optional query parameters.
      *
-     * @param  array  $query  Query parameters for filtering messages
+     * @param  array<string, mixed>  $query  Query parameters for filtering messages
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  int  $maxResults  Maximum number of results per page
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
-     * @return Collection|GmailPaginator|\Illuminate\Support\LazyCollection
+     * @return Collection<int, Email>|Gmail\Pagination\GmailPaginator<Email>|Gmail\Pagination\GmailLazyCollection<Email>
      */
     public function listMessages(
         array $query = [],
@@ -185,8 +192,9 @@ class GmailClient
     /**
      * Create a paginator for messages.
      *
-     * @param  array  $query  Query parameters for filtering messages
+     * @param  array<string, mixed>  $query  Query parameters for filtering messages
      * @param  int  $maxResults  Maximum number of results per page
+     * @return GmailPaginator<Email>
      */
     public function paginateMessages(array $query = [], int $maxResults = 100): GmailPaginator
     {
@@ -197,9 +205,10 @@ class GmailClient
      * Create a lazy-loading collection for messages.
      * This provides memory-efficient iteration over messages.
      *
-     * @param  array  $query  Query parameters for filtering messages
+     * @param  array<string, mixed>  $query  Query parameters for filtering messages
      * @param  int  $maxResults  Maximum number of results per page
      * @param  bool  $fullDetails  Whether to fetch full message details or just basic info
+     * @return Gmail\Pagination\GmailLazyCollection<Email>
      */
     public function lazyLoadMessages(array $query = [], int $maxResults = 100, bool $fullDetails = true): Gmail\Pagination\GmailLazyCollection
     {
@@ -209,6 +218,8 @@ class GmailClient
     /**
      * Create a lazy-loading collection for labels.
      * This provides memory-efficient iteration over labels.
+     *
+     * @return Gmail\Pagination\GmailLazyCollection<Label>
      */
     public function lazyLoadLabels(): Gmail\Pagination\GmailLazyCollection
     {
@@ -231,6 +242,8 @@ class GmailClient
     /**
      * Send a new email message.
      *
+     * @param  array<string, mixed>  $options
+     *
      * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
@@ -247,7 +260,7 @@ class GmailClient
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  int  $maxResults  Maximum number of results per page
-     * @return Collection|GmailPaginator|Gmail\Pagination\GmailLazyCollection
+     * @return Collection<int, Label>|Gmail\Pagination\GmailPaginator<Label>|Gmail\Pagination\GmailLazyCollection<Label>
      */
     public function listLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
     {
@@ -262,6 +275,7 @@ class GmailClient
      * Create a paginator for labels.
      *
      * @param  int  $maxResults  Maximum number of results per page
+     * @return GmailPaginator<Label>
      */
     public function paginateLabels(int $maxResults = 100): GmailPaginator
     {
@@ -278,6 +292,8 @@ class GmailClient
 
     /**
      * Create a new label.
+     *
+     * @param  array<string, mixed>  $options
      */
     public function createLabel(string $name, array $options = []): Label
     {
@@ -286,6 +302,8 @@ class GmailClient
 
     /**
      * Update an existing label.
+     *
+     * @param  array<string, mixed>  $updates
      */
     public function updateLabel(string $id, array $updates): Label
     {
@@ -304,7 +322,7 @@ class GmailClient
      * Add labels to a message.
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $labelIds  Array of label IDs to add
+     * @param  array<string>  $labelIds  Array of label IDs to add
      *
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
@@ -320,7 +338,7 @@ class GmailClient
      * Remove labels from a message.
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $labelIds  Array of label IDs to remove
+     * @param  array<string>  $labelIds  Array of label IDs to remove
      *
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
@@ -336,8 +354,8 @@ class GmailClient
      * Modify labels on a message (add and/or remove labels).
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $addLabelIds  Array of label IDs to add (optional)
-     * @param  array  $removeLabelIds  Array of label IDs to remove (optional)
+     * @param  array<string>  $addLabelIds  Array of label IDs to add (optional)
+     * @param  array<string>  $removeLabelIds  Array of label IDs to remove (optional)
      *
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
@@ -352,8 +370,8 @@ class GmailClient
     /**
      * Get account statistics with optimized batch retrieval.
      *
-     * @param  array  $options  Configuration options for statistics retrieval
-     * @return array Comprehensive account statistics
+     * @param  array<string, mixed>  $options  Configuration options for statistics retrieval
+     * @return array<string, mixed> Comprehensive account statistics
      *
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
@@ -367,7 +385,7 @@ class GmailClient
     /**
      * Get account health information.
      *
-     * @return array Health status including connection, token, and API quota info
+     * @return array<string, mixed> Health status including connection, token, and API quota info
      *
      * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
      */
@@ -382,7 +400,7 @@ class GmailClient
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  int  $maxResults  Maximum number of results per page
-     * @return \Illuminate\Support\Collection|GmailPaginator|Gmail\Pagination\GmailLazyCollection|\Illuminate\Support\LazyCollection
+     * @return Collection<int, Label>|Gmail\Pagination\GmailPaginator<Label>|Gmail\Pagination\GmailLazyCollection<Label>
      */
     public function safeListLabels(bool $paginate = false, bool $lazy = false, int $maxResults = 100): mixed
     {
@@ -409,12 +427,12 @@ class GmailClient
     /**
      * Safely attempt to list messages, returning empty collection on failure.
      *
-     * @param  array  $query  Query parameters for filtering messages
+     * @param  array<string, mixed>  $query  Query parameters for filtering messages
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  int  $maxResults  Maximum number of results per page
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
-     * @return \Illuminate\Support\Collection|GmailPaginator|\Illuminate\Support\LazyCollection
+     * @return Collection<int, Email>|Gmail\Pagination\GmailPaginator<Email>|Gmail\Pagination\GmailLazyCollection<Email>
      */
     public function safeListMessages(
         array $query = [],
@@ -457,8 +475,8 @@ class GmailClient
     /**
      * Safely get account statistics with graceful fallback.
      *
-     * @param  array  $options  Configuration options for statistics retrieval
-     * @return array Statistics with partial_failure flag if needed
+     * @param  array<string, mixed>  $options  Configuration options for statistics retrieval
+     * @return array<string, mixed> Statistics with partial_failure flag if needed
      */
     public function safeGetAccountStatistics(array $options = []): array
     {
@@ -475,6 +493,8 @@ class GmailClient
 
     /**
      * Get a summary of Gmail account status with safe fallbacks.
+     *
+     * @return array<string, mixed>
      */
     public function getAccountSummary(): array
     {

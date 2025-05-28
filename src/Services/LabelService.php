@@ -51,13 +51,18 @@ class LabelService implements LabelServiceInterface
         $response = $this->getLabelResource()->list();
         $data = $response->json();
 
-        return collect($data['labels'] ?? [])->map(function ($label) {
+        /** @var array<int, array<string, mixed>> $labels */
+        $labels = $data['labels'] ?? [];
+
+        return collect($labels)->map(function (array $label) {
             return Label::fromApiResponse($label);
         });
     }
 
     /**
      * Create a paginator for labels.
+     *
+     * @return GmailPaginator<Label>
      */
     public function paginateLabels(int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): GmailPaginator
     {
@@ -104,11 +109,11 @@ class LabelService implements LabelServiceInterface
      * Create a new label.
      *
      * @param  string  $name  The label name
-     * @param  array  $options  Optional settings:
-     *                          - messageListVisibility: string Visibility in message list
-     *                          - labelListVisibility: string Visibility in label list
-     *                          - backgroundColor: string Background color hex code
-     *                          - textColor: string Text color hex code
+     * @param  array<string, mixed>  $options  Optional settings:
+     *                                         - messageListVisibility: string Visibility in message list
+     *                                         - labelListVisibility: string Visibility in label list
+     *                                         - backgroundColor: string Background color hex code
+     *                                         - textColor: string Text color hex code
      * @return Label The created label data
      *
      * @throws ValidationException When label data is invalid
@@ -145,7 +150,7 @@ class LabelService implements LabelServiceInterface
      * Update an existing label.
      *
      * @param  string  $id  The label ID to update
-     * @param  array  $updates  Array of label properties to update
+     * @param  array<string, mixed>  $updates  Array of label properties to update
      * @return Label The updated label data
      *
      * @throws NotFoundException When the label is not found

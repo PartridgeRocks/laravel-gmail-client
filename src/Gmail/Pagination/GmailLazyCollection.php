@@ -6,6 +6,11 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use PartridgeRocks\GmailClient\GmailClient;
 
+/**
+ * @template TValue
+ *
+ * @extends LazyCollection<int, TValue>
+ */
 class GmailLazyCollection extends LazyCollection
 {
     /**
@@ -16,9 +21,10 @@ class GmailLazyCollection extends LazyCollection
      * automatically and can fetch either full message details or just IDs.
      *
      * @param  \PartridgeRocks\GmailClient\GmailClient  $client  The Gmail client instance
-     * @param  array  $query  Query parameters for filtering messages
+     * @param  array<string, mixed>  $query  Query parameters for filtering messages
      * @param  int  $pageSize  Maximum number of results per page
      * @param  bool  $fullDetails  Whether to fetch full message details
+     * @return GmailLazyCollection<\PartridgeRocks\GmailClient\Data\Email>
      */
     public static function messages(
         GmailClient $client,
@@ -75,6 +81,7 @@ class GmailLazyCollection extends LazyCollection
      * from the Gmail API only when they are accessed.
      *
      * @param  \PartridgeRocks\GmailClient\GmailClient  $client  The Gmail client instance
+     * @return GmailLazyCollection<\PartridgeRocks\GmailClient\Data\Label>
      */
     public static function labels(GmailClient $client): self
     {
@@ -98,7 +105,7 @@ class GmailLazyCollection extends LazyCollection
      * This method materializes the lazy collection into a regular collection,
      * which may consume more memory but allows for more operations.
      *
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection<int, TValue>
      */
     public function toCollection()
     {

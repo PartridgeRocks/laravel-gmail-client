@@ -33,6 +33,7 @@ class AuthResource extends BaseResource
      *               - expires_in: int Token lifetime in seconds
      *               - token_type: string Usually 'Bearer'
      *               - scope: string Granted OAuth scopes
+     * @return array<string, mixed> Token data including access_token, refresh_token, expires_in, scope
      *
      * @throws AuthenticationException When code exchange fails or token is invalid
      *
@@ -74,6 +75,7 @@ class AuthResource extends BaseResource
      *               - expires_in: int New token lifetime in seconds
      *               - token_type: string Usually 'Bearer'
      *               - scope: string Granted OAuth scopes
+     * @return array<string, mixed> Token data including access_token, expires_in, scope
      *
      * @throws AuthenticationException When refresh fails or refresh token is invalid
      *
@@ -103,12 +105,12 @@ class AuthResource extends BaseResource
      * Users will authenticate with Google and authorize your application to access their Gmail.
      *
      * @param  string|null  $redirectUri  Override for redirect URI (where user returns after auth)
-     * @param  array  $scopes  Override for OAuth scopes (e.g., ['https://www.googleapis.com/auth/gmail.readonly'])
-     * @param  array  $additionalParams  Additional OAuth parameters:
-     *                                   - state: string CSRF protection token
-     *                                   - access_type: string 'offline' for refresh tokens
-     *                                   - prompt: string 'consent' to force consent screen
-     *                                   - login_hint: string Email address hint for user
+     * @param  array<string>  $scopes  Override for OAuth scopes (e.g., ['https://www.googleapis.com/auth/gmail.readonly'])
+     * @param  array<string, mixed>  $additionalParams  Additional OAuth parameters:
+     *                                                  - state: string CSRF protection token
+     *                                                  - access_type: string 'offline' for refresh tokens
+     *                                                  - prompt: string 'consent' to force consent screen
+     *                                                  - login_hint: string Email address hint for user
      * @return string Complete authorization URL for user redirection
      *
      * @throws \RuntimeException When OAuth configuration is invalid

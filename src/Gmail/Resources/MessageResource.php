@@ -22,12 +22,12 @@ class MessageResource extends BaseResource
     /**
      * List messages in the user's mailbox.
      *
-     * @param  array  $query  Optional query parameters:
-     *                        - q: string Search query (e.g., 'is:unread', 'from:example@gmail.com')
-     *                        - labelIds: array Filter by label IDs
-     *                        - maxResults: int Maximum number of messages to return (1-500, default 100)
-     *                        - pageToken: string Token for pagination
-     *                        - includeSpamTrash: bool Include spam and trash in results
+     * @param  array<string, mixed>  $query  Optional query parameters:
+     *                                       - q: string Search query (e.g., 'is:unread', 'from:example@gmail.com')
+     *                                       - labelIds: array Filter by label IDs
+     *                                       - maxResults: int Maximum number of messages to return (1-500, default 100)
+     *                                       - pageToken: string Token for pagination
+     *                                       - includeSpamTrash: bool Include spam and trash in results
      * @return Response Gmail API response containing message list
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.messages/list
@@ -41,9 +41,9 @@ class MessageResource extends BaseResource
      * Get a specific message by ID.
      *
      * @param  string  $id  The message ID to retrieve
-     * @param  array  $query  Optional query parameters:
-     *                        - format: string Message format ('minimal', 'full', 'raw', 'metadata')
-     *                        - metadataHeaders: array Specific headers to include when format=metadata
+     * @param  array<string, mixed>  $query  Optional query parameters:
+     *                                       - format: string Message format ('minimal', 'full', 'raw', 'metadata')
+     *                                       - metadataHeaders: array Specific headers to include when format=metadata
      * @return Response Gmail API response containing full message data
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.messages/get
@@ -56,9 +56,9 @@ class MessageResource extends BaseResource
     /**
      * Send an email message.
      *
-     * @param  array  $data  Message data:
-     *                       - raw: string Base64url-encoded RFC2822 formatted message
-     *                       - threadId: string (optional) Thread ID to reply to
+     * @param  array<string, mixed>  $data  Message data:
+     *                                      - raw: string Base64url-encoded RFC2822 formatted message
+     *                                      - threadId: string (optional) Thread ID to reply to
      * @return Response Gmail API response containing sent message data
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.messages/send
@@ -72,8 +72,8 @@ class MessageResource extends BaseResource
      * Modify labels on a message (add and/or remove labels).
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $addLabelIds  Array of label IDs to add to the message
-     * @param  array  $removeLabelIds  Array of label IDs to remove from the message
+     * @param  array<string>  $addLabelIds  Array of label IDs to add to the message
+     * @param  array<string>  $removeLabelIds  Array of label IDs to remove from the message
      * @return Response Gmail API response containing updated message data
      *
      * @see https://developers.google.com/gmail/api/reference/rest/v1/users.messages/modify
@@ -87,7 +87,7 @@ class MessageResource extends BaseResource
      * Add labels to a message.
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $labelIds  Array of label IDs to add (e.g., ['STARRED', 'IMPORTANT'])
+     * @param  array<string>  $labelIds  Array of label IDs to add (e.g., ['STARRED', 'IMPORTANT'])
      * @return Response Gmail API response containing updated message data
      */
     public function addLabels(string $messageId, array $labelIds): Response
@@ -99,7 +99,7 @@ class MessageResource extends BaseResource
      * Remove labels from a message.
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $labelIds  Array of label IDs to remove (e.g., ['UNREAD', 'INBOX'])
+     * @param  array<string>  $labelIds  Array of label IDs to remove (e.g., ['UNREAD', 'INBOX'])
      * @return Response Gmail API response containing updated message data
      */
     public function removeLabels(string $messageId, array $labelIds): Response

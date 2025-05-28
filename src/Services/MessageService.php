@@ -3,7 +3,6 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use Illuminate\Support\Collection;
-use PartridgeRocks\GmailClient\Constants\ConfigDefaults;
 use PartridgeRocks\GmailClient\Constants\GmailConstants;
 use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Data\Email;
@@ -30,7 +29,7 @@ class MessageService implements MessageServiceInterface
     /**
      * List messages with various options.
      *
-     * @param  array  $query  Search/filter parameters (e.g., ['q' => 'is:unread'])
+     * @param  array<string, mixed>  $query  Search/filter parameters (e.g., ['q' => 'is:unread'])
      * @param  bool  $paginate  Whether to return a paginator instance
      * @param  int  $maxResults  Maximum number of results per page
      * @param  bool  $lazy  Whether to return a lazy collection
@@ -58,9 +57,11 @@ class MessageService implements MessageServiceInterface
         $response = $this->getMessageResource()->list($query);
         $data = $response->json();
 
-        $messages = collect($data['messages'] ?? []);
+        /** @var array<int, array<string, mixed>> $messagesData */
+        $messagesData = $data['messages'] ?? [];
+        $messages = collect($messagesData);
 
-        return $messages->map(function ($message) {
+        return $messages->map(function (array $message) {
             return $this->getMessage($message['id']);
         });
     }
@@ -68,9 +69,9 @@ class MessageService implements MessageServiceInterface
     /**
      * Create a paginator for messages.
      *
-     * @param  array  $query  Search/filter parameters
+     * @param  array<string, mixed>  $query  Search/filter parameters
      * @param  int  $maxResults  Maximum number of results per page
-     * @return GmailPaginator Paginator instance for messages
+     * @return GmailPaginator<Email> Paginator instance for messages
      */
     public function paginateMessages(array $query = [], int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS): GmailPaginator
     {
@@ -86,10 +87,10 @@ class MessageService implements MessageServiceInterface
      * Create a lazy-loading collection for messages.
      * Note: Lazy loading should be handled by GmailClient directly.
      *
-     * @param  array  $query  Search/filter parameters
+     * @param  array<string, mixed>  $query  Search/filter parameters
      * @param  int  $maxResults  Maximum number of results per page
      * @param  bool  $fullDetails  Whether to fetch full message details
-     * @return \Illuminate\Support\LazyCollection Empty lazy collection (implementation placeholder)
+     * @return \Illuminate\Support\LazyCollection<int, Email> Empty lazy collection (implementation placeholder)
      */
     public function lazyLoadMessages(array $query = [], int $maxResults = GmailConstants::DEFAULT_MAX_RESULTS, bool $fullDetails = true): \Illuminate\Support\LazyCollection
     {
@@ -125,12 +126,12 @@ class MessageService implements MessageServiceInterface
      * @param  string  $to  Recipient email address
      * @param  string  $subject  Email subject line
      * @param  string  $body  Email body content
-     * @param  array  $options  Optional settings:
-     *                          - from: string Sender email (default: config value)
-     *                          - from_name: string Sender display name
-     *                          - cc: array CC recipients
-     *                          - bcc: array BCC recipients
-     *                          - html: bool Whether body is HTML (default: false)
+     * @param  array<string, mixed>  $options  Optional settings:
+     *                                         - from: string Sender email (default: config value)
+     *                                         - from_name: string Sender display name
+     *                                         - cc: array CC recipients
+     *                                         - bcc: array BCC recipients
+     *                                         - html: bool Whether body is HTML (default: false)
      * @return Email The sent message data
      *
      * @throws ValidationException When email addresses or required fields are invalid
@@ -164,7 +165,7 @@ class MessageService implements MessageServiceInterface
      * Add labels to a message.
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $labelIds  Array of label IDs to add
+     * @param  array<string>  $labelIds  Array of label IDs to add
      * @return Email The updated message data
      *
      * @throws NotFoundException When the message is not found
@@ -181,7 +182,7 @@ class MessageService implements MessageServiceInterface
      * Remove labels from a message.
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $labelIds  Array of label IDs to remove
+     * @param  array<string>  $labelIds  Array of label IDs to remove
      * @return Email The updated message data
      *
      * @throws NotFoundException When the message is not found
@@ -198,8 +199,8 @@ class MessageService implements MessageServiceInterface
      * Modify message labels (add and/or remove).
      *
      * @param  string  $messageId  The message ID to modify
-     * @param  array  $addLabelIds  Array of label IDs to add to the message
-     * @param  array  $removeLabelIds  Array of label IDs to remove from the message
+     * @param  array<string>  $addLabelIds  Array of label IDs to add to the message
+     * @param  array<string>  $removeLabelIds  Array of label IDs to remove from the message
      * @return Email The updated message data
      *
      * @throws NotFoundException When the message is not found
@@ -237,7 +238,7 @@ class MessageService implements MessageServiceInterface
     /**
      * Safely list messages, returning empty collection on failure.
      *
-     * @param  array  $query  Search/filter parameters
+     * @param  array<string, mixed>  $query  Search/filter parameters
      * @param  bool  $paginate  Whether to return a paginator instance
      * @param  int  $maxResults  Maximum number of results per page
      * @param  bool  $lazy  Whether to return a lazy collection
@@ -261,6 +262,8 @@ class MessageService implements MessageServiceInterface
 
     /**
      * Get appropriate empty structure for messages based on requested format.
+     *
+     * @param  array<string, mixed>  $query
      */
     private function getEmptyMessagesStructure(array $query, bool $paginate, bool $lazy, int $maxResults): mixed
     {
@@ -277,6 +280,8 @@ class MessageService implements MessageServiceInterface
 
     /**
      * Create raw email content.
+     *
+     * @param  array<string, mixed>  $options
      */
     private function createEmailRaw(string $to, string $subject, string $body, array $options = []): string
     {
@@ -317,23 +322,6 @@ class MessageService implements MessageServiceInterface
             : 'Content-Type: text/plain; charset=utf-8';
 
         return implode("\r\n", $headers)."\r\n\r\n".$body;
-    }
-
-    /**
-     * Parse the Retry-After header value.
-     */
-    private function parseRetryAfterHeader(string $value): int
-    {
-        if (is_numeric($value)) {
-            return (int) $value;
-        }
-
-        $timestamp = strtotime($value);
-        if ($timestamp !== false) {
-            return max(0, $timestamp - time());
-        }
-
-        return ConfigDefaults::DEFAULT_RETRY_AFTER_SECONDS;
     }
 
     /**
