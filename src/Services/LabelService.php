@@ -39,7 +39,7 @@ class LabelService implements LabelServiceInterface
     public function listLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed
     {
         $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
-        
+
         if ($lazy) {
             return $this->lazyLoadLabels();
         }
@@ -67,7 +67,7 @@ class LabelService implements LabelServiceInterface
     public function paginateLabels(?int $maxResults = null): GmailPaginator
     {
         $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
-        
+
         return new GmailPaginator(
             $this->connector,
             ListLabelsRequest::class,
@@ -201,7 +201,7 @@ class LabelService implements LabelServiceInterface
     public function safeListLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed
     {
         $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
-        
+
         return $this->safeCall(
             callback: fn () => $this->listLabels($paginate, $lazy, $maxResults),
             fallback: $this->getEmptyLabelsStructure($paginate, $lazy, $maxResults),

@@ -149,11 +149,11 @@ trait ExceptionHandling
     private function getHeaderAsString(Response $response, string $headerName): string
     {
         $headerValue = $response->header($headerName);
-        
+
         if (is_array($headerValue)) {
             return $headerValue[0] ?? '0';
         }
-        
+
         return (string) ($headerValue ?? '0');
     }
 

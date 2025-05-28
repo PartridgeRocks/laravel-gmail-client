@@ -213,7 +213,7 @@ class GmailClient
     public function lazyLoadMessages(array $query = [], ?int $maxResults = null, bool $fullDetails = true): Gmail\Pagination\GmailLazyCollection
     {
         $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
-        
+
         return Gmail\Pagination\GmailLazyCollection::messages($this, $query, $maxResults, $fullDetails);
     }
 

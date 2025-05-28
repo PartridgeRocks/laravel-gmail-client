@@ -46,7 +46,7 @@ class MessageService implements MessageServiceInterface
         bool $fullDetails = true
     ): mixed {
         $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
-        
+
         if ($lazy) {
             return $this->lazyLoadMessages($query, $maxResults, $fullDetails);
         }
@@ -77,7 +77,7 @@ class MessageService implements MessageServiceInterface
     public function paginateMessages(array $query = [], ?int $maxResults = null): GmailPaginator
     {
         $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
-        
+
         return new GmailPaginator(
             $this->connector,
             ListMessagesRequest::class,
@@ -256,7 +256,7 @@ class MessageService implements MessageServiceInterface
         bool $fullDetails = true
     ): mixed {
         $maxResults = $maxResults ?? config('gmail-client.pagination.default_page_size', 100);
-        
+
         return $this->safeCall(
             callback: fn () => $this->listMessages($query, $paginate, $maxResults, $lazy, $fullDetails),
             fallback: $this->getEmptyMessagesStructure($query, $paginate, $lazy, $maxResults),
