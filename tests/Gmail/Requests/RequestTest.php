@@ -10,7 +10,6 @@ use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\GetMessageRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\SendMessageRequest;
-use PartridgeRocks\GmailClient\Tests\TestHelpers\MockClientAdapter;
 use Saloon\Http\Faking\MockResponse;
 
 it('creates correct endpoint for get message', function () {
@@ -47,12 +46,9 @@ it('includes body data in send requests', function () {
 });
 
 it('handles 401 responses with authentication exception', function () {
-    $this->markTestSkipped('Skipping authentication exception test - requires process method override');
-
-    /*
     $connector = new GmailConnector;
 
-    $mockClient = MockClientAdapter::create([
+    $mockClient = new \Saloon\Http\Faking\MockClient([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 401,
@@ -64,17 +60,16 @@ it('handles 401 responses with authentication exception', function () {
     $connector->withMockClient($mockClient);
 
     $request = new GetMessageRequest('test-id');
-    $connector->send($request);
-    */
-})->throws(AuthenticationException::class);
+
+    // Send request and manually process response to trigger exception handling
+    $response = $connector->send($request);
+    expect(fn () => $request->processResponse($response))->toThrow(AuthenticationException::class);
+});
 
 it('handles 404 responses with not found exception', function () {
-    $this->markTestSkipped('Skipping not found exception test - requires process method override');
-
-    /*
     $connector = new GmailConnector;
 
-    $mockClient = MockClientAdapter::create([
+    $mockClient = new \Saloon\Http\Faking\MockClient([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 404,
@@ -86,17 +81,16 @@ it('handles 404 responses with not found exception', function () {
     $connector->withMockClient($mockClient);
 
     $request = new GetMessageRequest('test-id');
-    $connector->send($request);
-    */
-})->throws(NotFoundException::class);
+
+    // Send request and manually process response to trigger exception handling
+    $response = $connector->send($request);
+    expect(fn () => $request->processResponse($response))->toThrow(NotFoundException::class);
+});
 
 it('handles 429 responses with rate limit exception', function () {
-    $this->markTestSkipped('Skipping rate limit exception test - requires process method override');
-
-    /*
     $connector = new GmailConnector;
 
-    $mockClient = MockClientAdapter::create([
+    $mockClient = new \Saloon\Http\Faking\MockClient([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 429,
@@ -108,17 +102,16 @@ it('handles 429 responses with rate limit exception', function () {
     $connector->withMockClient($mockClient);
 
     $request = new GetMessageRequest('test-id');
-    $connector->send($request);
-    */
-})->throws(RateLimitException::class);
+
+    // Send request and manually process response to trigger exception handling
+    $response = $connector->send($request);
+    expect(fn () => $request->processResponse($response))->toThrow(RateLimitException::class);
+});
 
 it('handles 400 responses with validation exception', function () {
-    $this->markTestSkipped('Skipping validation exception test - requires process method override');
-
-    /*
     $connector = new GmailConnector;
 
-    $mockClient = MockClientAdapter::create([
+    $mockClient = new \Saloon\Http\Faking\MockClient([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 400,
@@ -130,6 +123,8 @@ it('handles 400 responses with validation exception', function () {
     $connector->withMockClient($mockClient);
 
     $request = new SendMessageRequest(['invalid' => 'data']);
-    $connector->send($request);
-    */
-})->throws(ValidationException::class);
+
+    // Send request and manually process response to trigger exception handling
+    $response = $connector->send($request);
+    expect(fn () => $request->processResponse($response))->toThrow(ValidationException::class);
+});
