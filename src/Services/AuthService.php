@@ -44,8 +44,8 @@ class AuthService implements AuthServiceInterface
      * Get the authorization URL for the OAuth flow.
      *
      * @param  string  $redirectUri  The redirect URI for OAuth callback
-     * @param  array  $scopes  Array of OAuth scopes to request
-     * @param  array  $additionalParams  Additional OAuth parameters
+     * @param  array<string>  $scopes  Array of OAuth scopes to request
+     * @param  array<string, mixed>  $additionalParams  Additional OAuth parameters
      * @return string The authorization URL
      */
     public function getAuthorizationUrl(
@@ -61,14 +61,14 @@ class AuthService implements AuthServiceInterface
      *
      * @param  string  $code  The authorization code from OAuth callback
      * @param  string  $redirectUri  The same redirect URI used for authorization
-     * @return array Token response including access_token, refresh_token, expires_in
+     * @return array<string, mixed> Token response including access_token, refresh_token, expires_in
      *
      * @throws AuthenticationException When code exchange fails
      */
     public function exchangeCode(string $code, string $redirectUri): array
     {
         $response = $this->getAuthResource()->exchangeCode($code, $redirectUri);
-        /** @var array $data */
+        /** @var array<string, mixed> $data */
         $data = $response->json();
 
         // Auto-authenticate with the new token
@@ -91,14 +91,14 @@ class AuthService implements AuthServiceInterface
      * Refresh an access token using a refresh token.
      *
      * @param  string  $refreshToken  The refresh token to use
-     * @return array New token response including access_token, expires_in
+     * @return array<string, mixed> New token response including access_token, expires_in
      *
      * @throws AuthenticationException When token refresh fails
      */
     public function refreshToken(string $refreshToken): array
     {
         $response = $this->getAuthResource()->refreshToken($refreshToken);
-        /** @var array $data */
+        /** @var array<string, mixed> $data */
         $data = $response->json();
 
         // Auto-authenticate with the new token
