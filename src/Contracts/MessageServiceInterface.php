@@ -13,6 +13,8 @@ interface MessageServiceInterface
 {
     /**
      * List messages with various options.
+     *
+     * @param  array<string, mixed>  $query
      */
     public function listMessages(
         array $query = [],
@@ -24,11 +26,16 @@ interface MessageServiceInterface
 
     /**
      * Create a paginator for messages.
+     *
+     * @param  array<string, mixed>  $query
      */
     public function paginateMessages(array $query = [], int $maxResults = 100): GmailPaginator;
 
     /**
      * Create a lazy-loading collection for messages.
+     *
+     * @param  array<string, mixed>  $query
+     * @return LazyCollection<int, Email>
      */
     public function lazyLoadMessages(array $query = [], int $maxResults = 100, bool $fullDetails = true): LazyCollection;
 
@@ -43,21 +50,30 @@ interface MessageServiceInterface
 
     /**
      * Send an email.
+     *
+     * @param  array<string, mixed>  $options
      */
     public function sendEmail(string $to, string $subject, string $body, array $options = []): Email;
 
     /**
      * Add labels to a message.
+     *
+     * @param  array<string>  $labelIds
      */
     public function addLabelsToMessage(string $messageId, array $labelIds): Email;
 
     /**
      * Remove labels from a message.
+     *
+     * @param  array<string>  $labelIds
      */
     public function removeLabelsFromMessage(string $messageId, array $labelIds): Email;
 
     /**
      * Modify message labels (add and/or remove).
+     *
+     * @param  array<string>  $addLabelIds
+     * @param  array<string>  $removeLabelIds
      */
     public function modifyMessageLabels(string $messageId, array $addLabelIds = [], array $removeLabelIds = []): Email;
 
@@ -68,6 +84,8 @@ interface MessageServiceInterface
 
     /**
      * Safely list messages, returning empty collection on failure.
+     *
+     * @param  array<string, mixed>  $query
      */
     public function safeListMessages(
         array $query = [],

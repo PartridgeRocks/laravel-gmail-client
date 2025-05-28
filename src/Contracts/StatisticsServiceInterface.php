@@ -10,8 +10,8 @@ interface StatisticsServiceInterface
     /**
      * Get comprehensive account statistics with optimized batch retrieval.
      *
-     * @param  array  $options  Configuration options for statistics retrieval
-     * @return array Comprehensive account statistics
+     * @param  array<string, mixed>  $options  Configuration options for statistics retrieval
+     * @return array<string, mixed> Comprehensive account statistics
      *
      * @throws AuthenticationException When authentication fails or token is invalid
      * @throws RateLimitException When API rate limit is exceeded
@@ -21,15 +21,15 @@ interface StatisticsServiceInterface
     /**
      * Get account health status with connection and API quota information.
      *
-     * @return array Health status with connection, authentication, and quota details
+     * @return array<string, mixed> Health status with connection, authentication, and quota details
      */
     public function getAccountHealth(): array;
 
     /**
      * Safely get account statistics with graceful fallback.
      *
-     * @param  array  $options  Configuration options for statistics retrieval
-     * @return array Statistics with partial_failure flag if needed
+     * @param  array<string, mixed>  $options  Configuration options for statistics retrieval
+     * @return array<string, mixed> Statistics with partial_failure flag if needed
      */
     public function safeGetAccountStatistics(array $options = []): array;
 
@@ -43,7 +43,7 @@ interface StatisticsServiceInterface
     /**
      * Get a high-level account summary with safe fallbacks.
      *
-     * @return array Account summary with connection status and basic metrics
+     * @return array<string, mixed> Account summary with connection status and basic metrics
      */
     public function getAccountSummary(): array;
 }
