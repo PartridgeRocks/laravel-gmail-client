@@ -20,6 +20,9 @@ interface AuthServiceInterface
 
     /**
      * Get the authorization URL for the OAuth flow.
+     *
+     * @param  array<string>  $scopes
+     * @param  array<string, mixed>  $additionalParams
      */
     public function getAuthorizationUrl(
         string $redirectUri,
@@ -29,11 +32,15 @@ interface AuthServiceInterface
 
     /**
      * Exchange an authorization code for an access token.
+     *
+     * @return array<string, mixed>
      */
     public function exchangeCode(string $code, string $redirectUri): array;
 
     /**
      * Refresh an access token using a refresh token.
+     *
+     * @return array<string, mixed>
      */
     public function refreshToken(string $refreshToken): array;
 }

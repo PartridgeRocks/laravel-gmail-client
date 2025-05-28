@@ -23,6 +23,8 @@ interface LabelServiceInterface
 
     /**
      * Create a lazy-loading collection for labels.
+     *
+     * @return LazyCollection<int, Label>
      */
     public function lazyLoadLabels(): LazyCollection;
 
@@ -37,11 +39,15 @@ interface LabelServiceInterface
 
     /**
      * Create a new label.
+     *
+     * @param  array<string, mixed>  $options
      */
     public function createLabel(string $name, array $options = []): Label;
 
     /**
      * Update an existing label.
+     *
+     * @param  array<string, mixed>  $updates
      */
     public function updateLabel(string $id, array $updates): Label;
 
