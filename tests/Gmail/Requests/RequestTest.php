@@ -10,6 +10,7 @@ use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\GetMessageRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use PartridgeRocks\GmailClient\Gmail\Requests\Messages\SendMessageRequest;
+use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 
 it('creates correct endpoint for get message', function () {
@@ -48,7 +49,7 @@ it('includes body data in send requests', function () {
 it('handles 401 responses with authentication exception', function () {
     $connector = new GmailConnector;
 
-    $mockClient = new \Saloon\Http\Faking\MockClient([
+    $mockClient = new MockClient([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 401,
@@ -69,7 +70,7 @@ it('handles 401 responses with authentication exception', function () {
 it('handles 404 responses with not found exception', function () {
     $connector = new GmailConnector;
 
-    $mockClient = new \Saloon\Http\Faking\MockClient([
+    $mockClient = new MockClient([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 404,
@@ -90,7 +91,7 @@ it('handles 404 responses with not found exception', function () {
 it('handles 429 responses with rate limit exception', function () {
     $connector = new GmailConnector;
 
-    $mockClient = new \Saloon\Http\Faking\MockClient([
+    $mockClient = new MockClient([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 429,
@@ -111,7 +112,7 @@ it('handles 429 responses with rate limit exception', function () {
 it('handles 400 responses with validation exception', function () {
     $connector = new GmailConnector;
 
-    $mockClient = new \Saloon\Http\Faking\MockClient([
+    $mockClient = new MockClient([
         '*' => MockResponse::make([
             'error' => [
                 'code' => 400,

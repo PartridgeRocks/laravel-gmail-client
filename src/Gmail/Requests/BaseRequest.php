@@ -33,7 +33,11 @@ abstract class BaseRequest extends Request
         }
 
         // Extract error data for better context
-        $errorData = $response->json() ?: [];
+        try {
+            $errorData = $response->json();
+        } catch (\JsonException) {
+            $errorData = [];
+        }
 
         // Handle specific error types based on status code and response content
         switch ($status) {
