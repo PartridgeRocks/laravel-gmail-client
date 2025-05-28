@@ -6,10 +6,12 @@ use PartridgeRocks\GmailClient\Commands\GmailClientCommand;
 use PartridgeRocks\GmailClient\Contracts\AuthServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
+use PartridgeRocks\GmailClient\Contracts\StatisticsServiceInterface;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Services\AuthService;
 use PartridgeRocks\GmailClient\Services\LabelService;
 use PartridgeRocks\GmailClient\Services\MessageService;
+use PartridgeRocks\GmailClient\Services\StatisticsService;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -61,6 +63,11 @@ class GmailClientServiceProvider extends PackageServiceProvider
             return new MessageService($app->make(GmailConnector::class));
         });
 
+        $this->app->singleton(StatisticsServiceInterface::class, StatisticsService::class);
+        $this->app->singleton(StatisticsService::class, function ($app) {
+            return new StatisticsService($app->make(GmailConnector::class));
+        });
+
         // Register main Gmail client
         $this->app->singleton(GmailClient::class, function ($app) {
             // If we have a token in session/config, authenticate the client
@@ -71,6 +78,7 @@ class GmailClientServiceProvider extends PackageServiceProvider
                 $app->make(AuthServiceInterface::class),
                 $app->make(LabelServiceInterface::class),
                 $app->make(MessageServiceInterface::class),
+                $app->make(StatisticsServiceInterface::class),
                 $app->make(GmailConnector::class)
             );
 

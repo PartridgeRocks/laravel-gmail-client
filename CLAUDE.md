@@ -201,6 +201,56 @@ if ($stats['partial_failure']) {
 
 **GitHub Issue**: Response to user request for null-safe `listLabels()` method - Completed ✅
 
+### Service Layer Architecture Enhancement (v1.5.0)
+
+**Feature**: Extracted statistics functionality into dedicated service layer with comprehensive interface contracts.
+
+**Implementation**:
+- **`StatisticsServiceInterface`** - Complete contract for account statistics and health monitoring
+- **`StatisticsService`** - Full implementation with smart performance optimizations
+- **Dependency injection integration** - Proper Laravel service container bindings with singleton pattern
+- **Background mode processing** - Safe statistics gathering for dashboard widgets
+- **Comprehensive test coverage** - 31 new tests covering all service methods and edge cases
+
+**Key Features**:
+```php
+// Comprehensive account statistics with smart counting
+$stats = $client->getAccountStatistics([
+    'unread_limit' => 25,
+    'include_labels' => true,
+    'estimate_large_counts' => true,
+    'background_mode' => false
+]);
+
+// Health monitoring for connection status
+$health = $client->getAccountHealth();
+// Returns: connected, status, api_quota_remaining, errors
+
+// Safe operations for production dashboards
+$summary = $client->getAccountSummary();
+$safeStats = $client->safeGetAccountStatistics();
+$isHealthy = $client->isConnected();
+```
+
+**Architecture Benefits**:
+- **Clean separation of concerns** - Statistics logic extracted from main client class
+- **Testability** - Interface contracts enable easy mocking and testing
+- **Performance optimization** - Smart counting, background mode, configurable limits
+- **Production reliability** - Safe methods with graceful fallbacks for dashboard widgets
+- **Extensibility** - Easy to swap implementations or add new statistics features
+
+**Configuration Integration**:
+```php
+// Uses existing gmail-client.performance config
+'performance' => [
+    'enable_smart_counting' => true,
+    'count_estimation_threshold' => 50,
+    'api_timeout' => 30,
+]
+```
+
+**Testing Coverage**: 31 new tests covering service contracts, dependency injection, error handling, and configuration integration.
+
 ### OAuth Authentication Bug (Fixed in v1.0.2)
 
 **Issue**: Missing `fromOAuthError()` method in `AuthenticationException` causing OAuth failures.

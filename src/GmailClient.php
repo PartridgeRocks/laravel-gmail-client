@@ -6,12 +6,9 @@ use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Contracts\AuthServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
+use PartridgeRocks\GmailClient\Contracts\StatisticsServiceInterface;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Data\Label;
-use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
-use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
-use PartridgeRocks\GmailClient\Exceptions\ValidationException;
-use PartridgeRocks\GmailClient\Gmail\GmailClientHelpers;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\Gmail\Resources\LabelResource;
@@ -19,6 +16,7 @@ use PartridgeRocks\GmailClient\Gmail\Resources\MessageResource;
 use PartridgeRocks\GmailClient\Services\AuthService;
 use PartridgeRocks\GmailClient\Services\LabelService;
 use PartridgeRocks\GmailClient\Services\MessageService;
+use PartridgeRocks\GmailClient\Services\StatisticsService;
 
 /**
  * Gmail Client - Main interface for Gmail API operations.
@@ -57,12 +55,11 @@ use PartridgeRocks\GmailClient\Services\MessageService;
  */
 class GmailClient
 {
-    use GmailClientHelpers;
-
     protected GmailConnector $connector;
     protected AuthServiceInterface $authService;
     protected LabelServiceInterface $labelService;
     protected MessageServiceInterface $messageService;
+    protected StatisticsServiceInterface $statisticsService;
 
     /**
      * Create a new GmailClient instance.
@@ -71,6 +68,7 @@ class GmailClient
      * @param  AuthServiceInterface|null  $authService  Optional auth service implementation
      * @param  LabelServiceInterface|null  $labelService  Optional label service implementation
      * @param  MessageServiceInterface|null  $messageService  Optional message service implementation
+     * @param  StatisticsServiceInterface|null  $statisticsService  Optional statistics service implementation
      * @param  GmailConnector|null  $connector  Optional Gmail connector implementation
      */
     public function __construct(
@@ -78,12 +76,14 @@ class GmailClient
         ?AuthServiceInterface $authService = null,
         ?LabelServiceInterface $labelService = null,
         ?MessageServiceInterface $messageService = null,
+        ?StatisticsServiceInterface $statisticsService = null,
         ?GmailConnector $connector = null
     ) {
         $this->connector = $connector ?? new GmailConnector;
         $this->authService = $authService ?? new AuthService($this->connector);
         $this->labelService = $labelService ?? new LabelService($this->connector);
         $this->messageService = $messageService ?? new MessageService($this->connector);
+        $this->statisticsService = $statisticsService ?? new StatisticsService($this->connector);
 
         if ($accessToken) {
             $this->authenticate($accessToken);
@@ -242,48 +242,6 @@ class GmailClient
     }
 
     /**
-     * Create a raw email message.
-     *
-     * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
-     */
-    protected function createEmailRaw(string $to, string $subject, string $body, array $options = []): string
-    {
-        $from = $options['from'] ?? config('gmail-client.from_email');
-
-        if (empty($from)) {
-            throw ValidationException::missingRequiredField('from_email');
-        }
-
-        // Validate sender email address
-        if (! filter_var($from, FILTER_VALIDATE_EMAIL)) {
-            throw ValidationException::invalidEmailAddress($from);
-        }
-
-        $cc = $options['cc'] ?? null;
-        $bcc = $options['bcc'] ?? null;
-
-        $email = "From: {$from}\r\n";
-        $email .= "To: {$to}\r\n";
-
-        if ($cc) {
-            $email .= "Cc: {$cc}\r\n";
-        }
-
-        if ($bcc) {
-            $email .= "Bcc: {$bcc}\r\n";
-        }
-
-        $email .= "Subject: {$subject}\r\n";
-        $email .= "MIME-Version: 1.0\r\n";
-        $email .= "Content-Type: text/html; charset=utf-8\r\n";
-        $email .= "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
-        $email .= quoted_printable_encode($body);
-
-        // Gmail API requires base64url encoding, not standard base64
-        return $this->base64UrlEncode($email);
-    }
-
-    /**
      * List all labels.
      *
      * @param  bool  $paginate  Whether to return a paginator for all results
@@ -403,162 +361,7 @@ class GmailClient
      */
     public function getAccountStatistics(array $options = []): array
     {
-        $defaults = [
-            'unread_limit' => config('gmail-client.performance.count_estimation_threshold', 25),
-            'today_limit' => 15,
-            'include_labels' => true,
-            'estimate_large_counts' => config('gmail-client.performance.enable_smart_counting', true),
-            'background_mode' => false,
-            'timeout' => config('gmail-client.performance.api_timeout', 30),
-        ];
-
-        $config = array_merge($defaults, $options);
-        $statistics = [
-            'unread_count' => null,
-            'today_count' => null,
-            'labels_count' => null,
-            'estimated_total' => null,
-            'api_calls_made' => 0,
-            'last_updated' => now()->toISOString(),
-            'partial_failure' => false,
-        ];
-
-        try {
-            // Get unread messages count with smart estimation
-            $statistics = $this->getUnreadCount($statistics, $config);
-
-            // Get today's messages count
-            $statistics = $this->getTodayCount($statistics, $config);
-
-            // Get labels count if requested
-            if ($config['include_labels']) {
-                $statistics = $this->getLabelsCount($statistics, $config);
-            }
-
-            // Get total mailbox estimation
-            $statistics = $this->getMailboxEstimation($statistics, $config);
-
-        } catch (\Exception $e) {
-            $statistics['partial_failure'] = true;
-            $statistics['error'] = $e->getMessage();
-
-            // In background mode, don't throw exceptions
-            if (! $config['background_mode']) {
-                throw $e;
-            }
-        }
-
-        return $statistics;
-    }
-
-    /**
-     * Get unread messages count with smart estimation.
-     */
-    protected function getUnreadCount(array $statistics, array $config): array
-    {
-        try {
-            $unreadQuery = ['q' => 'is:unread', 'maxResults' => $config['unread_limit']];
-            $response = $this->messages()->list($unreadQuery);
-            $data = $response->json();
-
-            $statistics['api_calls_made']++;
-            $messageCount = count($data['messages'] ?? []);
-
-            // Smart estimation for large counts
-            if ($config['estimate_large_counts'] && $messageCount >= $config['unread_limit']) {
-                $statistics['unread_count'] = $config['unread_limit'].'+';
-            } else {
-                $statistics['unread_count'] = $messageCount;
-            }
-
-            // Store estimated total if available
-            if (isset($data['resultSizeEstimate'])) {
-                $statistics['unread_estimate'] = $data['resultSizeEstimate'];
-            }
-
-        } catch (\Exception $e) {
-            $statistics['api_calls_made']++;
-            $statistics['unread_count'] = '?';
-            $statistics['partial_failure'] = true;
-        }
-
-        return $statistics;
-    }
-
-    /**
-     * Get today's messages count.
-     */
-    protected function getTodayCount(array $statistics, array $config): array
-    {
-        try {
-            $today = now()->format('Y/m/d');
-            $todayQuery = ['q' => "after:{$today}", 'maxResults' => $config['today_limit']];
-            $response = $this->messages()->list($todayQuery);
-            $data = $response->json();
-
-            $statistics['api_calls_made']++;
-            $messageCount = count($data['messages'] ?? []);
-
-            // Today's count is usually reasonable, so exact count unless very large
-            if ($config['estimate_large_counts'] && $messageCount >= $config['today_limit']) {
-                $statistics['today_count'] = $config['today_limit'].'+';
-            } else {
-                $statistics['today_count'] = $messageCount;
-            }
-
-        } catch (\Exception $e) {
-            $statistics['api_calls_made']++;
-            $statistics['today_count'] = '?';
-            $statistics['partial_failure'] = true;
-        }
-
-        return $statistics;
-    }
-
-    /**
-     * Get labels count.
-     */
-    protected function getLabelsCount(array $statistics, array $config): array
-    {
-        try {
-            $response = $this->labels()->list();
-            $data = $response->json();
-
-            $statistics['api_calls_made']++;
-            $statistics['labels_count'] = count($data['labels'] ?? []);
-
-        } catch (\Exception $e) {
-            $statistics['api_calls_made']++;
-            $statistics['labels_count'] = '?';
-            $statistics['partial_failure'] = true;
-        }
-
-        return $statistics;
-    }
-
-    /**
-     * Get mailbox size estimation.
-     */
-    protected function getMailboxEstimation(array $statistics, array $config): array
-    {
-        try {
-            // Use a broad query to get total mailbox estimation
-            $response = $this->messages()->list(['q' => 'in:anywhere', 'maxResults' => 1]);
-            $data = $response->json();
-
-            $statistics['api_calls_made']++;
-
-            if (isset($data['resultSizeEstimate'])) {
-                $statistics['estimated_total'] = $data['resultSizeEstimate'];
-            }
-
-        } catch (\Exception $e) {
-            $statistics['api_calls_made']++;
-            $statistics['estimated_total'] = null;
-            // Don't mark as partial failure for this optional metric
-        }
-
-        return $statistics;
+        return $this->statisticsService->getAccountStatistics($options);
     }
 
     /**
@@ -570,50 +373,7 @@ class GmailClient
      */
     public function getAccountHealth(): array
     {
-        $health = [
-            'connected' => false,
-            'token_expires_in' => null,
-            'api_quota_remaining' => null,
-            'last_successful_call' => null,
-            'errors' => [],
-            'status' => 'unknown',
-        ];
-
-        try {
-            // Test connection with a minimal API call
-            $response = $this->labels()->list();
-
-            if ($response->successful()) {
-                $health['connected'] = true;
-                $health['last_successful_call'] = now()->toISOString();
-                $health['status'] = 'healthy';
-
-                // Check for rate limit headers if available
-                $remaining = $response->header('X-RateLimit-Remaining');
-                if ($remaining !== null) {
-                    $health['api_quota_remaining'] = (int) $remaining;
-                }
-            } else {
-                $health['status'] = 'unhealthy';
-                $health['errors'][] = "API call failed with status: {$response->status()}";
-            }
-
-        } catch (AuthenticationException $e) {
-            $health['status'] = 'authentication_failed';
-            $health['errors'][] = $e->getMessage();
-        } catch (RateLimitException $e) {
-            $health['status'] = 'rate_limited';
-            $health['api_quota_remaining'] = 0;
-            $health['errors'][] = $e->getMessage();
-        } catch (\Exception $e) {
-            $health['status'] = 'error';
-            $health['errors'][] = $e->getMessage();
-        }
-
-        // Note: Token expiration checking would require extending the authenticator
-        // This is a future enhancement opportunity
-
-        return $health;
+        return $this->statisticsService->getAccountHealth();
     }
 
     /**
@@ -702,22 +462,7 @@ class GmailClient
      */
     public function safeGetAccountStatistics(array $options = []): array
     {
-        try {
-            return $this->getAccountStatistics(array_merge(['background_mode' => true], $options));
-        } catch (\Exception $e) {
-            logger()->warning('Failed to get Gmail account statistics: '.$e->getMessage());
-
-            return [
-                'unread_count' => '?',
-                'today_count' => '?',
-                'labels_count' => '?',
-                'estimated_total' => null,
-                'api_calls_made' => 0,
-                'last_updated' => now()->toISOString(),
-                'partial_failure' => true,
-                'error' => $e->getMessage(),
-            ];
-        }
+        return $this->statisticsService->safeGetAccountStatistics($options);
     }
 
     /**
@@ -725,13 +470,7 @@ class GmailClient
      */
     public function isConnected(): bool
     {
-        try {
-            $health = $this->getAccountHealth();
-
-            return $health['connected'] && $health['status'] === 'healthy';
-        } catch (\Exception) {
-            return false;
-        }
+        return $this->statisticsService->isConnected();
     }
 
     /**
@@ -739,39 +478,6 @@ class GmailClient
      */
     public function getAccountSummary(): array
     {
-        $summary = [
-            'connected' => false,
-            'labels_count' => 0,
-            'has_unread' => false,
-            'errors' => [],
-        ];
-
-        try {
-            // Check connection
-            $summary['connected'] = $this->isConnected();
-
-            if ($summary['connected']) {
-                // Get safe statistics
-                $stats = $this->safeGetAccountStatistics([
-                    'unread_limit' => 1, // Just check if any unread exist
-                    'include_labels' => true,
-                ]);
-
-                $summary['labels_count'] = is_numeric($stats['labels_count']) ? $stats['labels_count'] : 0;
-                $summary['has_unread'] = ! in_array($stats['unread_count'], ['?', 0, '0']);
-
-                if ($stats['partial_failure']) {
-                    $summary['errors'][] = 'STATISTICS_UNAVAILABLE';
-                }
-            }
-        } catch (\Exception $e) {
-            logger()->warning("Gmail operation failed: get account summary - {$e->getMessage()}", [
-                'operation' => 'get account summary',
-                'error_type' => get_class($e),
-            ]);
-            $summary['errors'][] = 'ACCOUNT_SUMMARY_ERROR';
-        }
-
-        return $summary;
+        return $this->statisticsService->getAccountSummary();
     }
 }
