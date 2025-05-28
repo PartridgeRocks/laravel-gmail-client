@@ -116,7 +116,7 @@ class GmailClientServiceProvider extends PackageServiceProvider
     {
         // Only register routes if the configuration indicates to do so
         if (config('gmail-client.register_routes', false)) {
-            $this->app['router']->group([
+            $this->app->make('router')->group([
                 'prefix' => config('gmail-client.route_prefix', 'gmail'),
                 'middleware' => config('gmail-client.route_middleware', ['web']),
             ], function ($router) {

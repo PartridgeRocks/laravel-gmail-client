@@ -31,7 +31,7 @@ trait ExceptionHandling
             config('gmail-client.http_status.client_error.not_found', 404) => throw NotFoundException::{$resourceType}($resourceId),
             config('gmail-client.http_status.client_error.unauthorized', 401) => throw AuthenticationException::invalidToken(),
             config('gmail-client.http_status.client_error.too_many_requests', 429) => throw RateLimitException::quotaExceeded(
-                $this->parseRetryAfterHeader($response->header('Retry-After') ?? '0')
+                $this->parseRetryAfterHeader($this->getHeaderAsString($response, 'Retry-After'))
             ),
             config('gmail-client.http_status.client_error.bad_request', 400) => throw new ValidationException('Invalid request data provided'),
             default => null
@@ -137,6 +137,24 @@ trait ExceptionHandling
         }
 
         return implode(' → ', $summary);
+    }
+
+    /**
+     * Get header value as string, handling array/string types safely.
+     *
+     * @param  Response  $response  The response to get header from
+     * @param  string  $headerName  The header name
+     * @return string Header value as string
+     */
+    private function getHeaderAsString(Response $response, string $headerName): string
+    {
+        $headerValue = $response->header($headerName);
+        
+        if (is_array($headerValue)) {
+            return $headerValue[0] ?? '0';
+        }
+        
+        return (string) ($headerValue ?? '0');
     }
 
     /**
