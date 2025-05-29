@@ -169,13 +169,63 @@ it('updateLabel throws NotFoundException when label not found', function () {
 });
 
 it('can generate an authorization URL', function () {
-    $this->markTestSkipped('Skipping OAuth URL test as it needs proper mocking setup');
+    $authUrl = $this->client->getAuthorizationUrl(
+        'https://example.com/callback',
+        ['https://www.googleapis.com/auth/gmail.readonly'],
+        ['access_type' => 'offline']
+    );
+
+    expect($authUrl)
+        ->toBeString()
+        ->toContain('accounts.google.com/o/oauth2/v2/auth')
+        ->toContain('response_type=code')
+        ->toContain('client_id=')
+        ->toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fcallback')
+        ->toContain('scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.readonly');
 });
 
 it('can exchange code for access token', function () {
-    $this->markTestSkipped('Skipping OAuth token exchange test as it needs proper mocking setup');
+    $tokenResponse = [
+        'access_token' => 'ya29.test_access_token',
+        'refresh_token' => 'test_refresh_token',
+        'expires_in' => 3600,
+        'scope' => 'https://www.googleapis.com/auth/gmail.readonly',
+        'token_type' => 'Bearer',
+    ];
+
+    $mockClient = new MockClient([
+        'https://oauth2.googleapis.com/token' => MockResponse::make($tokenResponse, 200),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $result = $this->client->exchangeCode('auth_code_123', 'https://example.com/callback');
+
+    expect($result)
+        ->toBe($tokenResponse)
+        ->and($result['access_token'])->toBe('ya29.test_access_token')
+        ->and($result['refresh_token'])->toBe('test_refresh_token')
+        ->and($result['expires_in'])->toBe(3600);
 });
 
 it('can refresh an access token', function () {
-    $this->markTestSkipped('Skipping OAuth token refresh test as it needs proper mocking setup');
+    $refreshResponse = [
+        'access_token' => 'ya29.new_access_token',
+        'expires_in' => 3600,
+        'scope' => 'https://www.googleapis.com/auth/gmail.readonly',
+        'token_type' => 'Bearer',
+    ];
+
+    $mockClient = new MockClient([
+        'https://oauth2.googleapis.com/token' => MockResponse::make($refreshResponse, 200),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+
+    $result = $this->client->refreshToken('test_refresh_token');
+
+    expect($result)
+        ->toBe($refreshResponse)
+        ->and($result['access_token'])->toBe('ya29.new_access_token')
+        ->and($result['expires_in'])->toBe(3600);
 });

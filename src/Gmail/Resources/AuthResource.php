@@ -41,14 +41,15 @@ class AuthResource extends BaseResource
      */
     public function exchangeCode(string $code, ?string $redirectUri = null): array
     {
-        // We can use the built-in method from AuthorizationCodeGrant trait
         try {
-            // Use the configured redirect URI from OAuthConfig if not specified
-            if ($redirectUri) {
-                $this->connector->oauthConfig()->setRedirectUri($redirectUri);
+            $redirectUri = $redirectUri ?? $this->connector->oauthConfig()->getRedirectUri();
+            $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Auth\ExchangeCodeRequest($code, $redirectUri);
+            $response = $this->connector->send($request);
+
+            if ($response->failed()) {
+                throw new \Exception('Token exchange failed: ' . $response->body());
             }
 
-            $response = $this->connector->getAccessToken($code);
             $tokenData = $response->json();
 
             // Authenticate the connector with the new token
@@ -84,7 +85,13 @@ class AuthResource extends BaseResource
     public function refreshToken(string $refreshToken): array
     {
         try {
-            $response = $this->connector->refreshAccessToken($refreshToken);
+            $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Auth\RefreshTokenRequest($refreshToken);
+            $response = $this->connector->send($request);
+
+            if ($response->failed()) {
+                throw new \Exception('Token refresh failed: ' . $response->body());
+            }
+
             $tokenData = $response->json();
 
             // Authenticate the connector with the new token
