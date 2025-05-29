@@ -11,7 +11,6 @@ use PartridgeRocks\GmailClient\Tests\TestHelpers\MockClientAdapter;
 use Saloon\Http\Faking\MockResponse;
 
 it('can fetch the first page of results', function () {
-    $this->markTestSkipped('Skipping due to potential memory issues');
     $connector = new GmailConnector;
 
     // First page of results with a next page token
@@ -44,7 +43,7 @@ it('can fetch the first page of results', function () {
 });
 
 it('can fetch all pages of results', function () {
-    $this->markTestSkipped('Skipping due to potential memory issues');
+    $this->markTestSkipped('Memory exhaustion in getAllPages() - needs optimization');
     $connector = new GmailConnector;
 
     // Respond with different data based on the page token
@@ -101,7 +100,6 @@ it('can fetch all pages of results', function () {
 });
 
 it('can transform results using a DTO', function () {
-    $this->markTestSkipped('Skipping due to potential memory issues');
     $connector = new GmailConnector;
 
     // Simple one-page response
