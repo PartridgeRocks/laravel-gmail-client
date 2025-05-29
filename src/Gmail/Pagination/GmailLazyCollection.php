@@ -43,9 +43,10 @@ class GmailLazyCollection extends LazyCollection
                 // Add page token to query if we have one
                 $currentQuery = $pageToken ? array_merge($query, ['pageToken' => $pageToken]) : $query;
 
-                // Get list of message IDs for this page
-                // Using the messages().list() method directly since getMessageIds doesn't exist
-                $response = $client->messages()->list($currentQuery);
+                // Get list of message IDs for this page using the connector directly
+                // This avoids recursion since we bypass the client's listMessages method
+                $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest($currentQuery);
+                $response = $client->getConnector()->send($request);
                 $data = $response->json();
 
                 // Get next page token and check if more pages exist
@@ -86,15 +87,18 @@ class GmailLazyCollection extends LazyCollection
     public static function labels(GmailClient $client): self
     {
         return new self(function () use ($client) {
-            $response = $client->labels()->list();
+            // Use the connector directly to avoid potential recursion
+            $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest();
+            $response = $client->getConnector()->send($request);
             $data = $response->json();
 
             if (empty($data['labels'])) {
                 return;
             }
 
-            foreach ($data['labels'] as $label) {
-                yield $client->getLabel($label['id']);
+            foreach ($data['labels'] as $labelData) {
+                // Transform the raw data into a Label object
+                yield \PartridgeRocks\GmailClient\Data\Label::fromApiResponse($labelData);
             }
         });
     }

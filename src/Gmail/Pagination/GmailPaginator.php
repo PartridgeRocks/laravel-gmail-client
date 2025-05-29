@@ -94,34 +94,61 @@ class GmailPaginator
 
         $request = $this->getRequest();
         $response = $this->connector->send($request);
-        $this->processResponse($response);
+        $data = $response->json();
+        
+        // Update pagination state
+        $this->nextPageToken = $data['nextPageToken'] ?? null;
+        $this->hasMorePages = $this->nextPageToken !== null;
 
-        // Get the last N items where N is the max results
-        return $this->items->slice(-$this->maxResults);
+        // Extract items for this page only (don't accumulate in $this->items)
+        $pageItems = $data;
+        if ($this->responseKey && isset($data[$this->responseKey])) {
+            $pageItems = $data[$this->responseKey];
+        }
+
+        // Return just this page's items as a collection
+        return collect(is_array($pageItems) ? $pageItems : []);
     }
 
     /**
      * Get all results by iterating through all pages.
+     * 
+     * Warning: This method loads all results into memory at once.
+     * For large datasets, consider using lazy loading instead.
      *
+     * @param int|null $maxItems Maximum number of items to retrieve (prevents memory issues)
      * @return Collection<int, TValue>
      */
-    public function getAllPages(): Collection
+    public function getAllPages(?int $maxItems = null): Collection
     {
+        $allResults = collect();
+        $itemCount = 0;
+        
         while ($this->hasMorePages) {
-            $this->getNextPage();
+            $page = $this->getNextPage();
+            
+            // Add items to result collection
+            foreach ($page as $item) {
+                if ($maxItems && $itemCount >= $maxItems) {
+                    break 2; // Break out of both loops
+                }
+                $allResults->push($item);
+                $itemCount++;
+            }
         }
 
-        return $this->items;
+        return $allResults;
     }
 
     /**
      * Transform collection using a DTO's static method.
      *
+     * @param int|null $maxItems Maximum number of items to transform (prevents memory issues)
      * @return Collection<int, TValue>
      */
-    public function transformUsingDTO(string $dtoClass, string $method = 'collectionFromApiResponse'): Collection
+    public function transformUsingDTO(string $dtoClass, string $method = 'collectionFromApiResponse', ?int $maxItems = null): Collection
     {
-        $response = $this->getAllPages();
+        $response = $this->getAllPages($maxItems);
 
         // Create the response data structure expected by the DTO
         $dataKey = $this->responseKey ?? 'items';

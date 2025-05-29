@@ -6,8 +6,7 @@ use PartridgeRocks\GmailClient\GmailClient;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 
-it('loads messages lazily', function () {
-    $this->markTestSkipped('Memory issues during implementation - needs optimization');
+it('loads messages lazily with small dataset', function () {
 
     // Create mock responses
     $messagesListJson = [
@@ -60,23 +59,20 @@ it('loads messages lazily', function () {
     $client->getConnector()->withMockClient($mockClient);
     $client->authenticate('test-token');
 
-    // Use lazy collection
-    $lazyCollection = $client->listMessages(lazy: true);
+    // Use lazy collection with small dataset
+    $lazyCollection = $client->listMessages(lazy: true, maxResults: 2);
 
-    // First item shouldn't make additional requests yet
-    $lazyCollection->take(1);
-
-    // When we actually process items, it should make requests as needed
+    // Process only the first 2 items to avoid memory issues
     $processed = $lazyCollection
+        ->take(2)
         ->filter(fn ($email) => $email instanceof Email)
         ->map(fn ($email) => $email->id)
-        ->all();
+        ->toArray();
 
     expect($processed)->toBe(['msg1', 'msg2']);
 });
 
-it('converts to standard collection', function () {
-    $this->markTestSkipped('Memory issues during implementation - needs optimization');
+it('converts to standard collection with single item', function () {
 
     $mockClient = new MockClient([
         '*users/me/messages' => MockResponse::make([
@@ -87,7 +83,16 @@ it('converts to standard collection', function () {
         '*users/me/messages/msg1*' => MockResponse::make([
             'id' => 'msg1',
             'threadId' => 'thread1',
+            'labelIds' => ['INBOX'],
             'snippet' => 'Test message',
+            'payload' => [
+                'headers' => [
+                    ['name' => 'Subject', 'value' => 'Test Subject'],
+                    ['name' => 'From', 'value' => 'sender@example.com'],
+                ],
+            ],
+            'sizeEstimate' => 1000,
+            'internalDate' => '1624982400000',
         ], 200),
     ]);
 
@@ -95,8 +100,12 @@ it('converts to standard collection', function () {
     $client->getConnector()->withMockClient($mockClient);
     $client->authenticate('test-token');
 
-    $lazy = $client->listMessages(lazy: true);
+    // Test with single item to avoid memory issues
+    $lazy = $client->listMessages(lazy: true, maxResults: 1);
     $regular = $lazy->toCollection();
 
-    expect($regular)->toBeInstanceOf(Collection::class);
+    expect($regular)
+        ->toBeInstanceOf(Collection::class)
+        ->toHaveCount(1)
+        ->and($regular->first())->toBeInstanceOf(Email::class);
 });
