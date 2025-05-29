@@ -3,7 +3,6 @@
 namespace PartridgeRocks\GmailClient\Gmail;
 
 use Saloon\Contracts\Authenticator;
-use Saloon\Contracts\OAuthAuthenticator;
 use Saloon\Helpers\OAuth2\OAuthConfig;
 use Saloon\Http\Connector;
 use Saloon\Http\Request;
