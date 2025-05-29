@@ -16,6 +16,8 @@ use Saloon\Http\Response;
  *
  * @see https://developers.google.com/gmail/api/auth/about-auth
  * @see https://developers.google.com/identity/protocols/oauth2
+ *
+ * @property \PartridgeRocks\GmailClient\Gmail\GmailConnector $connector
  */
 class AuthResource extends BaseResource
 {
@@ -139,6 +141,6 @@ class AuthResource extends BaseResource
             $this->connector->oauthConfig()->setDefaultScopes($scopes);
         }
 
-        return $this->connector->getAuthorizationUrl($additionalParams);
+        return $this->connector->getAuthorizationUrl([], null, ' ', $additionalParams);
     }
 }

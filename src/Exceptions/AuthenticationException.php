@@ -10,28 +10,28 @@ class AuthenticationException extends GmailClientException
     {
         $error = AuthenticationErrorDTO::fromType(AuthenticationErrorDTO::MISSING_TOKEN);
 
-        return new static($error->message, 401, $previous, $error);
+        return new self($error->message, 401, $previous, $error);
     }
 
     public static function invalidToken(?\Throwable $previous = null): self
     {
         $error = AuthenticationErrorDTO::fromType(AuthenticationErrorDTO::INVALID_TOKEN);
 
-        return new static($error->message, 401, $previous, $error);
+        return new self($error->message, 401, $previous, $error);
     }
 
     public static function tokenExpired(?\Throwable $previous = null): self
     {
         $error = AuthenticationErrorDTO::fromType(AuthenticationErrorDTO::TOKEN_EXPIRED);
 
-        return new static($error->message, 401, $previous, $error);
+        return new self($error->message, 401, $previous, $error);
     }
 
     public static function refreshFailed(?string $detail = null, ?\Throwable $previous = null): self
     {
         $error = AuthenticationErrorDTO::fromType(AuthenticationErrorDTO::REFRESH_FAILED, $detail);
 
-        return new static($error->message, 401, $previous, $error);
+        return new self($error->message, 401, $previous, $error);
     }
 
     public static function missingCredentials(?\Throwable $previous = null): self
@@ -41,7 +41,7 @@ class AuthenticationException extends GmailClientException
             'Missing required OAuth credentials. Please check your configuration.'
         );
 
-        return new static($error->message, 401, $previous, $error);
+        return new self($error->message, 401, $previous, $error);
     }
 
     public static function authorizationFailed(?string $message = null, ?\Throwable $previous = null): self
@@ -51,7 +51,7 @@ class AuthenticationException extends GmailClientException
             $message ?? 'Unknown error'
         );
 
-        return new static('Gmail authorization failed: '.($message ?? 'Unknown error'), 401, $previous, $error);
+        return new self('Gmail authorization failed: '.($message ?? 'Unknown error'), 401, $previous, $error);
     }
 
     /**
@@ -65,7 +65,7 @@ class AuthenticationException extends GmailClientException
             ['oauth_flow' => true, 'timestamp' => now()]
         );
 
-        return new static("OAuth authentication failed: {$message}", 401, $previous, $error);
+        return new self("OAuth authentication failed: {$message}", 401, $previous, $error);
     }
 
     /**
@@ -94,6 +94,6 @@ class AuthenticationException extends GmailClientException
             $response
         );
 
-        return new static($error->message, 401, $previous, $error);
+        return new self($error->message, 401, $previous, $error);
     }
 }

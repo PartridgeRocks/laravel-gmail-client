@@ -54,7 +54,7 @@ class LabelDTO extends ResponseDTO
      * Create a collection of LabelDTO objects from a list response
      *
      * @param  array<string, mixed>  $data
-     * @return Collection<int, self>
+     * @return Collection<int, static>
      */
     public static function collectionFromApiResponse(array $data): Collection
     {
@@ -62,7 +62,7 @@ class LabelDTO extends ResponseDTO
         $labelsData = $data['labels'] ?? [];
 
         return collect($labelsData)->map(function (array $label) {
-            return static::fromApiResponse($label);
+            return self::fromApiResponse($label);
         });
     }
 }

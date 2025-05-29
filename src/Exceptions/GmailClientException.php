@@ -50,7 +50,7 @@ class GmailClientException extends Exception
     {
         $error = ErrorDTO::fromResponse($response);
 
-        return new static(
+        return new self(
             $message ?? $error->message,
             0,
             null,

@@ -10,21 +10,21 @@ class NotFoundException extends GmailClientException
     {
         $error = NotFoundErrorDTO::forResource('message', $id);
 
-        return new static("Email message with ID '{$id}' not found.", 404, null, $error);
+        return new self("Email message with ID '{$id}' not found.", 404, null, $error);
     }
 
     public static function label(string $id): self
     {
         $error = NotFoundErrorDTO::forResource('label', $id);
 
-        return new static("Label with ID '{$id}' not found.", 404, null, $error);
+        return new self("Label with ID '{$id}' not found.", 404, null, $error);
     }
 
     public static function thread(string $id): self
     {
         $error = NotFoundErrorDTO::forResource('thread', $id);
 
-        return new static("Thread with ID '{$id}' not found.", 404, null, $error);
+        return new self("Thread with ID '{$id}' not found.", 404, null, $error);
     }
 
     /**
@@ -44,7 +44,7 @@ class NotFoundException extends GmailClientException
             $response
         );
 
-        return new static($message, 404, null, $error);
+        return new self($message, 404, null, $error);
     }
 
     /**
@@ -57,7 +57,7 @@ class NotFoundException extends GmailClientException
     {
         $error = NotFoundErrorDTO::fromResponse($response);
 
-        return new static(
+        return new self(
             $message ?? $error->message,
             404,
             null,
@@ -91,6 +91,6 @@ class NotFoundException extends GmailClientException
             ['path' => $path]
         );
 
-        return new static("$resourceType not found", 404, null, $error);
+        return new self("$resourceType not found", 404, null, $error);
     }
 }

@@ -3,13 +3,18 @@
 namespace PartridgeRocks\GmailClient\Gmail;
 
 use Saloon\Contracts\Authenticator;
-use Saloon\Contracts\OAuthAuthenticator;
 use Saloon\Helpers\OAuth2\OAuthConfig;
 use Saloon\Http\Connector;
 use Saloon\Http\Request;
 use Saloon\Traits\OAuth2\AuthorizationCodeGrant;
 use Saloon\Traits\Plugins\AcceptsJson;
 
+/**
+ * Gmail API Connector with OAuth2 support.
+ *
+ * @method OAuthConfig oauthConfig()
+ * @method string getAuthorizationUrl(array $scopes = [], ?string $state = null, string $scopeSeparator = ' ', array $additionalQueryParameters = [])
+ */
 class GmailConnector extends Connector
 {
     use AcceptsJson;
@@ -104,13 +109,6 @@ class GmailConnector extends Connector
      */
     public function authenticate(Authenticator $authenticator): static
     {
-        if ($authenticator instanceof OAuthAuthenticator) {
-            $this->withTokenAuth($authenticator->getToken());
-        } else {
-            // Fall back to parent implementation for other authenticator types
-            parent::authenticate($authenticator);
-        }
-
-        return $this;
+        return parent::authenticate($authenticator);
     }
 }
