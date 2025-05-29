@@ -22,7 +22,7 @@ readonly class RateLimitConfig
     ) {}
 
     /**
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      */
     public static function fromArray(array $config): self
     {
