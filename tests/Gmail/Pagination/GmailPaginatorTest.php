@@ -121,7 +121,7 @@ it('can transform results using a DTO', function () {
 
 it('respects memory limit across multiple pages', function () {
     $connector = new GmailConnector;
-    
+
     $mockClient = MockClientAdapter::create([
         MockClientAdapter::mockJsonResponse([
             'messages' => [
@@ -137,19 +137,19 @@ it('respects memory limit across multiple pages', function () {
             ],
         ]),
     ]);
-    
+
     $connector->withMockClient($mockClient);
-    
+
     $paginator = new GmailPaginator(
         $connector,
         ListMessagesRequest::class,
         'messages',
         2 // 2 items per page
     );
-    
+
     // Should stop at 3 items across 2 pages
     $results = $paginator->getAllPages(3);
-    
+
     expect($results)
         ->toBeInstanceOf(Collection::class)
         ->toHaveCount(3)

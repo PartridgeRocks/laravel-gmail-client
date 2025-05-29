@@ -26,7 +26,6 @@ class GmailPaginator
 
     protected ?string $responseKey = null;
 
-
     /**
      * Create a new paginator instance.
      */
@@ -54,7 +53,6 @@ class GmailPaginator
 
         return $requestClass;
     }
-
 
     /**
      * Get the next page of results.
