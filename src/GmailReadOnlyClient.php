@@ -54,7 +54,7 @@ class GmailReadOnlyClient implements GmailReadInterface, GmailSafeInterface
     }
 
     /**
-     * @param array<string, mixed> $options
+     * @param  array<string, mixed>  $options
      * @return array<string, mixed>
      */
     public function getAccountStatistics(array $options = []): array
@@ -84,7 +84,7 @@ class GmailReadOnlyClient implements GmailReadInterface, GmailSafeInterface
     }
 
     /**
-     * @param array<string, mixed> $query
+     * @param  array<string, mixed>  $query
      * @return Collection<int, Email>|LazyCollection<int, Email>
      */
     public function safeListMessages(
@@ -110,7 +110,7 @@ class GmailReadOnlyClient implements GmailReadInterface, GmailSafeInterface
     }
 
     /**
-     * @param array<string, mixed> $options
+     * @param  array<string, mixed>  $options
      * @return array<string, mixed>
      */
     public function safeGetAccountStatistics(array $options = []): array
