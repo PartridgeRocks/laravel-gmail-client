@@ -109,11 +109,6 @@ parameters:
 			path: src/Gmail/GmailConnector.php
 
 		-
-			message: "#^Call to an undefined method Saloon\\\\Http\\\\Connector\\:\\:getAccessToken\\(\\)\\.$#"
-			count: 1
-			path: src/Gmail/Resources/AuthResource.php
-
-		-
 			message: "#^Call to an undefined method Saloon\\\\Http\\\\Connector\\:\\:getAuthorizationUrl\\(\\)\\.$#"
 			count: 1
 			path: src/Gmail/Resources/AuthResource.php
@@ -121,10 +116,5 @@ parameters:
 		-
 			message: "#^Call to an undefined method Saloon\\\\Http\\\\Connector\\:\\:oauthConfig\\(\\)\\.$#"
 			count: 3
-			path: src/Gmail/Resources/AuthResource.php
-
-		-
-			message: "#^Call to an undefined method Saloon\\\\Http\\\\Connector\\:\\:refreshAccessToken\\(\\)\\.$#"
-			count: 1
 			path: src/Gmail/Resources/AuthResource.php
 
