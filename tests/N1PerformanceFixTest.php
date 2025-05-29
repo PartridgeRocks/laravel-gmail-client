@@ -68,7 +68,7 @@ it('batches API calls for listMessages with fullDetails=true to avoid N+1', func
 
 it('gracefully handles batch processing errors with fallback to minimal data', function () {
     $messagesListJson = json_decode(file_get_contents(__DIR__.'/fixtures/messages-list.json'), true);
-    
+
     // Create multiple messages with one that will fail
     $multipleMessagesJson = $messagesListJson;
     $multipleMessagesJson['messages'] = [

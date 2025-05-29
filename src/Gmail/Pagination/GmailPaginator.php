@@ -95,7 +95,7 @@ class GmailPaginator
         $request = $this->getRequest();
         $response = $this->connector->send($request);
         $data = $response->json();
-        
+
         // Update pagination state
         $this->nextPageToken = $data['nextPageToken'] ?? null;
         $this->hasMorePages = $this->nextPageToken !== null;
@@ -112,21 +112,21 @@ class GmailPaginator
 
     /**
      * Get all results by iterating through all pages.
-     * 
+     *
      * Warning: This method loads all results into memory at once.
      * For large datasets, consider using lazy loading instead.
      *
-     * @param int|null $maxItems Maximum number of items to retrieve (prevents memory issues)
+     * @param  int|null  $maxItems  Maximum number of items to retrieve (prevents memory issues)
      * @return Collection<int, TValue>
      */
     public function getAllPages(?int $maxItems = null): Collection
     {
         $allResults = collect();
         $itemCount = 0;
-        
+
         while ($this->hasMorePages) {
             $page = $this->getNextPage();
-            
+
             // Add items to result collection
             foreach ($page as $item) {
                 if ($maxItems && $itemCount >= $maxItems) {
@@ -143,7 +143,7 @@ class GmailPaginator
     /**
      * Transform collection using a DTO's static method.
      *
-     * @param int|null $maxItems Maximum number of items to transform (prevents memory issues)
+     * @param  int|null  $maxItems  Maximum number of items to transform (prevents memory issues)
      * @return Collection<int, TValue>
      */
     public function transformUsingDTO(string $dtoClass, string $method = 'collectionFromApiResponse', ?int $maxItems = null): Collection

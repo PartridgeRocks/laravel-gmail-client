@@ -88,7 +88,7 @@ class GmailLazyCollection extends LazyCollection
     {
         return new self(function () use ($client) {
             // Use the connector directly to avoid potential recursion
-            $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest();
+            $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
             $response = $client->getConnector()->send($request);
             $data = $response->json();
 
