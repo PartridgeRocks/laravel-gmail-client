@@ -54,45 +54,70 @@ class LabelRepository
         return $label;
     }
 
+    /**
+     * @return Collection<int, Label>
+     */
     public function all(): Collection
     {
         $response = $this->resource->list();
         $data = $response->json();
 
-        return collect($data['labels'] ?? [])
-            ->map(fn (array $labelData) => Label::fromApiResponse($labelData));
+        $labels = $data['labels'] ?? [];
+        $labelCollection = new Collection();
+        foreach ($labels as $labelData) {
+            $labelCollection->push(Label::fromApiResponse($labelData));
+        }
+        return $labelCollection;
     }
 
+    /**
+     * @return Collection<int, Label>
+     */
     public function systemLabels(): Collection
     {
         return $this->all()
             ->filter(fn (Label $label) => $label->type === 'system');
     }
 
+    /**
+     * @return Collection<int, Label>
+     */
     public function userLabels(): Collection
     {
         return $this->all()
             ->filter(fn (Label $label) => $label->type === 'user');
     }
 
+    /**
+     * @return Collection<int, Label>
+     */
     public function visibleLabels(): Collection
     {
         return $this->all()
             ->filter(fn (Label $label) => $label->labelListVisibility === 'labelShow');
     }
 
+    /**
+     * @return Collection<int, Label>
+     */
     public function hiddenLabels(): Collection
     {
         return $this->all()
             ->filter(fn (Label $label) => $label->labelListVisibility === 'labelHide');
     }
 
+    /**
+     * @return Collection<int, Label>
+     */
     public function labelsWithMessages(): Collection
     {
         return $this->all()
             ->filter(fn (Label $label) => $label->messagesTotal > 0);
     }
 
+    /**
+     * @return Collection<int, Label>
+     */
     public function labelsWithUnreadMessages(): Collection
     {
         return $this->all()
@@ -144,6 +169,9 @@ class LabelRepository
         return $this->findByName($name) !== null;
     }
 
+    /**
+     * @param array<string, mixed> $attributes
+     */
     public function create(array $attributes): Label
     {
         $response = $this->resource->create($attributes);
@@ -151,6 +179,9 @@ class LabelRepository
         return Label::fromApiResponse($response->json());
     }
 
+    /**
+     * @param array<string, mixed> $attributes
+     */
     public function update(string $id, array $attributes): Label
     {
         $response = $this->resource->update($id, $attributes);
@@ -169,6 +200,9 @@ class LabelRepository
         }
     }
 
+    /**
+     * @return array<string, int>
+     */
     public function getStatistics(): array
     {
         $labels = $this->all();

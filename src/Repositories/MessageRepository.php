@@ -37,15 +37,26 @@ class MessageRepository
         return $email;
     }
 
+    /**
+     * @param array<string, mixed> $criteria
+     * @return Collection<int, Email>
+     */
     public function findWhere(array $criteria): Collection
     {
         $response = $this->resource->list($criteria);
         $data = $response->json();
 
-        return collect($data['messages'] ?? [])
-            ->map(fn (array $messageData) => Email::fromApiResponse($messageData));
+        $messages = $data['messages'] ?? [];
+        $emailCollection = new Collection();
+        foreach ($messages as $messageData) {
+            $emailCollection->push(Email::fromApiResponse($messageData));
+        }
+        return $emailCollection;
     }
 
+    /**
+     * @return Collection<int, Email>
+     */
     public function findUnread(int $maxResults = 25): Collection
     {
         return $this->findWhere([
@@ -54,6 +65,9 @@ class MessageRepository
         ]);
     }
 
+    /**
+     * @return Collection<int, Email>
+     */
     public function findStarred(int $maxResults = 25): Collection
     {
         return $this->findWhere([
@@ -62,6 +76,9 @@ class MessageRepository
         ]);
     }
 
+    /**
+     * @return Collection<int, Email>
+     */
     public function findInLabel(string $label, int $maxResults = 25): Collection
     {
         return $this->findWhere([
@@ -70,6 +87,9 @@ class MessageRepository
         ]);
     }
 
+    /**
+     * @return Collection<int, Email>
+     */
     public function findFromSender(string $email, int $maxResults = 25): Collection
     {
         return $this->findWhere([
@@ -78,6 +98,9 @@ class MessageRepository
         ]);
     }
 
+    /**
+     * @return Collection<int, Email>
+     */
     public function findBySubject(string $subject, int $maxResults = 25): Collection
     {
         return $this->findWhere([
@@ -86,6 +109,9 @@ class MessageRepository
         ]);
     }
 
+    /**
+     * @return Collection<int, Email>
+     */
     public function findInDateRange(\DateTimeInterface $from, \DateTimeInterface $to, int $maxResults = 25): Collection
     {
         $fromFormatted = $from->format('Y/m/d');
@@ -97,6 +123,9 @@ class MessageRepository
         ]);
     }
 
+    /**
+     * @return Collection<int, Email>
+     */
     public function search(string $query, int $maxResults = 25): Collection
     {
         return $this->findWhere([
@@ -105,6 +134,9 @@ class MessageRepository
         ]);
     }
 
+    /**
+     * @param array<string, mixed> $criteria
+     */
     public function count(array $criteria = []): int
     {
         $response = $this->resource->list(array_merge($criteria, ['maxResults' => 1]));

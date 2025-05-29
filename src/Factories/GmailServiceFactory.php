@@ -40,6 +40,9 @@ class GmailServiceFactory
         return new StatisticsService($this->connector);
     }
 
+    /**
+     * @return array<string, object>
+     */
     public function createAllServices(): array
     {
         return [

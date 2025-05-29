@@ -53,6 +53,10 @@ interface GmailReadInterface
      *
      * @return array<string, mixed>
      */
+    /**
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
     public function getAccountStatistics(array $options = []): array;
 
     /**
