@@ -39,7 +39,7 @@ interface GmailReadInterface
     /**
      * List all labels.
      *
-     * @return Collection<int, Label>
+     * @return Collection<int, Label>|GmailPaginator<Label>|LazyCollection<int, Label>
      */
     public function listLabels(bool $paginate = false, bool $lazy = false): mixed;
 

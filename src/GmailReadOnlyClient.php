@@ -53,11 +53,18 @@ class GmailReadOnlyClient implements GmailReadInterface, GmailSafeInterface
         return $this->client->getLabel($id);
     }
 
+    /**
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
     public function getAccountStatistics(array $options = []): array
     {
         return $this->client->getAccountStatistics($options);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getAccountHealth(): array
     {
         return $this->client->getAccountHealth();
@@ -68,11 +75,18 @@ class GmailReadOnlyClient implements GmailReadInterface, GmailSafeInterface
         return $this->client->isConnected();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getAccountSummary(): array
     {
         return $this->client->getAccountSummary();
     }
 
+    /**
+     * @param array<string, mixed> $query
+     * @return Collection<int, Email>|LazyCollection<int, Email>
+     */
     public function safeListMessages(
         array $query = [],
         ?int $maxResults = null,
@@ -87,11 +101,18 @@ class GmailReadOnlyClient implements GmailReadInterface, GmailSafeInterface
         return $this->client->safeGetMessage($id);
     }
 
+    /**
+     * @return Collection<int, Label>|LazyCollection<int, Label>
+     */
     public function safeListLabels(bool $lazy = false, bool $paginate = false): Collection|LazyCollection
     {
         return $this->client->safeListLabels($lazy, $paginate);
     }
 
+    /**
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
     public function safeGetAccountStatistics(array $options = []): array
     {
         return $this->client->safeGetAccountStatistics($options);
