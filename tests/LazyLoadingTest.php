@@ -62,7 +62,7 @@ it('safely handles lazy loading failures for labels', function () {
 
     $this->client->getConnector()->withMockClient($mockClient);
 
-    $result = $this->client->safeListLabels(false, true);
+    $result = $this->client->safeListLabels(true); // lazy=true
 
     // Should return empty GmailLazyCollection instead of throwing
     expect($result)->toBeInstanceOf(GmailLazyCollection::class);

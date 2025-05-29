@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\GmailClient;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
@@ -139,16 +140,18 @@ test('getAccountSummary handles connection failures with safe error messages', f
         ->and($result['has_unread'])->toBeFalse();
 });
 
-test('safeListLabels works with paginate option', function () {
+test('safeListLabels returns collection on API failures', function () {
     $mockClient = new MockClient([
         '*users/me/labels*' => MockResponse::make([], 500),
     ]);
 
     $this->client->getConnector()->withMockClient($mockClient);
 
-    $result = $this->client->safeListLabels(paginate: true);
+    $result = $this->client->safeListLabels();
 
-    expect($result)->not->toBeNull();
+    expect($result)
+        ->toBeInstanceOf(Collection::class)
+        ->toHaveCount(0); // Should return empty collection on failure
 });
 
 test('safeListLabels works with lazy option', function () {
@@ -175,16 +178,18 @@ test('safeListMessages works with lazy option', function () {
     expect($result)->not->toBeNull();
 });
 
-test('safeListMessages works with paginate option', function () {
+test('safeListMessages returns collection on API failures', function () {
     $mockClient = new MockClient([
         '*users/me/messages*' => MockResponse::make([], 500),
     ]);
 
     $this->client->getConnector()->withMockClient($mockClient);
 
-    $result = $this->client->safeListMessages(paginate: true);
+    $result = $this->client->safeListMessages();
 
-    expect($result)->not->toBeNull();
+    expect($result)
+        ->toBeInstanceOf(Collection::class)
+        ->toHaveCount(0); // Should return empty collection on failure
 });
 
 test('getAccountSummary returns basic structure', function () {

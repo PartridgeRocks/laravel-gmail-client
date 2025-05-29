@@ -4,6 +4,7 @@ namespace PartridgeRocks\GmailClient;
 
 use Illuminate\Support\Collection;
 use PartridgeRocks\GmailClient\Contracts\AuthServiceInterface;
+use PartridgeRocks\GmailClient\Contracts\Composite\GmailFullInterface;
 use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\StatisticsServiceInterface;
@@ -53,7 +54,7 @@ use PartridgeRocks\GmailClient\Services\StatisticsService;
  *
  * @see https://developers.google.com/gmail/api
  */
-class GmailClient
+class GmailClient implements GmailFullInterface
 {
     protected GmailConnector $connector;
     protected AuthServiceInterface $authService;
@@ -244,15 +245,22 @@ class GmailClient
     /**
      * Send a new email message.
      *
-     * @param  array<string, mixed>  $options
+     * @param  array<string, mixed>  $headers
      *
      * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
      * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
      * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
      */
-    public function sendEmail(string $to, string $subject, string $body, array $options = []): Email
-    {
+    public function sendEmail(
+        string $to, 
+        string $subject, 
+        string $body, 
+        ?string $from = null, 
+        array $headers = []
+    ): Email {
+        // Convert to the options format that MessageService expects
+        $options = compact('from', 'headers');
         return $this->messageService->sendEmail($to, $subject, $body, $options);
     }
 
@@ -399,12 +407,11 @@ class GmailClient
     /**
      * Safely attempt to list labels, returning empty collection on failure.
      *
-     * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
-     * @param  int|null  $maxResults  Maximum number of results per page
-     * @return Collection<int, Label>|Gmail\Pagination\GmailPaginator<Label>|Gmail\Pagination\GmailLazyCollection<Label>
+     * @param  bool  $paginate  Whether to return a paginator for all results
+     * @return Collection<int, Label>|\Illuminate\Support\LazyCollection<int, Label>
      */
-    public function safeListLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed
+    public function safeListLabels(bool $lazy = false, bool $paginate = false): Collection|\Illuminate\Support\LazyCollection
     {
         if ($lazy) {
             try {
@@ -423,26 +430,25 @@ class GmailClient
             }
         }
 
-        return $this->labelService->safeListLabels($paginate, false, $maxResults);
+        // Safe methods should never paginate - always return collections
+        return $this->labelService->safeListLabels(false, false);
     }
 
     /**
      * Safely attempt to list messages, returning empty collection on failure.
      *
      * @param  array<string, mixed>  $query  Query parameters for filtering messages
-     * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  int|null  $maxResults  Maximum number of results per page
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
-     * @return Collection<int, Email>|Gmail\Pagination\GmailPaginator<Email>|Gmail\Pagination\GmailLazyCollection<Email>
+     * @return Collection<int, Email>|\Illuminate\Support\LazyCollection<int, Email>
      */
     public function safeListMessages(
         array $query = [],
-        bool $paginate = false,
         ?int $maxResults = null,
         bool $lazy = false,
         bool $fullDetails = true
-    ): mixed {
+    ): Collection|\Illuminate\Support\LazyCollection {
         if ($lazy) {
             try {
                 return $this->lazyLoadMessages($query, $maxResults, $fullDetails);
@@ -461,7 +467,7 @@ class GmailClient
             }
         }
 
-        return $this->messageService->safeListMessages($query, $paginate, $maxResults, false, $fullDetails);
+        return $this->messageService->safeListMessages($query, false, $maxResults, false, $fullDetails);
     }
 
     /**
