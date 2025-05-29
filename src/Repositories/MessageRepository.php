@@ -38,7 +38,7 @@ class MessageRepository
     }
 
     /**
-     * @param array<string, mixed> $criteria
+     * @param  array<string, mixed>  $criteria
      * @return Collection<int, Email>
      */
     public function findWhere(array $criteria): Collection
@@ -47,10 +47,11 @@ class MessageRepository
         $data = $response->json();
 
         $messages = $data['messages'] ?? [];
-        $emailCollection = new Collection();
+        $emailCollection = new Collection;
         foreach ($messages as $messageData) {
             $emailCollection->push(Email::fromApiResponse($messageData));
         }
+
         return $emailCollection;
     }
 
@@ -135,7 +136,7 @@ class MessageRepository
     }
 
     /**
-     * @param array<string, mixed> $criteria
+     * @param  array<string, mixed>  $criteria
      */
     public function count(array $criteria = []): int
     {

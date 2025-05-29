@@ -29,7 +29,7 @@ interface GmailWriteInterface
      * Send an email message.
      */
     /**
-     * @param array<string, string> $headers
+     * @param  array<string, string>  $headers
      */
     public function sendEmail(
         string $to,
@@ -43,7 +43,7 @@ interface GmailWriteInterface
      * Add labels to a message.
      */
     /**
-     * @param array<string> $labelIds
+     * @param  array<string>  $labelIds
      */
     public function addLabelsToMessage(string $messageId, array $labelIds): Email;
 
@@ -51,7 +51,7 @@ interface GmailWriteInterface
      * Remove labels from a message.
      */
     /**
-     * @param array<string> $labelIds
+     * @param  array<string>  $labelIds
      */
     public function removeLabelsFromMessage(string $messageId, array $labelIds): Email;
 
@@ -59,8 +59,8 @@ interface GmailWriteInterface
      * Modify message labels (add and remove in single operation).
      */
     /**
-     * @param array<string> $addLabelIds
-     * @param array<string> $removeLabelIds
+     * @param  array<string>  $addLabelIds
+     * @param  array<string>  $removeLabelIds
      */
     public function modifyMessageLabels(
         string $messageId,
@@ -72,7 +72,7 @@ interface GmailWriteInterface
      * Create a new label.
      */
     /**
-     * @param array<string, mixed> $options
+     * @param  array<string, mixed>  $options
      */
     public function createLabel(string $name, array $options = []): Label;
 
@@ -80,7 +80,7 @@ interface GmailWriteInterface
      * Update an existing label.
      */
     /**
-     * @param array<string, mixed> $updates
+     * @param  array<string, mixed>  $updates
      */
     public function updateLabel(string $labelId, array $updates): Label;
 

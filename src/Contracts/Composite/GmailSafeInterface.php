@@ -47,7 +47,7 @@ interface GmailSafeInterface
      * @return array<string, mixed>
      */
     /**
-     * @param array<string, mixed> $options
+     * @param  array<string, mixed>  $options
      * @return array<string, mixed>
      */
     public function safeGetAccountStatistics(array $options = []): array;

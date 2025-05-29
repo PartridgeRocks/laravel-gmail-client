@@ -63,10 +63,11 @@ class LabelRepository
         $data = $response->json();
 
         $labels = $data['labels'] ?? [];
-        $labelCollection = new Collection();
+        $labelCollection = new Collection;
         foreach ($labels as $labelData) {
             $labelCollection->push(Label::fromApiResponse($labelData));
         }
+
         return $labelCollection;
     }
 
@@ -170,7 +171,7 @@ class LabelRepository
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      */
     public function create(array $attributes): Label
     {
@@ -180,7 +181,7 @@ class LabelRepository
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      */
     public function update(string $id, array $attributes): Label
     {
