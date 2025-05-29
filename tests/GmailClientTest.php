@@ -33,7 +33,22 @@ it('can authenticate with a token', function () {
 });
 
 it('can list messages', function () {
-    $this->markTestSkipped('Skipping due to potential recursion/memory issues in implementation');
+    $messagesListJson = json_decode(file_get_contents(__DIR__.'/fixtures/messages-list.json'), true);
+    $messageJson = json_decode(file_get_contents(__DIR__.'/fixtures/message.json'), true);
+
+    $mockClient = new MockClient([
+        'https://gmail.googleapis.com/gmail/v1/users/me/messages' => MockResponse::make($messagesListJson, 200),
+        'https://gmail.googleapis.com/gmail/v1/users/me/messages/msg123' => MockResponse::make($messageJson, 200),
+    ]);
+
+    $this->client->getConnector()->withMockClient($mockClient);
+    $this->client->authenticate('test-token');
+
+    $messages = $this->client->listMessages(['q' => 'is:unread'], maxResults: 5);
+
+    expect($messages)
+        ->toBeInstanceOf(Collection::class)
+        ->toHaveCount(1);
 });
 
 it('can get paginated messages', function () {
