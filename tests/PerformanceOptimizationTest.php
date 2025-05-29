@@ -10,6 +10,10 @@ use Saloon\Http\Faking\MockResponse;
  *
  * These tests verify that the N+1 query pattern fix in listMessages()
  * provides significant performance improvements by reducing API calls.
+ *
+ * Note: These tests focus on the MessageService layer, while N1PerformanceFixTest.php
+ * tests the same functionality at the GmailClient layer. Both test suites provide
+ * valuable coverage at different abstraction levels.
  */
 test('listMessages with fullDetails=false creates minimal Email objects', function () {
     $mockClient = new MockClient([

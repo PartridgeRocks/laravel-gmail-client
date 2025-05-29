@@ -26,8 +26,6 @@ class GmailPaginator
 
     protected ?string $responseKey = null;
 
-    /** @var Collection<int, TValue> */
-    protected Collection $items;
 
     /**
      * Create a new paginator instance.
@@ -42,7 +40,6 @@ class GmailPaginator
         $this->resourceClass = $resourceClass;
         $this->responseKey = $responseKey;
         $this->maxResults = $maxResults;
-        $this->items = collect();
     }
 
     /**
@@ -58,28 +55,6 @@ class GmailPaginator
         return $requestClass;
     }
 
-    /**
-     * Process the response to extract items and pagination token.
-     */
-    protected function processResponse(Response $response): void
-    {
-        $data = $response->json();
-
-        // Store the next page token if it exists
-        $this->nextPageToken = $data['nextPageToken'] ?? null;
-        $this->hasMorePages = $this->nextPageToken !== null;
-
-        // Extract items using the response key if provided
-        $items = $data;
-        if ($this->responseKey && isset($data[$this->responseKey])) {
-            $items = $data[$this->responseKey];
-        }
-
-        // Store the items in the collection
-        if (is_array($items)) {
-            $this->items = $this->items->merge($items);
-        }
-    }
 
     /**
      * Get the next page of results.

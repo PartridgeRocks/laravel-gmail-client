@@ -118,3 +118,40 @@ it('can transform results using a DTO', function () {
         ->and($results->first()->id)->toBe('msg1')
         ->and($results->first()->subject)->toBe('Test Subject');
 });
+
+it('respects memory limit across multiple pages', function () {
+    $connector = new GmailConnector;
+    
+    $mockClient = MockClientAdapter::create([
+        MockClientAdapter::mockJsonResponse([
+            'messages' => [
+                ['id' => 'msg1', 'threadId' => 'thread1'],
+                ['id' => 'msg2', 'threadId' => 'thread2'],
+            ],
+            'nextPageToken' => 'page2',
+        ]),
+        MockClientAdapter::mockJsonResponse([
+            'messages' => [
+                ['id' => 'msg3', 'threadId' => 'thread3'],
+                ['id' => 'msg4', 'threadId' => 'thread4'],
+            ],
+        ]),
+    ]);
+    
+    $connector->withMockClient($mockClient);
+    
+    $paginator = new GmailPaginator(
+        $connector,
+        ListMessagesRequest::class,
+        'messages',
+        2 // 2 items per page
+    );
+    
+    // Should stop at 3 items across 2 pages
+    $results = $paginator->getAllPages(3);
+    
+    expect($results)
+        ->toBeInstanceOf(Collection::class)
+        ->toHaveCount(3)
+        ->and($results->pluck('id')->toArray())->toBe(['msg1', 'msg2', 'msg3']);
+});
