@@ -9,9 +9,7 @@ namespace PartridgeRocks\GmailClient\Contracts\Composite;
  * core operations, safe methods, and advanced features. This is the
  * main interface that GmailClient implements.
  */
-interface GmailFullInterface extends 
-    GmailCoreInterface,
-    GmailSafeInterface
+interface GmailFullInterface extends GmailCoreInterface, GmailSafeInterface
 {
     /**
      * Get the underlying connector for advanced usage.

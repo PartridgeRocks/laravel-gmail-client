@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace PartridgeRocks\GmailClient\Tests\Factories;
 
-use Saloon\Http\Faking\MockClient;
-use Saloon\Http\Faking\MockResponse;
 use PartridgeRocks\GmailClient\Tests\Builders\EmailBuilder;
 use PartridgeRocks\GmailClient\Tests\Builders\LabelBuilder;
+use Saloon\Http\Faking\MockClient;
+use Saloon\Http\Faking\MockResponse;
 
 class GmailMockFactory
 {
@@ -34,16 +34,14 @@ class GmailMockFactory
         }
 
         return new MockClient([
-            'gmail.googleapis.com/gmail/v1/users/me/messages*' => 
-                MockResponse::make($response, 200)
+            'gmail.googleapis.com/gmail/v1/users/me/messages*' => MockResponse::make($response, 200),
         ]);
     }
 
     public static function createMessageGetMock(EmailBuilder $emailBuilder): MockClient
     {
         return new MockClient([
-            'gmail.googleapis.com/gmail/v1/users/me/messages/*' => 
-                MockResponse::make($emailBuilder->buildApiResponse(), 200)
+            'gmail.googleapis.com/gmail/v1/users/me/messages/*' => MockResponse::make($emailBuilder->buildApiResponse(), 200),
         ]);
     }
 
@@ -65,16 +63,14 @@ class GmailMockFactory
         ];
 
         return new MockClient([
-            'gmail.googleapis.com/gmail/v1/users/me/labels*' => 
-                MockResponse::make($response, 200)
+            'gmail.googleapis.com/gmail/v1/users/me/labels*' => MockResponse::make($response, 200),
         ]);
     }
 
     public static function createLabelGetMock(LabelBuilder $labelBuilder): MockClient
     {
         return new MockClient([
-            'gmail.googleapis.com/gmail/v1/users/me/labels/*' => 
-                MockResponse::make($labelBuilder->buildApiResponse(), 200)
+            'gmail.googleapis.com/gmail/v1/users/me/labels/*' => MockResponse::make($labelBuilder->buildApiResponse(), 200),
         ]);
     }
 
@@ -86,8 +82,8 @@ class GmailMockFactory
                 'token_type' => 'Bearer',
                 'expires_in' => 3600,
                 'refresh_token' => 'test-refresh-token',
-                'scope' => 'https://www.googleapis.com/auth/gmail.readonly'
-            ], 200)
+                'scope' => 'https://www.googleapis.com/auth/gmail.readonly',
+            ], 200),
         ]);
     }
 
@@ -96,8 +92,8 @@ class GmailMockFactory
         return new MockClient([
             'oauth2.googleapis.com/token' => MockResponse::make([
                 'error' => $error,
-                'error_description' => 'Invalid authorization code.'
-            ], 400)
+                'error_description' => 'Invalid authorization code.',
+            ], 400),
         ]);
     }
 
@@ -108,9 +104,9 @@ class GmailMockFactory
                 'error' => [
                     'code' => 429,
                     'message' => 'Rate limit exceeded',
-                    'status' => 'RESOURCE_EXHAUSTED'
-                ]
-            ], 429, ['Retry-After' => '60'])
+                    'status' => 'RESOURCE_EXHAUSTED',
+                ],
+            ], 429, ['Retry-After' => '60']),
         ]);
     }
 
@@ -121,9 +117,9 @@ class GmailMockFactory
                 'error' => [
                     'code' => 404,
                     'message' => 'Requested entity was not found.',
-                    'status' => 'NOT_FOUND'
-                ]
-            ], 404)
+                    'status' => 'NOT_FOUND',
+                ],
+            ], 404),
         ]);
     }
 
@@ -134,9 +130,9 @@ class GmailMockFactory
                 'error' => [
                     'code' => 401,
                     'message' => 'Request had invalid authentication credentials.',
-                    'status' => 'UNAUTHENTICATED'
-                ]
-            ], 401)
+                    'status' => 'UNAUTHENTICATED',
+                ],
+            ], 401),
         ]);
     }
 
@@ -147,33 +143,31 @@ class GmailMockFactory
                 'error' => [
                     'code' => 500,
                     'message' => 'Internal server error.',
-                    'status' => 'INTERNAL'
-                ]
-            ], 500)
+                    'status' => 'INTERNAL',
+                ],
+            ], 500),
         ]);
     }
 
     public static function createSendEmailSuccessMock(string $messageId = 'sent-message-id'): MockClient
     {
         return new MockClient([
-            'gmail.googleapis.com/gmail/v1/users/me/messages/send' => 
-                MockResponse::make([
-                    'id' => $messageId,
-                    'threadId' => 'thread-' . $messageId,
-                    'labelIds' => ['SENT']
-                ], 200)
+            'gmail.googleapis.com/gmail/v1/users/me/messages/send' => MockResponse::make([
+                'id' => $messageId,
+                'threadId' => 'thread-'.$messageId,
+                'labelIds' => ['SENT'],
+            ], 200),
         ]);
     }
 
     public static function createModifyMessageMock(string $messageId, array $addedLabels = [], array $removedLabels = []): MockClient
     {
         return new MockClient([
-            "gmail.googleapis.com/gmail/v1/users/me/messages/{$messageId}/modify" => 
-                MockResponse::make([
-                    'id' => $messageId,
-                    'threadId' => 'thread-' . $messageId,
-                    'labelIds' => array_merge(['INBOX'], $addedLabels)
-                ], 200)
+            "gmail.googleapis.com/gmail/v1/users/me/messages/{$messageId}/modify" => MockResponse::make([
+                'id' => $messageId,
+                'threadId' => 'thread-'.$messageId,
+                'labelIds' => array_merge(['INBOX'], $addedLabels),
+            ], 200),
         ]);
     }
 
@@ -190,7 +184,7 @@ class GmailMockFactory
     public static function createSampleEmails(int $count = 5): array
     {
         $emails = [];
-        
+
         for ($i = 1; $i <= $count; $i++) {
             $builder = EmailBuilder::create()
                 ->withId("email-{$i}")

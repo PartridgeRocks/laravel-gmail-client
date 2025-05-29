@@ -23,42 +23,48 @@ class GmailClientBuilder
 
     public static function create(): self
     {
-        return new self();
+        return new self;
     }
 
     public function withToken(string $accessToken): self
     {
         $this->accessToken = $accessToken;
+
         return $this;
     }
 
     public function withConnector(GmailConnector $connector): self
     {
         $this->connector = $connector;
+
         return $this;
     }
 
     public function withAuthService(AuthServiceInterface $authService): self
     {
         $this->authService = $authService;
+
         return $this;
     }
 
     public function withLabelService(LabelServiceInterface $labelService): self
     {
         $this->labelService = $labelService;
+
         return $this;
     }
 
     public function withMessageService(MessageServiceInterface $messageService): self
     {
         $this->messageService = $messageService;
+
         return $this;
     }
 
     public function withStatisticsService(StatisticsServiceInterface $statisticsService): self
     {
         $this->statisticsService = $statisticsService;
+
         return $this;
     }
 

@@ -19,6 +19,7 @@ class MessageRepository
     {
         try {
             $response = $this->resource->get($id);
+
             return Email::fromApiResponse($response->json());
         } catch (NotFoundException) {
             return null;
@@ -28,7 +29,7 @@ class MessageRepository
     public function findByIdOrFail(string $id): Email
     {
         $email = $this->findById($id);
-        
+
         if ($email === null) {
             throw new NotFoundException("Email with ID {$id} not found");
         }
@@ -42,7 +43,7 @@ class MessageRepository
         $data = $response->json();
 
         return collect($data['messages'] ?? [])
-            ->map(fn(array $messageData) => Email::fromApiResponse($messageData));
+            ->map(fn (array $messageData) => Email::fromApiResponse($messageData));
     }
 
     public function findUnread(int $maxResults = 25): Collection

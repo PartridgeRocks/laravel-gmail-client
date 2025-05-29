@@ -253,14 +253,15 @@ class GmailClient implements GmailFullInterface
      * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
      */
     public function sendEmail(
-        string $to, 
-        string $subject, 
-        string $body, 
-        ?string $from = null, 
+        string $to,
+        string $subject,
+        string $body,
+        ?string $from = null,
         array $headers = []
     ): Email {
         // Convert to the options format that MessageService expects
         $options = compact('from', 'headers');
+
         return $this->messageService->sendEmail($to, $subject, $body, $options);
     }
 

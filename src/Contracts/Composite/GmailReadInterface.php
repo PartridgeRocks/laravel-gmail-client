@@ -21,10 +21,6 @@ interface GmailReadInterface
      * List messages with optional filtering.
      *
      * @param  array<string, mixed>  $query
-     * @param  bool  $paginate
-     * @param  int|null  $maxResults
-     * @param  bool  $lazy
-     * @param  bool  $fullDetails
      * @return Collection<int, Email>|GmailPaginator<Email>|LazyCollection<int, Email>
      */
     public function listMessages(

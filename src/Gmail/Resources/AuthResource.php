@@ -47,7 +47,7 @@ class AuthResource extends BaseResource
             $response = $this->connector->send($request);
 
             if ($response->failed()) {
-                throw new \Exception('Token exchange failed: ' . $response->body());
+                throw new \Exception('Token exchange failed: '.$response->body());
             }
 
             $tokenData = $response->json();
@@ -89,7 +89,7 @@ class AuthResource extends BaseResource
             $response = $this->connector->send($request);
 
             if ($response->failed()) {
-                throw new \Exception('Token refresh failed: ' . $response->body());
+                throw new \Exception('Token refresh failed: '.$response->body());
             }
 
             $tokenData = $response->json();

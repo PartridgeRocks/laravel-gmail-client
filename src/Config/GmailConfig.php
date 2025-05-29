@@ -13,10 +13,10 @@ readonly class GmailConfig
         public array $scopes,
         public ?string $fromEmail = null,
         public bool $storeTokensInDatabase = false,
-        public PerformanceConfig $performance = new PerformanceConfig(),
-        public CacheConfig $cache = new CacheConfig(),
-        public LoggingConfig $logging = new LoggingConfig(),
-        public RateLimitConfig $rateLimit = new RateLimitConfig(),
+        public PerformanceConfig $performance = new PerformanceConfig,
+        public CacheConfig $cache = new CacheConfig,
+        public LoggingConfig $logging = new LoggingConfig,
+        public RateLimitConfig $rateLimit = new RateLimitConfig,
     ) {}
 
     public static function fromArray(array $config): self

@@ -22,18 +22,21 @@ class LabelBuilder
     public function withId(string $id): self
     {
         $this->id = $id;
+
         return $this;
     }
 
     public function withName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
     public function withType(string $type): self
     {
         $this->type = $type;
+
         return $this;
     }
 
@@ -41,6 +44,7 @@ class LabelBuilder
     {
         $this->messagesTotal = $total;
         $this->messagesUnread = $unread;
+
         return $this;
     }
 
@@ -48,30 +52,35 @@ class LabelBuilder
     {
         $this->threadsTotal = $total;
         $this->threadsUnread = $unread;
+
         return $this;
     }
 
     public function withColor(array $color): self
     {
         $this->color = $color;
+
         return $this;
     }
 
     public function hidden(): self
     {
         $this->messageListVisibility = 'hide';
+
         return $this;
     }
 
     public function systemLabel(): self
     {
         $this->type = 'system';
+
         return $this;
     }
 
     public function userLabel(): self
     {
         $this->type = 'user';
+
         return $this;
     }
 
@@ -126,7 +135,7 @@ class LabelBuilder
     public function buildApiResponse(): array
     {
         $label = $this->build();
-        
+
         $response = [
             'id' => $label->id,
             'name' => $label->name,
@@ -145,7 +154,7 @@ class LabelBuilder
             $response['threadsUnread'] = $label->threadsUnread;
         }
 
-        if (!empty($label->color)) {
+        if (! empty($label->color)) {
             $response['color'] = $label->color;
         }
 
@@ -154,7 +163,7 @@ class LabelBuilder
 
     public static function create(): self
     {
-        return new self();
+        return new self;
     }
 
     public static function sample(): Label
@@ -168,7 +177,7 @@ class LabelBuilder
     public static function collection(int $count = 5): array
     {
         $labels = [];
-        
+
         for ($i = 1; $i <= $count; $i++) {
             $labels[] = self::create()
                 ->withId("label-{$i}")

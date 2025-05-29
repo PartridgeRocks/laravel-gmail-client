@@ -26,96 +26,112 @@ class EmailBuilder
     public function withId(string $id): self
     {
         $this->id = $id;
+
         return $this;
     }
 
     public function withThreadId(string $threadId): self
     {
         $this->threadId = $threadId;
+
         return $this;
     }
 
     public function withLabels(array $labelIds): self
     {
         $this->labelIds = $labelIds;
+
         return $this;
     }
 
     public function withSubject(string $subject): self
     {
         $this->subject = $subject;
+
         return $this;
     }
 
     public function withFrom(string $from): self
     {
         $this->from = $from;
+
         return $this;
     }
 
     public function withTo(string $to): self
     {
         $this->to = $to;
+
         return $this;
     }
 
     public function withBody(string $body): self
     {
         $this->body = $body;
+
         return $this;
     }
 
     public function withSnippet(string $snippet): self
     {
         $this->snippet = $snippet;
+
         return $this;
     }
 
     public function withSize(int $sizeEstimate): self
     {
         $this->sizeEstimate = $sizeEstimate;
+
         return $this;
     }
 
     public function withDate(Carbon $date): self
     {
         $this->internalDate = $date;
+
         return $this;
     }
 
     public function unread(): self
     {
         $this->labelIds = array_merge($this->labelIds, ['UNREAD']);
+
         return $this;
     }
 
     public function starred(): self
     {
         $this->labelIds = array_merge($this->labelIds, ['STARRED']);
+
         return $this;
     }
 
     public function important(): self
     {
         $this->labelIds = array_merge($this->labelIds, ['IMPORTANT']);
+
         return $this;
     }
 
     public function draft(): self
     {
         $this->labelIds = ['DRAFT'];
+
         return $this;
     }
 
     public function sent(): self
     {
         $this->labelIds = ['SENT'];
+
         return $this;
     }
 
     public function withAttachments(array $attachments): self
     {
         $this->attachments = $attachments;
+
         return $this;
     }
 
@@ -153,7 +169,7 @@ class EmailBuilder
     public function buildApiResponse(): array
     {
         $email = $this->build();
-        
+
         return [
             'id' => $email->id,
             'threadId' => $email->threadId,
@@ -167,7 +183,7 @@ class EmailBuilder
 
     public static function create(): self
     {
-        return new self();
+        return new self;
     }
 
     public static function sample(): Email

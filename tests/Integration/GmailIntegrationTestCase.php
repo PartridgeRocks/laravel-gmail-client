@@ -17,8 +17,8 @@ abstract class GmailIntegrationTestCase extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        $this->mockClient = new MockClient();
+
+        $this->mockClient = new MockClient;
         $this->client = $this->createGmailClient();
     }
 
@@ -32,7 +32,7 @@ abstract class GmailIntegrationTestCase extends TestCase
     protected function setMockClient(MockClient $mockClient): void
     {
         $this->mockClient = $mockClient;
-        
+
         // Update the client's connector to use the mock
         $connector = $this->client->getConnector();
         $connector->sender()->setClient($mockClient);
@@ -50,7 +50,7 @@ abstract class GmailIntegrationTestCase extends TestCase
             'token_type' => 'Bearer',
             'expires_in' => 3600,
             'refresh_token' => 'test-refresh-token',
-            'scope' => 'https://www.googleapis.com/auth/gmail.readonly'
+            'scope' => 'https://www.googleapis.com/auth/gmail.readonly',
         ]);
     }
 
@@ -58,7 +58,7 @@ abstract class GmailIntegrationTestCase extends TestCase
     {
         $this->expectApiCall('oauth2.googleapis.com/token', [
             'error' => $error,
-            'error_description' => 'Invalid authorization code.'
+            'error_description' => 'Invalid authorization code.',
         ], 400);
     }
 
@@ -68,8 +68,8 @@ abstract class GmailIntegrationTestCase extends TestCase
             'error' => [
                 'code' => 429,
                 'message' => 'Rate limit exceeded',
-                'status' => 'RESOURCE_EXHAUSTED'
-            ]
+                'status' => 'RESOURCE_EXHAUSTED',
+            ],
         ], 429);
     }
 
@@ -79,8 +79,8 @@ abstract class GmailIntegrationTestCase extends TestCase
             'error' => [
                 'code' => 404,
                 'message' => 'Requested entity was not found.',
-                'status' => 'NOT_FOUND'
-            ]
+                'status' => 'NOT_FOUND',
+            ],
         ], 404);
     }
 
@@ -90,8 +90,8 @@ abstract class GmailIntegrationTestCase extends TestCase
             'error' => [
                 'code' => 401,
                 'message' => 'Request had invalid authentication credentials.',
-                'status' => 'UNAUTHENTICATED'
-            ]
+                'status' => 'UNAUTHENTICATED',
+            ],
         ], 401);
     }
 

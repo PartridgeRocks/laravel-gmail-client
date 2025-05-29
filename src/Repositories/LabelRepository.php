@@ -19,6 +19,7 @@ class LabelRepository
     {
         try {
             $response = $this->resource->get($id);
+
             return Label::fromApiResponse($response->json());
         } catch (NotFoundException) {
             return null;
@@ -28,7 +29,7 @@ class LabelRepository
     public function findByIdOrFail(string $id): Label
     {
         $label = $this->findById($id);
-        
+
         if ($label === null) {
             throw new NotFoundException("Label with ID {$id} not found");
         }
@@ -39,13 +40,13 @@ class LabelRepository
     public function findByName(string $name): ?Label
     {
         return $this->all()
-            ->first(fn(Label $label) => $label->name === $name);
+            ->first(fn (Label $label) => $label->name === $name);
     }
 
     public function findByNameOrFail(string $name): Label
     {
         $label = $this->findByName($name);
-        
+
         if ($label === null) {
             throw new NotFoundException("Label with name '{$name}' not found");
         }
@@ -59,43 +60,43 @@ class LabelRepository
         $data = $response->json();
 
         return collect($data['labels'] ?? [])
-            ->map(fn(array $labelData) => Label::fromApiResponse($labelData));
+            ->map(fn (array $labelData) => Label::fromApiResponse($labelData));
     }
 
     public function systemLabels(): Collection
     {
         return $this->all()
-            ->filter(fn(Label $label) => $label->type === 'system');
+            ->filter(fn (Label $label) => $label->type === 'system');
     }
 
     public function userLabels(): Collection
     {
         return $this->all()
-            ->filter(fn(Label $label) => $label->type === 'user');
+            ->filter(fn (Label $label) => $label->type === 'user');
     }
 
     public function visibleLabels(): Collection
     {
         return $this->all()
-            ->filter(fn(Label $label) => $label->labelListVisibility === 'labelShow');
+            ->filter(fn (Label $label) => $label->labelListVisibility === 'labelShow');
     }
 
     public function hiddenLabels(): Collection
     {
         return $this->all()
-            ->filter(fn(Label $label) => $label->labelListVisibility === 'labelHide');
+            ->filter(fn (Label $label) => $label->labelListVisibility === 'labelHide');
     }
 
     public function labelsWithMessages(): Collection
     {
         return $this->all()
-            ->filter(fn(Label $label) => $label->messagesTotal > 0);
+            ->filter(fn (Label $label) => $label->messagesTotal > 0);
     }
 
     public function labelsWithUnreadMessages(): Collection
     {
         return $this->all()
-            ->filter(fn(Label $label) => $label->messagesUnread > 0);
+            ->filter(fn (Label $label) => $label->messagesUnread > 0);
     }
 
     public function findInbox(): ?Label
@@ -146,12 +147,14 @@ class LabelRepository
     public function create(array $attributes): Label
     {
         $response = $this->resource->create($attributes);
+
         return Label::fromApiResponse($response->json());
     }
 
     public function update(string $id, array $attributes): Label
     {
         $response = $this->resource->update($id, $attributes);
+
         return Label::fromApiResponse($response->json());
     }
 
@@ -159,6 +162,7 @@ class LabelRepository
     {
         try {
             $this->resource->delete($id);
+
             return true;
         } catch (\Exception) {
             return false;
@@ -168,15 +172,15 @@ class LabelRepository
     public function getStatistics(): array
     {
         $labels = $this->all();
-        
+
         return [
             'total_labels' => $labels->count(),
-            'system_labels' => $labels->filter(fn(Label $l) => $l->type === 'system')->count(),
-            'user_labels' => $labels->filter(fn(Label $l) => $l->type === 'user')->count(),
-            'visible_labels' => $labels->filter(fn(Label $l) => $l->labelListVisibility === 'labelShow')->count(),
-            'hidden_labels' => $labels->filter(fn(Label $l) => $l->labelListVisibility === 'labelHide')->count(),
-            'labels_with_messages' => $labels->filter(fn(Label $l) => $l->messagesTotal > 0)->count(),
-            'labels_with_unread' => $labels->filter(fn(Label $l) => $l->messagesUnread > 0)->count(),
+            'system_labels' => $labels->filter(fn (Label $l) => $l->type === 'system')->count(),
+            'user_labels' => $labels->filter(fn (Label $l) => $l->type === 'user')->count(),
+            'visible_labels' => $labels->filter(fn (Label $l) => $l->labelListVisibility === 'labelShow')->count(),
+            'hidden_labels' => $labels->filter(fn (Label $l) => $l->labelListVisibility === 'labelHide')->count(),
+            'labels_with_messages' => $labels->filter(fn (Label $l) => $l->messagesTotal > 0)->count(),
+            'labels_with_unread' => $labels->filter(fn (Label $l) => $l->messagesUnread > 0)->count(),
             'total_messages' => $labels->sum('messagesTotal'),
             'total_unread' => $labels->sum('messagesUnread'),
         ];
