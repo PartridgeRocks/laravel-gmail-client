@@ -10,21 +10,21 @@ class ValidationException extends GmailClientException
     {
         $error = ValidationErrorDTO::missingRequiredField($field);
 
-        return new static("Missing required field: '{$field}'.", 422, null, $error);
+        return new self("Missing required field: '{$field}'.", 422, null, $error);
     }
 
     public static function invalidEmailAddress(string $email): self
     {
         $error = ValidationErrorDTO::forField('email', "Invalid email address: '{$email}'.");
 
-        return new static("Invalid email address: '{$email}'.", 422, null, $error);
+        return new self("Invalid email address: '{$email}'.", 422, null, $error);
     }
 
     public static function invalidMessageFormat(): self
     {
         $error = ValidationErrorDTO::forField('message', 'The email message format is invalid.');
 
-        return new static('The email message format is invalid.', 422, null, $error);
+        return new self('The email message format is invalid.', 422, null, $error);
     }
 
     /**
@@ -36,7 +36,7 @@ class ValidationException extends GmailClientException
     {
         $error = ValidationErrorDTO::withErrors($errors);
 
-        return new static('Multiple validation errors occurred.', 422, null, $error);
+        return new self('Multiple validation errors occurred.', 422, null, $error);
     }
 
     /**
@@ -63,12 +63,12 @@ class ValidationException extends GmailClientException
                 $response
             );
 
-            return new static($error->message, 422, null, $error);
+            return new self($error->message, 422, null, $error);
         }
 
         $error = ValidationErrorDTO::withErrors($errors, $response);
 
-        return new static('Multiple validation errors occurred.', 422, null, $error);
+        return new self('Multiple validation errors occurred.', 422, null, $error);
     }
 
     /**
@@ -88,6 +88,6 @@ class ValidationException extends GmailClientException
             $response
         );
 
-        return new static($message ?? $defaultMessage, 422, null, $error);
+        return new self($message ?? $defaultMessage, 422, null, $error);
     }
 }

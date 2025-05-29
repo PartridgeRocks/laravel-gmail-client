@@ -113,7 +113,7 @@ class EmailDTO extends ResponseDTO
      * Create a collection of EmailDTO objects from a list response
      *
      * @param  array<string, mixed>  $data
-     * @return Collection<int, self>
+     * @return Collection<int, static>
      */
     public static function collectionFromApiResponse(array $data): Collection
     {
@@ -121,8 +121,8 @@ class EmailDTO extends ResponseDTO
         $messagesData = $data['messages'] ?? [];
         $messages = collect($messagesData);
 
-        if (empty($messages)) {
-            /** @var Collection<int, EmailDTO> $emptyCollection */
+        if ($messages->isEmpty()) {
+            /** @var Collection<int, static> $emptyCollection */
             $emptyCollection = collect();
 
             return $emptyCollection;
@@ -144,7 +144,7 @@ class EmailDTO extends ResponseDTO
                 );
             }
 
-            return static::fromApiResponse($message);
+            return self::fromApiResponse($message);
         });
     }
 }

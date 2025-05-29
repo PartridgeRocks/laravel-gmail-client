@@ -21,7 +21,7 @@ class RateLimitException extends GmailClientException
             'You have exceeded the Gmail API rate limit. Please try again later.'
         );
 
-        return new static(
+        return new self(
             'You have exceeded the Gmail API rate limit. Please try again later.',
             $retryAfter,
             $error
@@ -39,7 +39,7 @@ class RateLimitException extends GmailClientException
             'Daily quota exceeded for Gmail API. Please try again tomorrow.'
         );
 
-        return new static(
+        return new self(
             'Daily quota exceeded for Gmail API. Please try again tomorrow.',
             86400, // Retry after 24 hours
             $error
@@ -77,7 +77,7 @@ class RateLimitException extends GmailClientException
             );
         }
 
-        return new static($message, $retryAfter, $error);
+        return new self($message, $retryAfter, $error);
     }
 
     /**
@@ -97,7 +97,7 @@ class RateLimitException extends GmailClientException
             $response
         );
 
-        return new static($message ?? $defaultMessage, 0, $error);
+        return new self($message ?? $defaultMessage, 0, $error);
     }
 
     public function getRetryAfter(): int
