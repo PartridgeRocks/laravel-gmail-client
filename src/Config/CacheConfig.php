@@ -16,9 +16,13 @@ readonly class CacheConfig
         public int $statisticsTtl = 900,
         public int $authTokensTtl = 3500,
         public bool $enableTagging = true,
+        /** @var array<string> */
         public array $tags = ['gmail', 'api'],
     ) {}
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public static function fromArray(array $config): self
     {
         return new self(
@@ -35,6 +39,9 @@ readonly class CacheConfig
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

@@ -10,6 +10,7 @@ readonly class GmailConfig
         public string $clientId,
         public string $clientSecret,
         public string $redirectUri,
+        /** @var array<string> */
         public array $scopes,
         public ?string $fromEmail = null,
         public bool $storeTokensInDatabase = false,
@@ -19,6 +20,9 @@ readonly class GmailConfig
         public RateLimitConfig $rateLimit = new RateLimitConfig,
     ) {}
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public static function fromArray(array $config): self
     {
         return new self(
@@ -41,6 +45,9 @@ readonly class GmailConfig
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

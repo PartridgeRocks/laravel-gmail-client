@@ -14,11 +14,15 @@ readonly class LoggingConfig
         public bool $logResponses = false,
         public bool $logErrors = true,
         public bool $logPerformance = false,
+        /** @var array<string> */
         public array $sensitiveFields = ['access_token', 'refresh_token', 'client_secret'],
         public bool $enableContextLogging = true,
         public int $maxLogSize = 1024,
     ) {}
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public static function fromArray(array $config): self
     {
         return new self(
@@ -35,6 +39,9 @@ readonly class LoggingConfig
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

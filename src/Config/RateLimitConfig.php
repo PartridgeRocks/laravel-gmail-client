@@ -17,9 +17,13 @@ readonly class RateLimitConfig
         public float $backoffMultiplier = 2.0,
         public int $maxRetries = 3,
         public bool $enableJitter = true,
+        /** @var array<string> */
         public array $exemptOperations = ['auth.refresh'],
     ) {}
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public static function fromArray(array $config): self
     {
         return new self(
@@ -37,6 +41,9 @@ readonly class RateLimitConfig
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

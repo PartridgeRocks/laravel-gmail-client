@@ -70,7 +70,7 @@ class GmailClientBuilder
 
     public function build(): GmailClient
     {
-        $connector = $this->connector ?? new GmailConnector($this->accessToken);
+        $connector = $this->connector ?? new GmailConnector;
         $factory = new GmailServiceFactory($connector);
 
         return new GmailClient(
@@ -85,7 +85,7 @@ class GmailClientBuilder
 
     public function buildWithDefaults(): GmailClient
     {
-        $connector = new GmailConnector($this->accessToken);
+        $connector = new GmailConnector;
         $factory = new GmailServiceFactory($connector);
 
         return new GmailClient(

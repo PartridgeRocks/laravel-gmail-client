@@ -25,6 +25,9 @@ readonly class PerformanceConfig
         public int $queryOptimizationCacheSize = 1000,
     ) {}
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public static function fromArray(array $config): self
     {
         return new self(
@@ -47,6 +50,9 @@ readonly class PerformanceConfig
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
