@@ -64,6 +64,13 @@ A Laravel package that integrates with the Gmail API to seamlessly manage emails
   - Comprehensive exception handling
   - Null-safe methods for robust applications (dashboards, background processing)
   - Command-line testing utilities
+- **Enterprise Architecture**:
+  - Service layer with interface contracts for enhanced testability
+  - Builder pattern for fluent client construction
+  - Repository pattern for data access abstraction
+  - Factory pattern for centralized service management
+  - Type-safe configuration objects
+  - Comprehensive test data builders and mock factories
 
 ## 📋 Requirements
 
@@ -503,6 +510,33 @@ public function index(GmailClient $gmailClient)
     $messages = $gmailClient->listMessages();
     
     // ...
+}
+```
+
+### Builder Pattern & Service Integration
+
+For advanced usage with dependency injection and configuration:
+
+```php
+use PartridgeRocks\GmailClient\Builders\GmailClientBuilder;
+use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
+
+// Using builder pattern
+$client = GmailClientBuilder::create()
+    ->withToken($accessToken)
+    ->withConfig($customConfig)
+    ->build();
+
+// Using service injection
+class EmailController extends Controller
+{
+    public function __construct(private MessageServiceInterface $messageService) {}
+    
+    public function dashboard()
+    {
+        $recentMessages = $this->messageService->findRecent(10);
+        return view('dashboard', compact('recentMessages'));
+    }
 }
 ```
 

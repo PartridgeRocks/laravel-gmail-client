@@ -23,12 +23,27 @@ The package is organized into the following main components:
 
 ```
 src/
+├── Builders/             # Builder pattern implementations
+│   └── GmailClientBuilder.php
 ├── Commands/             # Artisan commands
+├── Config/               # Type-safe configuration objects
+│   ├── GmailConfig.php
+│   ├── CacheConfig.php
+│   ├── PerformanceConfig.php
+│   └── ...
+├── Contracts/            # Service interface contracts
+│   ├── AuthServiceInterface.php
+│   ├── MessageServiceInterface.php
+│   ├── LabelServiceInterface.php
+│   ├── StatisticsServiceInterface.php
+│   └── Composite/        # Composite interfaces
 ├── Data/                 # Data objects and DTOs
 │   ├── Errors/           # Error DTOs for structured error responses
 │   └── Responses/        # Response DTOs for API responses
 ├── Exceptions/           # Custom exceptions
 ├── Facades/              # Laravel facades
+├── Factories/            # Service factory pattern
+│   └── GmailServiceFactory.php
 ├── Gmail/                # Gmail API integration
 │   ├── Pagination/       # Pagination utilities
 │   ├── Requests/         # Saloon requests for various API endpoints
@@ -38,7 +53,16 @@ src/
 │   └── Resources/        # Resources grouping related requests
 ├── Http/                 # HTTP controllers
 │   └── Controllers/      # Authentication controllers
+├── Repositories/         # Repository pattern implementations
+│   ├── MessageRepository.php
+│   └── LabelRepository.php
+├── Services/             # Service layer implementations
+│   ├── AuthService.php
+│   ├── MessageService.php
+│   ├── LabelService.php
+│   └── StatisticsService.php
 ├── GmailClient.php       # Main client class
+├── GmailReadOnlyClient.php # Read-only client variant
 └── GmailClientServiceProvider.php  # Laravel service provider
 ```
 
@@ -52,8 +76,38 @@ The `GmailClient` class (`src/GmailClient.php`) is the main entry point for the 
 - Managing messages (listing, getting, sending)
 - Managing labels (listing, getting, creating, updating, deleting)
 - Handling pagination and lazy loading
+- Account statistics and health monitoring
 
-The client uses resource classes to group related functionality and provides a clean, high-level API for common operations.
+The client uses resource classes to group related functionality and provides a clean, high-level API for common operations. With the architectural improvements, the client now supports:
+
+- **Builder Pattern**: Use `GmailClientBuilder` for fluent client construction
+- **Service Layer Integration**: Automatic service resolution via dependency injection
+- **Type-safe Configuration**: Configuration objects for better type safety
+- **Repository Pattern**: Data access abstraction for enhanced testability
+
+### 1.1. GmailClientBuilder
+
+The `GmailClientBuilder` class (`src/Builders/GmailClientBuilder.php`) provides a fluent interface for client construction:
+
+```php
+$client = GmailClientBuilder::create()
+    ->withToken($accessToken)
+    ->withRefreshToken($refreshToken)
+    ->withConfig($config)
+    ->build();
+```
+
+### 1.2. Service Layer Architecture
+
+The package now includes a comprehensive service layer with interface contracts:
+
+- **GmailServiceFactory**: Centralized service creation and management
+- **AuthService**: OAuth authentication and token management  
+- **MessageService**: Message operations and data access
+- **LabelService**: Label management functionality
+- **StatisticsService**: Account statistics and health monitoring
+
+All services implement proper interface contracts for enhanced testability and dependency injection.
 
 ### 2. GmailConnector
 
@@ -74,7 +128,45 @@ Resources are classes that group related requests to the Gmail API:
 
 Each resource takes a `GmailConnector` instance for making API requests.
 
-### 4. Data Objects
+### 4. Configuration Objects
+
+Type-safe configuration objects provide better validation and IDE support:
+
+- **GmailConfig**: Core Gmail API configuration (client ID, secret, scopes)
+- **CacheConfig**: Caching settings for performance optimization
+- **PerformanceConfig**: Performance-related settings (timeouts, limits)
+- **RateLimitConfig**: Rate limiting configuration
+- **LoggingConfig**: Logging configuration for debugging
+
+### 5. Service Factory Pattern
+
+The `GmailServiceFactory` centralizes service creation and manages dependencies:
+
+```php
+$factory = new GmailServiceFactory($connector, $config);
+$services = $factory->createAllServices();
+
+// Access individual services
+$authService = $factory->createAuthService();
+$messageService = $factory->createMessageService();
+$labelService = $factory->createLabelService();
+$statisticsService = $factory->createStatisticsService();
+```
+
+### 6. Repository Pattern
+
+Repository classes provide data access abstraction:
+
+- **MessageRepository**: Rich query methods for message data access
+- **LabelRepository**: Label data access with advanced filtering
+
+```php
+$messageRepo = new MessageRepository($connector);
+$unreadMessages = $messageRepo->findUnread($maxResults = 25);
+$todayMessages = $messageRepo->findByDateRange(today(), now());
+```
+
+### 7. Data Objects
 
 Data objects are strongly-typed representations of Gmail entities:
 
@@ -83,7 +175,7 @@ Data objects are strongly-typed representations of Gmail entities:
 
 These data objects use Laravel Data for consistent structure and transformations.
 
-### 5. Requests
+### 8. Requests
 
 Requests are Saloon request classes for specific API endpoints:
 
@@ -93,14 +185,14 @@ Requests are Saloon request classes for specific API endpoints:
 
 Each request is responsible for building its own URL, headers, and body.
 
-### 6. Pagination
+### 9. Pagination
 
 The package includes two approaches to pagination:
 
 - **GmailPaginator**: A traditional paginator that loads pages on demand
 - **GmailLazyCollection**: A lazy collection that loads items on demand for memory-efficient processing
 
-### 7. Exception Handling
+### 10. Exception Handling
 
 Custom exceptions provide detailed error information:
 
@@ -159,8 +251,22 @@ The `GmailClientServiceProvider` handles:
 - Registering the package with Laravel
 - Publishing configuration files
 - Registering routes for authentication
-- Binding the `GmailClient` in the Laravel service container
+- Binding services in the Laravel service container with proper interface contracts
 - Setting up the facade
+- Configuring dependency injection for all service interfaces
+
+The service provider now registers all service interfaces as singletons:
+
+```php
+// Service interface bindings
+$this->app->singleton(AuthServiceInterface::class, AuthService::class);
+$this->app->singleton(MessageServiceInterface::class, MessageService::class);
+$this->app->singleton(LabelServiceInterface::class, LabelService::class);
+$this->app->singleton(StatisticsServiceInterface::class, StatisticsService::class);
+
+// Factory binding
+$this->app->singleton(GmailServiceFactory::class);
+```
 
 ## Testing
 

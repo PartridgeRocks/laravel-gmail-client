@@ -58,6 +58,56 @@ $message = GmailClient::getMessage('message-id');
 
 The facade is automatically registered by the package's service provider, so you can use it right away in your Laravel application.
 
+### Builder Pattern for Client Construction
+
+For advanced configuration and dependency injection scenarios, use the `GmailClientBuilder`:
+
+```php
+use PartridgeRocks\GmailClient\Builders\GmailClientBuilder;
+use PartridgeRocks\GmailClient\Config\GmailConfig;
+
+// Build a client with fluent API
+$client = GmailClientBuilder::create()
+    ->withToken($accessToken)
+    ->withRefreshToken($refreshToken)
+    ->withConfig(new GmailConfig(
+        clientId: config('gmail-client.client_id'),
+        clientSecret: config('gmail-client.client_secret'),
+        redirectUri: config('gmail-client.redirect_uri'),
+        scopes: config('gmail-client.scopes')
+    ))
+    ->build();
+
+// Use the built client
+$messages = $client->listMessages();
+```
+
+### Service Layer Integration
+
+Access individual services directly through Laravel's service container:
+
+```php
+use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
+use PartridgeRocks\GmailClient\Contracts\StatisticsServiceInterface;
+
+class GmailController extends Controller
+{
+    public function __construct(
+        private MessageServiceInterface $messageService,
+        private StatisticsServiceInterface $statisticsService
+    ) {}
+    
+    public function dashboard()
+    {
+        // Use injected services
+        $stats = $this->statisticsService->getAccountStatistics();
+        $recentMessages = $this->messageService->findRecent(10);
+        
+        return view('gmail.dashboard', compact('stats', 'recentMessages'));
+    }
+}
+```
+
 ## Authentication
 
 ### OAuth Flow
@@ -319,6 +369,35 @@ class RefreshGmailStatsJob implements ShouldQueue
 ```
 
 ## Working with Messages
+
+### Repository Pattern for Data Access
+
+The package provides repository classes for more sophisticated data access patterns:
+
+```php
+use PartridgeRocks\GmailClient\Repositories\MessageRepository;
+
+// Inject repository via service container
+class EmailService
+{
+    public function __construct(private MessageRepository $messageRepo) {}
+    
+    public function getUnreadMessages(int $limit = 25): Collection
+    {
+        return $this->messageRepo->findUnread($limit);
+    }
+    
+    public function getTodaysMessages(): Collection
+    {
+        return $this->messageRepo->findByDateRange(today(), now());
+    }
+    
+    public function searchMessages(string $query): Collection
+    {
+        return $this->messageRepo->findWhere(['q' => $query]);
+    }
+}
+```
 
 ### Listing Messages
 
@@ -723,7 +802,62 @@ The package provides several options for efficient memory usage:
 
 ## Testing
 
-When testing your application, you can use Saloon's built-in mocking capabilities:
+### Enhanced Testing Infrastructure
+
+The package now includes comprehensive testing utilities:
+
+#### Test Data Builders
+
+```php
+use Tests\Builders\EmailBuilder;
+use Tests\Builders\LabelBuilder;
+
+// Build test emails with fluent API
+$email = EmailBuilder::create()
+    ->unread()
+    ->from('test@example.com')
+    ->subject('Test Email')
+    ->body('Test email body')
+    ->build();
+
+// Build test labels
+$label = LabelBuilder::create()
+    ->withName('Test Label')
+    ->userLabel()
+    ->visible()
+    ->build();
+```
+
+#### Mock Factory for Consistent Test Data
+
+```php
+use Tests\Factories\GmailMockFactory;
+
+// Create realistic Gmail API mock responses
+$mockFactory = new GmailMockFactory();
+$messageListResponse = $mockFactory->createMessageListResponse(5);
+$singleMessageResponse = $mockFactory->createSingleMessageResponse();
+```
+
+#### Service Interface Testing
+
+```php
+use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
+
+class GmailServiceTest extends TestCase
+{
+    public function test_can_swap_service_implementations()
+    {
+        // Bind mock implementation
+        $this->app->bind(MessageServiceInterface::class, MockMessageService::class);
+        
+        $service = app(MessageServiceInterface::class);
+        $this->assertInstanceOf(MockMessageService::class, $service);
+    }
+}
+```
+
+#### Saloon Mocking Integration
 
 ```php
 use Saloon\Laravel\Facades\Saloon;
