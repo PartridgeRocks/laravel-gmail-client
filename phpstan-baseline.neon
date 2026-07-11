@@ -1,2 +1,49 @@
 parameters:
-	ignoreErrors: []
+	ignoreErrors:
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 33
+			path: config/gmail-client.php
+
+		-
+			message: '#^Class PartridgeRocks\\GmailClient\\Facades\\GmailClient has PHPDoc tag @method for method createLabel\(\) parameter \#2 \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Facades/GmailClient.php
+
+		-
+			message: '#^Class PartridgeRocks\\GmailClient\\Facades\\GmailClient has PHPDoc tag @method for method listMessages\(\) parameter \#1 \$query with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Facades/GmailClient.php
+
+		-
+			message: '#^Class PartridgeRocks\\GmailClient\\Facades\\GmailClient has PHPDoc tag @method for method sendEmail\(\) parameter \#4 \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Facades/GmailClient.php
+
+		-
+			message: '#^PHPDoc tag @method for method PartridgeRocks\\GmailClient\\Facades\\GmailClient\:\:listLabels\(\) return type contains generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Facades/GmailClient.php
+
+		-
+			message: '#^PHPDoc tag @method for method PartridgeRocks\\GmailClient\\Facades\\GmailClient\:\:listMessages\(\) return type contains generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Facades/GmailClient.php
+
+		-
+			message: '#^Class PartridgeRocks\\GmailClient\\Gmail\\GmailConnector has PHPDoc tag @method for method getAuthorizationUrl\(\) parameter \#1 \$scopes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Gmail/GmailConnector.php
+
+		-
+			message: '#^Class PartridgeRocks\\GmailClient\\Gmail\\GmailConnector has PHPDoc tag @method for method getAuthorizationUrl\(\) parameter \#4 \$additionalQueryParameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Gmail/GmailConnector.php

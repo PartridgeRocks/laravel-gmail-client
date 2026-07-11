@@ -34,10 +34,10 @@ class GmailAuthController extends Controller
     {
         if ($request->has('error')) {
             return redirect()->route('gmail.error')
-                ->with('error', $request->get('error'));
+                ->with('error', $request->input('error'));
         }
 
-        $code = $request->get('code');
+        $code = $request->input('code');
 
         try {
             // Exchange authorization code for an access token
