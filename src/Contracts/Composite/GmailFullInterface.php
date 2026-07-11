@@ -2,6 +2,8 @@
 
 namespace PartridgeRocks\GmailClient\Contracts\Composite;
 
+use PartridgeRocks\GmailClient\Gmail\GmailConnector;
+
 /**
  * Complete Gmail interface with all available operations.
  *
@@ -14,5 +16,5 @@ interface GmailFullInterface extends GmailCoreInterface, GmailSafeInterface
     /**
      * Get the underlying connector for advanced usage.
      */
-    public function getConnector(): \PartridgeRocks\GmailClient\Gmail\GmailConnector;
+    public function getConnector(): GmailConnector;
 }

@@ -3,6 +3,7 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
@@ -93,9 +94,9 @@ class MessageService implements MessageServiceInterface
      * @param  array<string, mixed>  $query  Search/filter parameters
      * @param  int  $maxResults  Maximum number of results per page
      * @param  bool  $fullDetails  Whether to fetch full message details
-     * @return \Illuminate\Support\LazyCollection<int, Email> Empty lazy collection (implementation placeholder)
+     * @return LazyCollection<int, Email> Empty lazy collection (implementation placeholder)
      */
-    public function lazyLoadMessages(array $query = [], ?int $maxResults = null, bool $fullDetails = true): \Illuminate\Support\LazyCollection
+    public function lazyLoadMessages(array $query = [], ?int $maxResults = null, bool $fullDetails = true): LazyCollection
     {
         // Return empty lazy collection since lazy loading requires GmailClient instance
         return collect()->lazy();
@@ -145,12 +146,12 @@ class MessageService implements MessageServiceInterface
     {
         // Validate email address
         if (! filter_var($to, FILTER_VALIDATE_EMAIL)) {
-            throw \PartridgeRocks\GmailClient\Exceptions\ValidationException::invalidEmailAddress($to);
+            throw ValidationException::invalidEmailAddress($to);
         }
 
         // Validate required fields
         if (empty($subject)) {
-            throw \PartridgeRocks\GmailClient\Exceptions\ValidationException::missingRequiredField('subject');
+            throw ValidationException::missingRequiredField('subject');
         }
 
         $rawMessage = $this->createEmailRaw($to, $subject, $body, $options);
@@ -297,12 +298,12 @@ class MessageService implements MessageServiceInterface
         $isHtml = $options['html'] ?? false;
 
         if (empty($fromEmail)) {
-            throw \PartridgeRocks\GmailClient\Exceptions\ValidationException::missingRequiredField('from_email');
+            throw ValidationException::missingRequiredField('from_email');
         }
 
         // Validate sender email address
         if (! filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
-            throw \PartridgeRocks\GmailClient\Exceptions\ValidationException::invalidEmailAddress($fromEmail);
+            throw ValidationException::invalidEmailAddress($fromEmail);
         }
 
         $from = $fromName ? "{$fromName} <{$fromEmail}>" : $fromEmail;

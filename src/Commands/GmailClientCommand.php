@@ -3,6 +3,9 @@
 namespace PartridgeRocks\GmailClient\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
+use PartridgeRocks\GmailClient\Data\Email;
+use PartridgeRocks\GmailClient\Data\Label;
 use PartridgeRocks\GmailClient\GmailClient;
 
 class GmailClientCommand extends Command
@@ -58,10 +61,10 @@ class GmailClientCommand extends Command
                 $messages = $this->client->listMessages(['maxResults' => 10]);
 
                 // Convert to collection for consistent interface
-                if ($messages instanceof \Illuminate\Support\Collection) {
+                if ($messages instanceof Collection) {
                     $messagesCollection = $messages;
                 } elseif (method_exists($messages, 'toCollection')) {
-                    /** @var \Illuminate\Support\Collection<int, \PartridgeRocks\GmailClient\Data\Email> $messagesCollection */
+                    /** @var Collection<int, Email> $messagesCollection */
                     $messagesCollection = $messages->toCollection();
                 } else {
                     $messagesCollection = collect([]);
@@ -69,7 +72,7 @@ class GmailClientCommand extends Command
 
                 $this->table(
                     ['ID', 'From', 'Subject', 'Date'],
-                    $messagesCollection->map(function (\PartridgeRocks\GmailClient\Data\Email $message): array {
+                    $messagesCollection->map(function (Email $message): array {
                         return [
                             'id' => $message->id,
                             'from' => $message->from ?? 'Unknown',
@@ -92,10 +95,10 @@ class GmailClientCommand extends Command
                 $labels = $this->client->listLabels();
 
                 // Convert to collection for consistent interface
-                if ($labels instanceof \Illuminate\Support\Collection) {
+                if ($labels instanceof Collection) {
                     $labelsCollection = $labels;
                 } elseif (method_exists($labels, 'toCollection')) {
-                    /** @var \Illuminate\Support\Collection<int, \PartridgeRocks\GmailClient\Data\Label> $labelsCollection */
+                    /** @var Collection<int, Label> $labelsCollection */
                     $labelsCollection = $labels->toCollection();
                 } else {
                     $labelsCollection = collect([]);
@@ -103,7 +106,7 @@ class GmailClientCommand extends Command
 
                 $this->table(
                     ['ID', 'Name', 'Type', 'Messages', 'Unread'],
-                    $labelsCollection->map(function (\PartridgeRocks\GmailClient\Data\Label $label) {
+                    $labelsCollection->map(function (Label $label) {
                         return [
                             'id' => $label->id,
                             'name' => $label->name,
