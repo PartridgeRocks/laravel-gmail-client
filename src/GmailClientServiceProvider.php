@@ -8,6 +8,7 @@ use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\StatisticsServiceInterface;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
+use PartridgeRocks\GmailClient\Http\Controllers\GmailAuthController;
 use PartridgeRocks\GmailClient\Services\AuthService;
 use PartridgeRocks\GmailClient\Services\LabelService;
 use PartridgeRocks\GmailClient\Services\MessageService;
@@ -120,10 +121,10 @@ class GmailClientServiceProvider extends PackageServiceProvider
                 'prefix' => config('gmail-client.route_prefix', 'gmail'),
                 'middleware' => config('gmail-client.route_middleware', ['web']),
             ], function ($router) {
-                $router->get('auth/redirect', [\PartridgeRocks\GmailClient\Http\Controllers\GmailAuthController::class, 'redirect'])
+                $router->get('auth/redirect', [GmailAuthController::class, 'redirect'])
                     ->name('gmail.auth.redirect');
 
-                $router->get('auth/callback', [\PartridgeRocks\GmailClient\Http\Controllers\GmailAuthController::class, 'callback'])
+                $router->get('auth/callback', [GmailAuthController::class, 'callback'])
                     ->name('gmail.auth.callback');
             });
         }

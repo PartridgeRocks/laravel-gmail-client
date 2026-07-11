@@ -46,7 +46,7 @@ class GmailOAuthAuthenticator implements OAuthAuthenticator
      *
      * This method is used to update token information
      */
-    public function updateToken(string $accessToken, ?string $refreshToken = null, ?string $tokenType = null, ?\DateTimeInterface $expiresAt = null): static
+    public function updateToken(string $accessToken, ?string $refreshToken = null, ?string $tokenType = null, ?DateTimeInterface $expiresAt = null): static
     {
         $this->accessToken = $accessToken;
         $this->refreshToken = $refreshToken;
@@ -73,7 +73,7 @@ class GmailOAuthAuthenticator implements OAuthAuthenticator
         protected string $accessToken,
         protected ?string $refreshToken = null,
         protected ?string $tokenType = 'Bearer',
-        protected ?\DateTimeInterface $expiresAt = null
+        protected ?DateTimeInterface $expiresAt = null
     ) {}
 
     /**

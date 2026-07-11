@@ -3,6 +3,9 @@
 namespace PartridgeRocks\GmailClient\Gmail\Resources;
 
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
+use PartridgeRocks\GmailClient\Gmail\GmailConnector;
+use PartridgeRocks\GmailClient\Gmail\Requests\Auth\ExchangeCodeRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Auth\RefreshTokenRequest;
 use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\BaseResource;
 use Saloon\Http\Response;
@@ -17,7 +20,7 @@ use Saloon\Http\Response;
  * @see https://developers.google.com/gmail/api/auth/about-auth
  * @see https://developers.google.com/identity/protocols/oauth2
  *
- * @property \PartridgeRocks\GmailClient\Gmail\GmailConnector $connector
+ * @property GmailConnector $connector
  */
 class AuthResource extends BaseResource
 {
@@ -45,7 +48,7 @@ class AuthResource extends BaseResource
     {
         try {
             $redirectUri = $redirectUri ?? $this->connector->oauthConfig()->getRedirectUri();
-            $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Auth\ExchangeCodeRequest($code, $redirectUri);
+            $request = new ExchangeCodeRequest($code, $redirectUri);
             $response = $this->connector->send($request);
 
             if ($response->failed()) {
@@ -87,7 +90,7 @@ class AuthResource extends BaseResource
     public function refreshToken(string $refreshToken): array
     {
         try {
-            $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Auth\RefreshTokenRequest($refreshToken);
+            $request = new RefreshTokenRequest($refreshToken);
             $response = $this->connector->send($request);
 
             if ($response->failed()) {

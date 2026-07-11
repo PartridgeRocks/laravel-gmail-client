@@ -3,6 +3,7 @@
 namespace PartridgeRocks\GmailClient\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as Orchestra;
 use PartridgeRocks\GmailClient\GmailClientServiceProvider;
 
@@ -37,7 +38,7 @@ class TestCase extends Orchestra
     /**
      * Configures the application environment for testing by setting the default database connection to 'testing'.
      *
-     * @param  \Illuminate\Foundation\Application  $app  The application instance.
+     * @param  Application  $app  The application instance.
      */
     public function getEnvironmentSetUp($app)
     {

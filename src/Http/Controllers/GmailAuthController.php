@@ -2,6 +2,7 @@
 
 namespace PartridgeRocks\GmailClient\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use PartridgeRocks\GmailClient\GmailClient;
@@ -11,7 +12,7 @@ class GmailAuthController extends Controller
     /**
      * Redirects the user to the Google OAuth authorization URL for Gmail authentication.
      *
-     * @return \Illuminate\Http\RedirectResponse Redirects to Google's OAuth consent screen.
+     * @return RedirectResponse Redirects to Google's OAuth consent screen.
      */
     public function redirect(GmailClient $client)
     {
@@ -28,16 +29,16 @@ class GmailAuthController extends Controller
      *
      * Redirects to a success route on successful authentication, or to an error route if authentication fails or an error is present in the request.
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function callback(Request $request, GmailClient $client)
     {
         if ($request->has('error')) {
             return redirect()->route('gmail.error')
-                ->with('error', $request->get('error'));
+                ->with('error', $request->input('error'));
         }
 
-        $code = $request->get('code');
+        $code = $request->input('code');
 
         try {
             // Exchange authorization code for an access token

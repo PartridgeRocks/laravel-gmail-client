@@ -19,7 +19,7 @@ test('safeListLabels returns empty collection when authentication fails', functi
 
     $result = $this->client->safeListLabels();
 
-    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class)
+    expect($result)->toBeInstanceOf(Collection::class)
         ->and($result)->toBeEmpty();
 });
 
@@ -49,7 +49,7 @@ test('safeListMessages returns empty collection when fails', function () {
 
     $result = $this->client->safeListMessages();
 
-    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class)
+    expect($result)->toBeInstanceOf(Collection::class)
         ->and($result)->toBeEmpty();
 });
 
@@ -103,7 +103,7 @@ test('safe methods handle rate limit errors gracefully', function () {
 
     $result = $this->client->safeListMessages();
 
-    expect($result)->toBeInstanceOf(\Illuminate\Support\Collection::class)
+    expect($result)->toBeInstanceOf(Collection::class)
         ->and($result)->toBeEmpty();
 });
 

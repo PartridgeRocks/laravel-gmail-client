@@ -3,6 +3,7 @@
 namespace PartridgeRocks\GmailClient\Services;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
 use PartridgeRocks\GmailClient\Data\Label;
 use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
@@ -80,7 +81,7 @@ class LabelService implements LabelServiceInterface
      * Create a lazy-loading collection for labels.
      * Note: Lazy loading should be handled by GmailClient directly.
      */
-    public function lazyLoadLabels(): \Illuminate\Support\LazyCollection
+    public function lazyLoadLabels(): LazyCollection
     {
         // Return empty lazy collection since lazy loading requires GmailClient instance
         return collect()->lazy();

@@ -3,6 +3,7 @@
 namespace PartridgeRocks\GmailClient;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use PartridgeRocks\GmailClient\Contracts\AuthServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\Composite\GmailFullInterface;
 use PartridgeRocks\GmailClient\Contracts\LabelServiceInterface;
@@ -10,6 +11,11 @@ use PartridgeRocks\GmailClient\Contracts\MessageServiceInterface;
 use PartridgeRocks\GmailClient\Contracts\StatisticsServiceInterface;
 use PartridgeRocks\GmailClient\Data\Email;
 use PartridgeRocks\GmailClient\Data\Label;
+use PartridgeRocks\GmailClient\Exceptions\AuthenticationException;
+use PartridgeRocks\GmailClient\Exceptions\GmailClientException;
+use PartridgeRocks\GmailClient\Exceptions\NotFoundException;
+use PartridgeRocks\GmailClient\Exceptions\RateLimitException;
+use PartridgeRocks\GmailClient\Exceptions\ValidationException;
 use PartridgeRocks\GmailClient\Gmail\GmailConnector;
 use PartridgeRocks\GmailClient\Gmail\Pagination\GmailPaginator;
 use PartridgeRocks\GmailClient\Gmail\Resources\LabelResource;
@@ -104,7 +110,7 @@ class GmailClient implements GmailFullInterface
      *
      * @return $this
      *
-     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
+     * @throws AuthenticationException
      */
     public function authenticate(
         string $accessToken,
@@ -174,7 +180,7 @@ class GmailClient implements GmailFullInterface
      * @param  int|null  $maxResults  Maximum number of results per page
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
-     * @return Collection<int, Email>|Gmail\Pagination\GmailPaginator<Email>|Gmail\Pagination\GmailLazyCollection<Email>
+     * @return Collection<int, Email>|GmailPaginator<Email>|Gmail\Pagination\GmailLazyCollection<Email>
      */
     public function listMessages(
         array $query = [],
@@ -232,10 +238,10 @@ class GmailClient implements GmailFullInterface
     /**
      * Get a specific message.
      *
-     * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     * @throws NotFoundException
+     * @throws AuthenticationException
+     * @throws RateLimitException
+     * @throws GmailClientException
      */
     public function getMessage(string $id): Email
     {
@@ -247,10 +253,10 @@ class GmailClient implements GmailFullInterface
      *
      * @param  array<string, mixed>  $headers
      *
-     * @throws \PartridgeRocks\GmailClient\Exceptions\ValidationException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     * @throws ValidationException
+     * @throws AuthenticationException
+     * @throws RateLimitException
+     * @throws GmailClientException
      */
     public function sendEmail(
         string $to,
@@ -271,7 +277,7 @@ class GmailClient implements GmailFullInterface
      * @param  bool  $paginate  Whether to return a paginator for all results
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  int|null  $maxResults  Maximum number of results per page
-     * @return Collection<int, Label>|Gmail\Pagination\GmailPaginator<Label>|Gmail\Pagination\GmailLazyCollection<Label>
+     * @return Collection<int, Label>|GmailPaginator<Label>|Gmail\Pagination\GmailLazyCollection<Label>
      */
     public function listLabels(bool $paginate = false, bool $lazy = false, ?int $maxResults = null): mixed
     {
@@ -335,10 +341,10 @@ class GmailClient implements GmailFullInterface
      * @param  string  $messageId  The message ID to modify
      * @param  array<string>  $labelIds  Array of label IDs to add
      *
-     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws RateLimitException
+     * @throws GmailClientException
      */
     public function addLabelsToMessage(string $messageId, array $labelIds): Email
     {
@@ -351,10 +357,10 @@ class GmailClient implements GmailFullInterface
      * @param  string  $messageId  The message ID to modify
      * @param  array<string>  $labelIds  Array of label IDs to remove
      *
-     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws RateLimitException
+     * @throws GmailClientException
      */
     public function removeLabelsFromMessage(string $messageId, array $labelIds): Email
     {
@@ -368,10 +374,10 @@ class GmailClient implements GmailFullInterface
      * @param  array<string>  $addLabelIds  Array of label IDs to add (optional)
      * @param  array<string>  $removeLabelIds  Array of label IDs to remove (optional)
      *
-     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\NotFoundException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws RateLimitException
+     * @throws GmailClientException
      */
     public function modifyMessageLabels(string $messageId, array $addLabelIds = [], array $removeLabelIds = []): Email
     {
@@ -384,9 +390,9 @@ class GmailClient implements GmailFullInterface
      * @param  array<string, mixed>  $options  Configuration options for statistics retrieval
      * @return array<string, mixed> Comprehensive account statistics
      *
-     * @throws \PartridgeRocks\GmailClient\Exceptions\AuthenticationException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\RateLimitException
-     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     * @throws AuthenticationException
+     * @throws RateLimitException
+     * @throws GmailClientException
      */
     public function getAccountStatistics(array $options = []): array
     {
@@ -398,7 +404,7 @@ class GmailClient implements GmailFullInterface
      *
      * @return array<string, mixed> Health status including connection, token, and API quota info
      *
-     * @throws \PartridgeRocks\GmailClient\Exceptions\GmailClientException
+     * @throws GmailClientException
      */
     public function getAccountHealth(): array
     {
@@ -410,9 +416,9 @@ class GmailClient implements GmailFullInterface
      *
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  bool  $paginate  Whether to return a paginator for all results
-     * @return Collection<int, Label>|\Illuminate\Support\LazyCollection<int, Label>
+     * @return Collection<int, Label>|LazyCollection<int, Label>
      */
-    public function safeListLabels(bool $lazy = false, bool $paginate = false): Collection|\Illuminate\Support\LazyCollection
+    public function safeListLabels(bool $lazy = false, bool $paginate = false): Collection|LazyCollection
     {
         if ($lazy) {
             try {
@@ -442,14 +448,14 @@ class GmailClient implements GmailFullInterface
      * @param  int|null  $maxResults  Maximum number of results per page
      * @param  bool  $lazy  Whether to return a lazy collection for memory-efficient iteration
      * @param  bool  $fullDetails  Whether to fetch full message details (only applies with lazy=true)
-     * @return Collection<int, Email>|\Illuminate\Support\LazyCollection<int, Email>
+     * @return Collection<int, Email>|LazyCollection<int, Email>
      */
     public function safeListMessages(
         array $query = [],
         ?int $maxResults = null,
         bool $lazy = false,
         bool $fullDetails = true
-    ): Collection|\Illuminate\Support\LazyCollection {
+    ): Collection|LazyCollection {
         if ($lazy) {
             try {
                 return $this->lazyLoadMessages($query, $maxResults, $fullDetails);

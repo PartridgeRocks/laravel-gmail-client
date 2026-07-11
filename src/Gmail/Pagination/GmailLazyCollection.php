@@ -4,6 +4,10 @@ namespace PartridgeRocks\GmailClient\Gmail\Pagination;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
+use PartridgeRocks\GmailClient\Data\Email;
+use PartridgeRocks\GmailClient\Data\Label;
+use PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
+use PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest;
 use PartridgeRocks\GmailClient\GmailClient;
 
 /**
@@ -20,11 +24,11 @@ class GmailLazyCollection extends LazyCollection
      * from the Gmail API only when they are accessed. It handles pagination
      * automatically and can fetch either full message details or just IDs.
      *
-     * @param  \PartridgeRocks\GmailClient\GmailClient  $client  The Gmail client instance
+     * @param  GmailClient  $client  The Gmail client instance
      * @param  array<string, mixed>  $query  Query parameters for filtering messages
      * @param  int  $pageSize  Maximum number of results per page
      * @param  bool  $fullDetails  Whether to fetch full message details
-     * @return GmailLazyCollection<\PartridgeRocks\GmailClient\Data\Email>
+     * @return GmailLazyCollection<Email>
      */
     public static function messages(
         GmailClient $client,
@@ -45,7 +49,7 @@ class GmailLazyCollection extends LazyCollection
 
                 // Get list of message IDs for this page using the connector directly
                 // This avoids recursion since we bypass the client's listMessages method
-                $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Messages\ListMessagesRequest($currentQuery);
+                $request = new ListMessagesRequest($currentQuery);
                 $response = $client->getConnector()->send($request);
                 $data = $response->json();
 
@@ -81,14 +85,14 @@ class GmailLazyCollection extends LazyCollection
      * This method creates a memory-efficient collection that loads labels
      * from the Gmail API only when they are accessed.
      *
-     * @param  \PartridgeRocks\GmailClient\GmailClient  $client  The Gmail client instance
-     * @return GmailLazyCollection<\PartridgeRocks\GmailClient\Data\Label>
+     * @param  GmailClient  $client  The Gmail client instance
+     * @return GmailLazyCollection<Label>
      */
     public static function labels(GmailClient $client): self
     {
         return new self(function () use ($client) {
             // Use the connector directly to avoid potential recursion
-            $request = new \PartridgeRocks\GmailClient\Gmail\Requests\Labels\ListLabelsRequest;
+            $request = new ListLabelsRequest;
             $response = $client->getConnector()->send($request);
             $data = $response->json();
 
@@ -98,7 +102,7 @@ class GmailLazyCollection extends LazyCollection
 
             foreach ($data['labels'] as $labelData) {
                 // Transform the raw data into a Label object
-                yield \PartridgeRocks\GmailClient\Data\Label::fromApiResponse($labelData);
+                yield Label::fromApiResponse($labelData);
             }
         });
     }
@@ -109,7 +113,7 @@ class GmailLazyCollection extends LazyCollection
      * This method materializes the lazy collection into a regular collection,
      * which may consume more memory but allows for more operations.
      *
-     * @return \Illuminate\Support\Collection<int, TValue>
+     * @return Collection<int, TValue>
      */
     public function toCollection()
     {
