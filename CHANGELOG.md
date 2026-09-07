@@ -4,6 +4,9 @@ All notable changes to `gmail_client` will be documented in this file.
 
 ## Unreleased
 
+### Fixed
+- Raise the Orchestra Testbench 9.x floor to ^9.2.0 so Laravel 11 prefer-lowest CI no longer installs Testbench 9.0, which fatals under Pest (`Access to undeclared static property ::$latestResponse`).
+
 ## v2.0.0 - 2025-05-29
 
 ### Major - Enterprise Architecture Improvements 🏗️
